@@ -9,6 +9,8 @@ namespace Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users");
+
+            builder.HasQueryFilter(u => !u.IsDeleted);
         }
     }
 }

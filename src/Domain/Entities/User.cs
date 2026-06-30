@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Domain.Common.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class User : IdentityUser
+    public class User : IdentityUser, ISoftDelete
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -25,5 +26,7 @@ namespace Domain.Entities
         public virtual ICollection<TaskAssignment> ReceivedAssignments { get; set; }
         public virtual ICollection<TaskComment> TaskComments { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }

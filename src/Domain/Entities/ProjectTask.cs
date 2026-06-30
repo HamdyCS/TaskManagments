@@ -1,10 +1,11 @@
+using Domain.Common.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Entities
 {
-    public class ProjectTask
+    public class ProjectTask : ISoftDelete
     {
         public long Id { get; set; }
         public string Name { get; set; }
@@ -16,7 +17,6 @@ namespace Domain.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime Deadline { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
-        public bool IsDeleted { get; set; }
 
         public virtual Project Project { get; set; }
         public virtual ProjectTaskStatus TaskStatus { get; set; }
@@ -27,5 +27,7 @@ namespace Domain.Entities
         public virtual ICollection<TaskComment> TaskComments { get; set; }
         public virtual ICollection<TaskAttachment> TaskAttachments { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }
