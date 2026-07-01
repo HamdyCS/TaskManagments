@@ -4,5 +4,6 @@ using System.Text;
 
 namespace Application.Common.Exceptions
 {
-    public class DatabaseOperationException(string message, Exception? innerException) : Exception(message, innerException);
+    public class DatabaseOperationException(Exception? innerException) : Exception(
+        "An error occurred while performing a database operation", innerException);
 }
