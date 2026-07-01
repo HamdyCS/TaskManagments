@@ -1,3 +1,5 @@
+using Api.ExceptionHandler;
+using Application;
 using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,8 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 //app services
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services
+    .AddInfrastructure(builder.Configuration)
+    .AddApplication(builder.Configuration);
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 
 var app = builder.Build();
@@ -21,6 +27,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
