@@ -11,7 +11,11 @@ namespace Domain.Entities
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public short  RoleId { get; set; }
+        public short RoleId { get; set; }
+
+        public DateOnly DateOfBirth { get; set; }
+
+        public DateTime CreatedAt { get; set; }
 
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";

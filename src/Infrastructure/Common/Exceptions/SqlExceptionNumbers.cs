@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Infrastructure.common
+namespace Infrastructure.common.Exceptions
 {
     public static class SqlExceptionNumbers
     {

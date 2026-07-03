@@ -1,0 +1,83 @@
+using Application.Common.Interfaces.Repositories;
+using Domain.Entities;
+using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+
+namespace Infrastructure.Repositories
+{
+    public class UserRepository(AppDbContext context, UserManager<User> userManager) : IUserRepository
+    {
+        public async Task<(string email, string? token)> AddNewUserAsync(User user)
+        {
+            user.EmailConfirmed = false;
+
+            //create new user
+            var result = await userManager.CreateAsync(user);
+
+
+            if (!result.Succeeded)
+            {
+                return (user.Email, null);
+            }
+            ;
+
+
+            //generate token
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            if (token is null)
+            {
+                return (user.Email, null);
+            }
+
+            return (user.Email, token);
+
+        }
+
+        public async Task<bool> ConfirmUserAsync(User user, string token)
+        {
+            var result = await userManager.ConfirmEmailAsync(user, token);
+            return result.Succeeded;
+        }
+
+        public async Task<IEnumerable<User>> GetExpiredUnConfirmedUsersAsync()
+        {
+            var ExpiredUsers = await context.Users.Where(u => !u.EmailConfirmed 
+            && u.CreatedAt.AddHours(24) >= DateTime.UtcNow).ToListAsync();
+
+            return ExpiredUsers;
+        }
+
+        public async Task<User?> GetConfirmedUserByEmailAsync(string email)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed == true);
+            return user;
+        }
+
+        public async Task<User?> GetConfirmedUserByIdAsync(string id)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id && u.EmailConfirmed == true);
+            return user;
+        }
+
+        public async Task<bool> IsExistByEmailAsync(string email)
+        {
+            var isExist = await context.Users.AnyAsync(u => u.Email == email);
+            return isExist;
+        }
+
+        public void DeleteExpiredUnConfirmedUsers(IEnumerable<User> expiredUsers)
+        {
+            context.Users.RemoveRange(expiredUsers);
+            return;
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return user;
+        }
+    }
+}

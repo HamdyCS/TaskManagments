@@ -1,10 +1,11 @@
+using Infrastructure.common.Exceptions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Infrastructure.common
+namespace Infrastructure.common.Extensions
 {
     public static class DbUpdateExceptionExtensions
     {

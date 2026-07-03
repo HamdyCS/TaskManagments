@@ -1,16 +1,25 @@
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.UnitOfWork;
-using Infrastructure.common;
+using Application.Common.Interfaces.Repositories;
+using Infrastructure.common.Extensions;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Infrastructure.UnitOfWork
+namespace Infrastructure.Repositories
 {
-    public class UnitOfWork(AppDbContext context) : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
+        private readonly AppDbContext context;
+        public IUserRepository userRepository { get; private set; }
+
+        public UnitOfWork(AppDbContext context,IUserRepository userRepository)
+        {
+            this.context = context;
+            this.userRepository = userRepository;
+        }
+
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {

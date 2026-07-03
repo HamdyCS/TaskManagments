@@ -1,4 +1,4 @@
-using Domain.Pagination;
+using Domain.Common.Pagination;
 using System;
 using System.Collections.Generic;
 using System.Text;

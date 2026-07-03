@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Repositories;
 using Domain.Common.Interfaces;
-using Domain.Pagination;
+using Domain.Common.Pagination;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;

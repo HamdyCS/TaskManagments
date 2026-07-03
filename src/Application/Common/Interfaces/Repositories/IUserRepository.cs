@@ -1,0 +1,22 @@
+﻿using Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.Common.Interfaces.Repositories
+{
+    public interface IUserRepository
+    {
+        Task<User?> GetConfirmedUserByEmailAsync(string email);
+        Task<User?> GetConfirmedUserByIdAsync(string id);
+        Task<(string email, string? token)> AddNewUserAsync(User user);
+        Task<bool> ConfirmUserAsync(User user, string token);
+
+        Task<bool> IsExistByEmailAsync(string email);
+
+        Task<IEnumerable<User>> GetExpiredUnConfirmedUsersAsync();
+
+        void DeleteExpiredUnConfirmedUsers(IEnumerable<User> expiredUsers);
+        Task<User?> GetByEmailAsync(string email);
+    }   
+}

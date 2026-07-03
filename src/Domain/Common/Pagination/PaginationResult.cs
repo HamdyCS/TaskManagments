@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Domain.Pagination
+namespace Domain.Common.Pagination
 {
     public class PaginationResult<T> where T : class
     {
