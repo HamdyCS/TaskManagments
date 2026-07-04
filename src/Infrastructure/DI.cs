@@ -161,7 +161,8 @@ namespace Infrastructure
 
         public static IServiceCollection AddBackgroundServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHostedService<ConfirmationEmailBackgroundService>();
+            services.AddHostedService<ConfirmationEmailBgService>();
+            services.AddHostedService<RemoveUnConfirmedUsersBgService>();
 
             return services;
         }

@@ -16,10 +16,10 @@ namespace Application.Common.Interfaces.Repositories
 
         Task<IEnumerable<User>> GetExpiredUnConfirmedUsersAsync();
 
-        void DeleteExpiredUnConfirmedUsers(IEnumerable<User> expiredUsers);
         Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByIdAsync(string userId);
 
         Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password);
+        Task RemoveUnConfirmedUsersAsync();
     }   
 }

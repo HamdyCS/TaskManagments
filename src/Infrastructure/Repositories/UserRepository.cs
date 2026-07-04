@@ -9,7 +9,7 @@ namespace Infrastructure.Repositories
 {
     public class UserRepository(AppDbContext context, UserManager<User> userManager) : IUserRepository
     {
-        public async Task<(string email, string? token)> AddNewUserAsync(User user,string password)
+        public async Task<(string email, string? token)> AddNewUserAsync(User user, string password)
         {
             user.EmailConfirmed = false;
 
@@ -19,7 +19,7 @@ namespace Infrastructure.Repositories
 
             if (!result.Succeeded)
             {
-                return (user.Email,null);
+                return (user.Email, null);
             }
             ;
 
@@ -68,12 +68,6 @@ namespace Infrastructure.Repositories
             return isExist;
         }
 
-        public void DeleteExpiredUnConfirmedUsers(IEnumerable<User> expiredUsers)
-        {
-            context.Users.RemoveRange(expiredUsers);
-            return;
-        }
-
         public async Task<User?> GetByEmailAsync(string email)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -89,11 +83,24 @@ namespace Infrastructure.Repositories
         public async Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed);
-            if(user is null)
+            if (user is null)
                 return null;
 
             var isPasswordCorrect = await userManager.CheckPasswordAsync(user, password);
             return isPasswordCorrect ? user : null;
+        }
+
+        public async Task RemoveUnConfirmedUsersAsync()
+        {
+            var expiredUnConfirmedUsers = await GetExpiredUnConfirmedUsersAsync();
+
+            if (!expiredUnConfirmedUsers.Any())
+                return;
+
+            context.RemoveRange(expiredUnConfirmedUsers);
+
+
+            return;
         }
     }
 }
