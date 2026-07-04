@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Api.ExceptionHandler
 {
-    public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+    public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger,IProblemDetailsService problemDetailsService) : IExceptionHandler
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
@@ -44,12 +44,11 @@ namespace Api.ExceptionHandler
 
             httpContext.Response.StatusCode = problemDetails.Status!.Value;
 
-            httpContext.Response.ContentType = "application/problem+json";
-            await httpContext.Response.WriteAsJsonAsync(new ProblemDetailsContext
+            await problemDetailsService.WriteAsync(new ProblemDetailsContext
             { 
                 HttpContext = httpContext, 
                 ProblemDetails = problemDetails 
-            }, cancellationToken);
+            });
 
             return true;
         }

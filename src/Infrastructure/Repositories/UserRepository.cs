@@ -9,17 +9,17 @@ namespace Infrastructure.Repositories
 {
     public class UserRepository(AppDbContext context, UserManager<User> userManager) : IUserRepository
     {
-        public async Task<(string email, string? token)> AddNewUserAsync(User user)
+        public async Task<(string email, string? token)> AddNewUserAsync(User user,string password)
         {
             user.EmailConfirmed = false;
 
             //create new user
-            var result = await userManager.CreateAsync(user);
+            var result = await userManager.CreateAsync(user, password);
 
 
             if (!result.Succeeded)
             {
-                return (user.Email, null);
+                return (user.Email,null);
             }
             ;
 
@@ -44,7 +44,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetExpiredUnConfirmedUsersAsync()
         {
-            var ExpiredUsers = await context.Users.Where(u => !u.EmailConfirmed 
+            var ExpiredUsers = await context.Users.Where(u => !u.EmailConfirmed
             && u.CreatedAt.AddHours(24) >= DateTime.UtcNow).ToListAsync();
 
             return ExpiredUsers;
@@ -78,6 +78,22 @@ namespace Infrastructure.Repositories
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
             return user;
+        }
+
+        public async Task<User?> GetByIdAsync(string userId)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            return user;
+        }
+
+        public async Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed);
+            if(user is null)
+                return null;
+
+            var isPasswordCorrect = await userManager.CheckPasswordAsync(user, password);
+            return isPasswordCorrect ? user : null;
         }
     }
 }

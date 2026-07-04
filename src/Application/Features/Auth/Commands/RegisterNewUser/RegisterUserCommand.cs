@@ -7,6 +7,6 @@ using System.Text;
 
 namespace Application.Features.Users.Commands.RegisterNewUser
 {
-    public sealed record RegisterUserCommand(RegisterUserDto registerNewUserDto,Roles enRole) : IRequest<ErrorOr<RegisterUserResultDto>>;
+    public sealed record RegisterUserCommand(RegisterUserDto registerNewUserDto,Role enRole) : IRequest<ErrorOr<RegisterUserResultDto>>;
     
 }

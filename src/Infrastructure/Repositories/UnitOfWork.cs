@@ -14,10 +14,13 @@ namespace Infrastructure.Repositories
         private readonly AppDbContext context;
         public IUserRepository userRepository { get; private set; }
 
-        public UnitOfWork(AppDbContext context,IUserRepository userRepository)
+        public IRefreshTokenRepository refreshTokenRepository { get; private set; }
+
+        public UnitOfWork(AppDbContext context,IUserRepository userRepository,IRefreshTokenRepository refreshTokenRepository)
         {
             this.context = context;
             this.userRepository = userRepository;
+            this.refreshTokenRepository = refreshTokenRepository;
         }
 
 

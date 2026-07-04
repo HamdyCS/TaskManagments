@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Common.Enums
 {
-    public enum Roles
+    public enum Role
     {
         Admin = 1,
         User

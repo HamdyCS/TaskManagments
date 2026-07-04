@@ -9,26 +9,28 @@ using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
-    public class GenericRepository<T>(ILogger<GenericRepository<T>> logger, AppDbContext context)
+    public class GenericRepository<T>
         : IGenericRepository<T> where T : class
     {
-        private string _entityName => typeof(T).Name;
+        protected AppDbContext context { get; }
+
+        public GenericRepository(AppDbContext context)
+        {
+            this.context = context;
+        }
 
         public void Add(T entity)
         {
-            logger.LogInformation("Adding a new {EntityType}", _entityName);
             context.Set<T>().Add(entity);
         }
 
         public void AddRange(IEnumerable<T> entities)
         {
-            logger.LogInformation("Adding a new range of {EntityType}", _entityName);
             context.Set<T>().AddRange(entities);
         }
 
         public void Delete(T entity)
         {
-            logger.LogInformation("Deleting a {EntityType}", _entityName);
 
             //check if entity is ISoftDelete
             if (entity is ISoftDelete softDelete)
@@ -49,7 +51,6 @@ namespace Infrastructure.Repositories
 
         public void DeleteRange(IEnumerable<T> entities)
         {
-            logger.LogInformation("Deleting range of a {EntityType}", _entityName);
 
             //هل يمكن تحويل T => ISoftDelete
             if (typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
@@ -75,8 +76,7 @@ namespace Infrastructure.Repositories
 
         public async Task<PaginationResult<T>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
         {
-            logger.LogInformation("Getting all of {EntityType} page {PageNumber}, size {PageSize}", _entityName, pageNumber, pageSize);
-            
+
             var totalCount = await context.Set<T>().CountAsync();
             var data = await context.Set<T>().Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
@@ -86,7 +86,6 @@ namespace Infrastructure.Repositories
 
         protected async Task<PaginationResult<T>> GetAllByFilterAsync(Expression<Func<T, bool>> predicate, int pageNumber = 1, int pageSize = 1)
         {
-            logger.LogInformation("Getting all with filter of {EntityType} page {PageNumber}, size {PageSize}", _entityName, pageNumber, pageSize);
 
             //query
             var query = context.Set<T>().Where(predicate);
@@ -101,23 +100,26 @@ namespace Infrastructure.Repositories
 
         public T GetByIdAsync(long id)
         {
-            logger.LogInformation("Getting {EntityType} by id {Id}", _entityName, id);
 
             var entity = context.Set<T>().Find(id);
             return entity;
         }
 
+        protected async Task<T> GetByFilterAsync(Expression<Func<T, bool>> predicate)
+        {
+
+            var entity = await context.Set<T>().FirstOrDefaultAsync(predicate);
+            return entity;
+        }
+
         public void Update(T entity)
         {
-            logger.LogInformation("Updating a {EntityType}", _entityName);
 
             context.Set<T>().Update(entity);
         }
 
         public void UpdateRange(IEnumerable<T> entities)
         {
-            logger.LogInformation("Updating range of a {EntityType}", _entityName);
-
             context.Set<T>().UpdateRange(entities);
         }
 

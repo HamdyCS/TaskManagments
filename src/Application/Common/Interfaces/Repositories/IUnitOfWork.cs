@@ -7,6 +7,7 @@ namespace Application.Common.Interfaces.Repositories
     public interface IUnitOfWork
     {
         IUserRepository userRepository { get; }
+        IRefreshTokenRepository refreshTokenRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitTransactionAsync(CancellationToken cancellationToken = default);

@@ -6,6 +6,7 @@ using Domain.Entities;
 using ErrorOr;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,8 +15,8 @@ using System.Text;
 
 namespace Application.Features.Users.Commands.RegisterNewUser
 {
-    public class RegisterUserCommandHandler(IUnitOfWork unitOfWork, IConfiguration configuration, 
-        ILogger<ConfirmationEmailCommandHandler> logger,IConfirmationEmailQueue confirmationEmailQueue) : IRequestHandler<RegisterUserCommand, ErrorOr<RegisterUserResultDto>>
+    public class RegisterUserCommandHandler(IUnitOfWork unitOfWork, IConfiguration configuration,
+        ILogger<ConfirmationEmailCommandHandler> logger, IConfirmationEmailQueue confirmationEmailQueue) : IRequestHandler<RegisterUserCommand, ErrorOr<RegisterUserResultDto>>
     {
         public async Task<ErrorOr<RegisterUserResultDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
@@ -42,15 +43,17 @@ namespace Application.Features.Users.Commands.RegisterNewUser
             logger.LogInformation("Adding new user with email {Email} to database", registerNewUserDto.Email);
 
             //add new user
-            var result = await unitOfWork.userRepository.AddNewUserAsync(user);
+            var result = await unitOfWork.userRepository.AddNewUserAsync(user, registerNewUserDto.Password);
 
-            if ( result.token is null)
+            if (result.token is null)
             {
                 logger.LogWarning("Failed to register new user. token is null");
                 return UserErrors.RegisterFailed;
             }
 
-            var path = configuration["settings:frontendUrl"] + "?email=" + result.email + "&token=" + result.token;
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(result.token));
+
+            var path = configuration["settings:frontendUrl"] + "?email=" + result.email + "&token=" + encodedToken;
             logger.LogInformation("User registered successfully email {email}", result.email);
 
             //add email to queue

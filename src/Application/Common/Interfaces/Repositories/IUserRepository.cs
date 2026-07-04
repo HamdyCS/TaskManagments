@@ -9,7 +9,7 @@ namespace Application.Common.Interfaces.Repositories
     {
         Task<User?> GetConfirmedUserByEmailAsync(string email);
         Task<User?> GetConfirmedUserByIdAsync(string id);
-        Task<(string email, string? token)> AddNewUserAsync(User user);
+        Task<(string email, string? token)> AddNewUserAsync(User user, string password);
         Task<bool> ConfirmUserAsync(User user, string token);
 
         Task<bool> IsExistByEmailAsync(string email);
@@ -18,5 +18,8 @@ namespace Application.Common.Interfaces.Repositories
 
         void DeleteExpiredUnConfirmedUsers(IEnumerable<User> expiredUsers);
         Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByIdAsync(string userId);
+
+        Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password);
     }   
 }

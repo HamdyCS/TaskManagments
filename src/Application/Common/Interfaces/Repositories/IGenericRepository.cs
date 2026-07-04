@@ -1,6 +1,7 @@
 using Domain.Common.Pagination;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Application.Common.Interfaces.Repositories
@@ -8,7 +9,7 @@ namespace Application.Common.Interfaces.Repositories
     public interface IGenericRepository<T> where T : class
     {
         //get
-        Task<PaginationResult<T>> GetAllAsync(int pageNumber, int pageSize); 
+        Task<PaginationResult<T>> GetAllAsync(int pageNumber, int pageSize);
 
         T GetByIdAsync(long id);
 
@@ -25,6 +26,7 @@ namespace Application.Common.Interfaces.Repositories
         //delete
         void Delete(T entity);
         void DeleteRange(IEnumerable<T> entities);
+
 
     }
 }
