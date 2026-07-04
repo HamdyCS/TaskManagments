@@ -31,7 +31,7 @@ namespace Application.Features.Auth.Commands.Login
                 return refreshTokenResult.Errors;
 
             //create token
-            var tokenResult = await mediator.Send(new CreateTokenCommand(refreshTokenResult.Value, user.Id));
+            var tokenResult = await mediator.Send(new CreateTokenCommand(refreshTokenResult.Value));
             if(tokenResult.IsError)
                 return tokenResult.Errors;
 

@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="Domain.Entities" />
     <Using Include="ErrorOr" />
     <Using Include="MediatR" />
   </ItemGroup>

@@ -3,7 +3,9 @@ using Application.Features.Auth.Commands;
 using Application.Features.Auth.Commands.CreateToken;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
+using Application.Features.Users;
 using Application.Features.Users.Commands.RegisterNewUser;
+using Application.Features.Users.Queries;
 using Domain.Common.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +16,13 @@ using System.Security.Claims;
 namespace Api.Controllers
 {
     [Route("api/auth")]
+    [Authorize]
     [ApiController]
     public class AuthController(IMediator mediator) : ControllerBase
     {
+
         [HttpPost("register-user", Name = "RegisterUser")]
+        [AllowAnonymous]
         public async Task<ActionResult<RegisterUserResultDto>> RegisterUser([FromBody] RegisterUserDto registerUserDto)
         {
             var result = await mediator.Send(new RegisterUserCommand(registerUserDto, Role.User));
@@ -26,7 +31,9 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
+
         [HttpPost("confirm-email", Name = "ConfirmEmail")]
+        [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
         {
             var result = await mediator.Send(new ConfirmationEmailCommand(email, token));
@@ -35,7 +42,9 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
+
         [HttpPost("login", Name = "Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var result = await mediator.Send(new LoginCommand(loginDto));
@@ -50,21 +59,18 @@ namespace Api.Controllers
             return NoContent();
         }
 
+
         [HttpPost("refresh-token", Name = "RefreshToken")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshToken()
         {
+            //Get refresh token
             var refreshToken = Request.GetValueFromCookie("refresh_token");
 
             if (string.IsNullOrEmpty(refreshToken))
-                return Unauthorized();
+                return Unauthorized();    
 
-
-            var userId = User.GetUserId();
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            var result = await mediator.Send(new CreateTokenCommand(refreshToken, userId));
+            var result = await mediator.Send(new CreateTokenCommand(refreshToken));
 
             if (result.IsError)
             {
@@ -76,8 +82,8 @@ namespace Api.Controllers
             return NoContent();
         }
 
+
         [HttpPost("logout", Name = "Logout")]
-        [Authorize]
         public async Task<IActionResult> Logout()
         {
             var refreshToken = Request.GetValueFromCookie("refresh_token");
@@ -101,5 +107,20 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        [HttpGet("", Name = "GetAuthUser")]
+        public async Task<ActionResult<UserDto>> GetAuthUser()
+        {
+            //get user Id
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await mediator.Send(new GetUserByIdQuery(userId));
+
+            return result.Match(value =>
+                 Ok(value),
+                 errors => errors.ToProblemDetailsObjectResult()
+            );
+        }
     }
 }
