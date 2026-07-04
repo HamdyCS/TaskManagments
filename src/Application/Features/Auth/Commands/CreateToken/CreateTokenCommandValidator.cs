@@ -9,7 +9,11 @@ namespace Application.Features.Auth.Commands.CreateToken
     {
         public CreateTokenCommandValidator()
         {
-            RuleFor(x=>x.refreshToken).NotEmpty().WithMessage("Refresh token cannot be empty");
+            RuleFor(x=>x.refreshToken)
+                .NotEmpty().WithMessage("Refresh token cannot be empty");
+
+            RuleFor(x=>x.userId)
+                .NotEmpty().WithMessage("User Id cannot be empty");
 
         }
     }

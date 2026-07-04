@@ -16,7 +16,10 @@ namespace Application.Common.Errors
         public static Error CreatedFailed(string userId) =>
             Error.Failure("RefreshToken_CreatedFailed", $"Failed creating refresh token for user with id {userId}");
 
-        public static Error RefreshTokenRevokedOrExpired =>
-            Error.Unauthorized("RefreshToken_RevokedOrExpired", "Refresh token revoked or expired");
+        public static Error RefreshTokenRevokedOrExpired(long refreshTokenId) =>
+            Error.Unauthorized("RefreshToken_RevokedOrExpired", $"Refresh token with id {refreshTokenId} revoked or expired");
+
+        public static Error RefreshTokenNotRevoked(long refreshTokenId)=>
+            Error.Failure("RefreshToken_NotRevoked", $"Refresh token with id {refreshTokenId} not revoked");
     }
 }

@@ -15,23 +15,23 @@ namespace Application.Features.Auth.Commands.CreateToken
     {
         public async Task<ErrorOr<string>> Handle(CreateTokenCommand request, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Starting Create Token");
+            logger.LogInformation("Starting Create Token for user with id {userId}", request.userId);
 
             //get refresh token
 
-            logger.LogInformation("Getting refresh token from db");
+            logger.LogInformation("Getting refresh token from db for user with id {userId}", request.userId);
             var refreshToken = await unitOfWork.refreshTokenRepository.GetByTokenAsync(request.refreshToken);
 
             if(refreshToken is null)
             {
-                logger.LogInformation("Refresh token not found");
+                logger.LogInformation("Refresh token not found for user with id {userId}", request.userId);
                 return RefreshTokenErrors.RefreshTokenNotFound;
             }
 
             if(refreshToken.IsRevoked || refreshToken.IsExpired)
             {
-                logger.LogInformation("Refresh token is revoked or expired");
-                return RefreshTokenErrors.RefreshTokenRevokedOrExpired;
+                logger.LogInformation("Refresh token is revoked or expired for user with id {userId}", request.userId);
+                return RefreshTokenErrors.RefreshTokenRevokedOrExpired(refreshToken.Id);
             }
 
             //get user

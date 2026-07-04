@@ -4,7 +4,7 @@ namespace Api.Extensions
 {
     public static class HttpResponseExtension
     {
-        public static HttpResponse AddAuthInfoToCookies(this HttpResponse httpResponse, string accessToken, string refreshToken)
+        public static HttpResponse AddAuthInfoToCookie(this HttpResponse httpResponse, string accessToken, string refreshToken)
         {
             var cookieOptions = CreateCookieOptions();
 
@@ -14,7 +14,16 @@ namespace Api.Extensions
             return httpResponse;
         }
 
-        public static HttpResponse AddAccessTokenToCookies(this HttpResponse httpResponse, string accessToken)
+        public static HttpResponse RemoveAuthInfoFromCookie(this HttpResponse httpResponse)
+        {
+
+            httpResponse.Cookies.Delete("access_token");
+            httpResponse.Cookies.Delete("refresh_token");
+
+            return httpResponse;
+        }
+
+        public static HttpResponse AddAccessTokenToCookie(this HttpResponse httpResponse, string accessToken)
         {
             var cookieOptions = CreateCookieOptions();
 

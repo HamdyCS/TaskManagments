@@ -2,12 +2,14 @@
 using Application.Features.Auth.Commands;
 using Application.Features.Auth.Commands.CreateToken;
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.Logout;
 using Application.Features.Users.Commands.RegisterNewUser;
 using Domain.Common.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -44,7 +46,7 @@ namespace Api.Controllers
             }
 
             //Add auth info to cookies
-            Response.AddAuthInfoToCookies(result.Value.AccessToken, result.Value.RefreshToken);
+            Response.AddAuthInfoToCookie(result.Value.AccessToken, result.Value.RefreshToken);
             return NoContent();
         }
 
@@ -58,7 +60,11 @@ namespace Api.Controllers
                 return Unauthorized();
 
 
-            var result = await mediator.Send(new CreateTokenCommand(refreshToken));
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await mediator.Send(new CreateTokenCommand(refreshToken, userId));
 
             if (result.IsError)
             {
@@ -66,7 +72,32 @@ namespace Api.Controllers
             }
 
             //Add auth info to cookies
-            Response.AddAccessTokenToCookies(result.Value);
+            Response.AddAccessTokenToCookie(result.Value);
+            return NoContent();
+        }
+
+        [HttpPost("logout", Name = "Logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var refreshToken = Request.GetValueFromCookie("refresh_token");
+
+            if (string.IsNullOrEmpty(refreshToken))
+                return Unauthorized();
+
+
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+           var result = await mediator.Send(new LogoutCommand(refreshToken, userId));
+
+            if(result.IsError)
+                return result.Errors.ToProblemDetailsObjectResult();
+
+            //Remove auth info from cookies
+            Response.RemoveAuthInfoFromCookie();
+
             return NoContent();
         }
 

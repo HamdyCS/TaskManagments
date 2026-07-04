@@ -18,4 +18,9 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="ErrorOr" />
+    <Using Include="MediatR" />
+  </ItemGroup>
+
 </Project>
