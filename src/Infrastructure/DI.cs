@@ -33,6 +33,13 @@ namespace Infrastructure
                 .AddUserManager<UserManager<User>>()
                 .AddSignInManager<SignInManager<User>>();
 
+            //add redis cache
+            services.AddStackExchangeRedisCache(opt =>
+            {
+                opt.Configuration = configuration.GetConnectionString("Redis");
+                opt.InstanceName = "RedisCache";
+            });
+
             return services;
         }
     }

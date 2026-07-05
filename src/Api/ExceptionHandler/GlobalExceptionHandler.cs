@@ -31,6 +31,12 @@ namespace Api.ExceptionHandler
                     Detail = "An unexpected database error occurred.",
                     Status = StatusCodes.Status500InternalServerError
                 },
+                CacheOperationException => new ProblemDetails
+                {
+                    Title = "Cache_Operation_Error",
+                    Detail = "An unexpected cache error occurred.",
+                    Status = StatusCodes.Status500InternalServerError
+                },
                 _ => new ProblemDetails
                 {
                     Title = "Unexpected_Server_Error",
