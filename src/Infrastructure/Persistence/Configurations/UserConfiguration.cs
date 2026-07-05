@@ -10,7 +10,6 @@ namespace Infrastructure.Persistence.Configurations
         {
             builder.ToTable("Users");
 
-            builder.HasQueryFilter(u => !u.IsDeleted);
         }
     }
 }

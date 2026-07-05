@@ -28,6 +28,9 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(u => u.TaskComments)
                 .HasForeignKey(tc => tc.CommentById)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //query filter
+            builder.HasQueryFilter(wu => !wu.Task.IsDeleted);
         }
     }
 }

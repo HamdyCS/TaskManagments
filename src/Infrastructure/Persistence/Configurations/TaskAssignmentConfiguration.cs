@@ -35,6 +35,9 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(u => u.ReceivedAssignments)
                 .HasForeignKey(ta => ta.AssignedToId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //query filter
+            builder.HasQueryFilter(wu => !wu.Task.IsDeleted);
         }
     }
 }

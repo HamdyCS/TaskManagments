@@ -25,6 +25,9 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(t => t.TaskAttachments)
                 .HasForeignKey(ta => ta.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            //query filter
+            builder.HasQueryFilter(wu => !wu.Task.IsDeleted);
         }
     }
 }
