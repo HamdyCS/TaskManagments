@@ -1,3 +1,4 @@
+using Application.Features.Users;
 using ErrorOr;
 using System;
 using System.Collections.Generic;
@@ -22,8 +23,11 @@ namespace Application.Common.Errors
         public static Error ConfirmEmailFailed(string email) => 
             Error.Failure("User_ConfirmEmailFailed", $"User confirm email {email} failed");
 
-        internal static ErrorOr<bool> UserAlreadyConfirmed(string email) => 
+        internal static Error UserAlreadyConfirmed(string email) => 
             Error.Conflict("User_AlreadyConfirmed", $"User email {email} already confirmed");
-      
+
+        internal static Error UpdateUserFailed(string userId)
+            => Error.Failure("User_UpdateFailed", $"Failed update user with id {userId}");
+       
     }
 }

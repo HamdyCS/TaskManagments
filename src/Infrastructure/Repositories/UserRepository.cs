@@ -102,5 +102,10 @@ namespace Infrastructure.Repositories
 
             return;
         }
+
+        public void UpdateUser(User user)
+        {
+            context.Users.Update(user);
+        }
     }
 }

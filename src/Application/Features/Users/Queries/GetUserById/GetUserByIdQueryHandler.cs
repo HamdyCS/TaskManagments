@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Features.Users.Queries
+namespace Application.Features.Users.Queries.GetUserById
 {
     public class GetUserByIdQueryHandler(IUnitOfWork unitOfWork,ILogger<GetUserByIdQueryHandler> logger) : IRequestHandler<GetUserByIdQuery, ErrorOr<UserDto>>
     {

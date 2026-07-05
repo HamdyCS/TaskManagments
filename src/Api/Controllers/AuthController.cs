@@ -5,7 +5,9 @@ using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Users;
 using Application.Features.Users.Commands.RegisterNewUser;
+using Application.Features.Users.Commands.UpdateUser;
 using Application.Features.Users.Queries;
+using Application.Features.Users.Queries.GetUserById;
 using Domain.Common.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -122,5 +124,26 @@ namespace Api.Controllers
                  errors => errors.ToProblemDetailsObjectResult()
             );
         }
+
+
+        [HttpPut("",Name = "UpdateAuthUser")]
+        public async Task<IActionResult> UpdateAuthUser([FromBody] UpdateUserDto updateUserDto)
+        {
+            //get user Id
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await mediator.Send(new UpdateUserCommand(userId, updateUserDto));
+
+            return result.Match<IActionResult>(value =>
+                CreatedAtRoute("",new
+                {
+
+                },value),
+                 errors => errors.ToProblemDetailsObjectResult()
+            );
+        }
+
     }
 }

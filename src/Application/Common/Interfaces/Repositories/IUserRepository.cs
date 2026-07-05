@@ -21,5 +21,7 @@ namespace Application.Common.Interfaces.Repositories
 
         Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password);
         Task RemoveUnConfirmedUsersAsync();
+
+        void UpdateUser(User user);
     }   
 }

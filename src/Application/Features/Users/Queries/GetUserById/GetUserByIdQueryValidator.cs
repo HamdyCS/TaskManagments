@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Features.Users.Queries
+namespace Application.Features.Users.Queries.GetUserById
 {
     public class GetUserByIdQueryValidator : AbstractValidator<GetUserByIdQuery>
     {
