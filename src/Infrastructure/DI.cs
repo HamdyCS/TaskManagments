@@ -34,6 +34,8 @@ namespace Infrastructure
             //add Identity
             services.AddCustomIdentity(configuration);
 
+            //add redis cache
+            services.AddRedisCache(configuration);
 
             //add Mail Options
             services.AddMailOptions(configuration);
@@ -153,6 +155,7 @@ namespace Infrastructure
 
         public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddScoped<ICacheService, CacheService>();
             services.AddTransient<IMailService, MailService>();
             services.AddSingleton<ITokenService, TokenService>();
 
@@ -164,7 +167,26 @@ namespace Infrastructure
             services.AddHostedService<ConfirmationEmailBgService>();
             services.AddHostedService<RemoveUnConfirmedUsersBgService>();
 
+            //add redis cache
+            services.AddStackExchangeRedisCache(opt =>
+            {
+                opt.Configuration = configuration.GetConnectionString("Redis");
+                opt.InstanceName = "RedisCache";
+            });
+
+
+
             return services;
+        }
+
+        public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
+        {
+            //add redis cache
+            services.AddStackExchangeRedisCache(opt =>
+            {
+                opt.Configuration = configuration.GetConnectionString("Redis");
+                opt.InstanceName = "RedisCache";
+            });
         }
     }
 }
