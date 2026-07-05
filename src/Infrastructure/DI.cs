@@ -187,6 +187,8 @@ namespace Infrastructure
                 opt.Configuration = configuration.GetConnectionString("Redis");
                 opt.InstanceName = "RedisCache";
             });
+
+            return services;
         }
     }
 }
