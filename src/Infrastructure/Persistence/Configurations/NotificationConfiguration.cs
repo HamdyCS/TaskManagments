@@ -39,6 +39,9 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(nt => nt.Notifications)
                 .HasForeignKey(n => n.NotificationTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //query filter
+            builder.HasQueryFilter(wu => !wu.Task.IsDeleted);
         }
     }
 }
