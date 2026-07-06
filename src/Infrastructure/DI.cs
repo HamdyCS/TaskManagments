@@ -142,6 +142,7 @@ namespace Infrastructure
         public static IServiceCollection AddQueues(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IConfirmationEmailQueue, ConfirmationEmailQueue>();
+            services.AddSingleton<IOtpEmailQueue, IOtpEmailQueue>();
             return services;
         }
 
