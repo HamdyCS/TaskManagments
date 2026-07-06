@@ -167,6 +167,7 @@ namespace Infrastructure
         {
             services.AddHostedService<ConfirmationEmailBgService>();
             services.AddHostedService<RemoveUnConfirmedUsersBgService>();
+            services.AddHostedService<OtpEmailBgService>();
 
             //add redis cache
             services.AddStackExchangeRedisCache(opt =>
