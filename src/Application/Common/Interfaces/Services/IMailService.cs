@@ -8,5 +8,7 @@ namespace Application.Common.Interfaces.Services
     public interface IMailService 
     {
         Task SendConfirmationEmailAsync(ConfirmationEmailContent confirmationEmailContent);
+
+        Task SendOtpEmailAsync(OtpEmailContent otpEmailContent);
     }
 }

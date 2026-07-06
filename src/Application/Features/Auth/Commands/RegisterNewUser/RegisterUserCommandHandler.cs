@@ -59,9 +59,6 @@ namespace Application.Features.Users.Commands.RegisterNewUser
             //add email to queue
             await confirmationEmailQueue.EnqueueAsync(new ConfirmationEmailContent
             {
-                Subject = "Please confirm your email",
-                TextBody = "Your Confirmation link is: " + path,
-                Messsage = "Please confirm your email by clicking the Confirmation Button",
                 To = result.email,
                 Url = path,
                 FullName = user.FullName

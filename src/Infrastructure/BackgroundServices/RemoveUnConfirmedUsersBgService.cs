@@ -19,7 +19,7 @@ namespace Infrastructure.BackgroundServices
             {
                 try
                 {
-                    using var scope = serviceScopeFactory.CreateScope();
+                    await using var scope = serviceScopeFactory.CreateAsyncScope();
                     var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     logger.LogInformation("RemoveUnConfirmedUsersBgService( service is running removing un confirmation users. Time = {TimeNow})", DateTime.UtcNow);

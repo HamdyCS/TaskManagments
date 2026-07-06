@@ -174,8 +174,6 @@ namespace Infrastructure
                 opt.InstanceName = "RedisCache";
             });
 
-
-
             return services;
         }
 

@@ -29,12 +29,12 @@ namespace Infrastructure.Services
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress("Task Managements", mailOptions.Email));
                 message.To.Add(new MailboxAddress("", confirmationEmailContent.To));
-                message.Subject = confirmationEmailContent.Subject;
+                message.Subject = "Please confirm your email";
 
                 var bodyBuilder = new BodyBuilder
                 {
                     HtmlBody = htmlTemplate,
-                    TextBody = confirmationEmailContent.TextBody
+                    TextBody = "Your Confirmation link is: " + confirmationEmailContent.Url,
                 };
 
                 message.Body = bodyBuilder.ToMessageBody();
@@ -55,6 +55,52 @@ namespace Infrastructure.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error on Send email {Email}, Error {error}", confirmationEmailContent.To,ex.Message);
+            }
+        }
+
+        public async Task SendOtpEmailAsync(OtpEmailContent otpEmailContent)
+        {
+            try
+            {
+                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Common/Templates", "OtpEmail.html");
+                string htmlTemplate = await System.IO.File.ReadAllTextAsync(filePath);
+
+
+                htmlTemplate = htmlTemplate.Replace("{UserName}", otpEmailContent.FullName);
+                htmlTemplate = htmlTemplate.Replace("{OTP_TYPE}", otpEmailContent.OtpType);
+                htmlTemplate = htmlTemplate.Replace("{OTP_Code}", otpEmailContent.OtpCode);
+                htmlTemplate = htmlTemplate.Replace("{Valid_Minutes}", otpEmailContent.Valid_Minutes.ToString());
+
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Task Managements", mailOptions.Email));
+                message.To.Add(new MailboxAddress("", otpEmailContent.To));
+                message.Subject = "Task Managements OTP code is: " + otpEmailContent.OtpCode;
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = htmlTemplate,
+                    TextBody = "Task Managements OTP code is: " + otpEmailContent.OtpCode,
+                };
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(mailOptions.Host, mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
+
+                    await client.AuthenticateAsync(mailOptions.Email, mailOptions.AppPassword);
+
+                    await client.SendAsync(message);
+
+                    await client.DisconnectAsync(true);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error on Send email {Email}, Error {error}", otpEmailContent.To, ex.Message);
             }
         }
     }
