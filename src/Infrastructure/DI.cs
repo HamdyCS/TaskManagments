@@ -159,6 +159,7 @@ namespace Infrastructure
             services.AddScoped<ICacheService, CacheService>();
             services.AddTransient<IMailService, MailService>();
             services.AddSingleton<ITokenService, TokenService>();
+            services.AddSingleton<IOtpService, OtpService>();
 
             return services;
         }
