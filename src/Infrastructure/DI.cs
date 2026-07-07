@@ -5,6 +5,7 @@ using Application.Common.Options;
 using Domain.Entities;
 using Infrastructure.BackgroundServices;
 using Infrastructure.common.channels;
+using Infrastructure.Common.Channels;
 using Infrastructure.Common.Options;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
@@ -142,7 +143,7 @@ namespace Infrastructure
         public static IServiceCollection AddQueues(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IConfirmationEmailQueue, ConfirmationEmailQueue>();
-            services.AddSingleton<IOtpEmailQueue, IOtpEmailQueue>();
+            services.AddSingleton<IOtpEmailQueue, OtpEmailQueue>();
             return services;
         }
 
