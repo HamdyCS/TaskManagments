@@ -1,6 +1,7 @@
 using Application.Common.Emails;
 using Application.Common.Interfaces.Services;
 using Application.Common.Options;
+using Domain.Common.Enums;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Logging;
 using MimeKit;
@@ -13,6 +14,18 @@ namespace Infrastructure.Services
 {
     public class MailService(MailOptions mailOptions, ILogger<MailService> logger) : IMailService
     {
+        private string _getOtpType(OtpPurpose otpPurpose)
+        {
+            switch (otpPurpose)
+            {
+                case OtpPurpose.ForgetPassword:
+                    return "Forget Password";
+                case OtpPurpose.ResetPassword:
+                    return "Reset Password";
+                default:
+                    return "Unknown";
+            }
+        }
        
         public async Task SendConfirmationEmailAsync(ConfirmationEmailContent confirmationEmailContent)
         {
@@ -65,9 +78,8 @@ namespace Infrastructure.Services
                 string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Common/Templates", "OtpEmail.html");
                 string htmlTemplate = await System.IO.File.ReadAllTextAsync(filePath);
 
-
-                htmlTemplate = htmlTemplate.Replace("{UserName}", otpEmailContent.FullName);
-                htmlTemplate = htmlTemplate.Replace("{OTP_TYPE}", otpEmailContent.OtpType);
+                //otpType
+                htmlTemplate = htmlTemplate.Replace("{OTP_TYPE}", _getOtpType(otpEmailContent.OtpPurpose));
                 htmlTemplate = htmlTemplate.Replace("{OTP_Code}", otpEmailContent.OtpCode);
                 htmlTemplate = htmlTemplate.Replace("{Valid_Minutes}", otpEmailContent.Valid_Minutes.ToString());
 

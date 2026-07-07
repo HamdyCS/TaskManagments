@@ -21,8 +21,7 @@ namespace Infrastructure.Repositories
             {
                 return (user.Email, null);
             }
-            ;
-
+            
 
             //generate token
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -55,11 +54,19 @@ namespace Infrastructure.Repositories
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed == true);
             return user;
         }
-
         public async Task<User?> GetConfirmedUserByIdAsync(string id)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id && u.EmailConfirmed == true);
             return user;
+        }
+        public async Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed);
+            if (user is null)
+                return null;
+
+            var isPasswordCorrect = await userManager.CheckPasswordAsync(user, password);
+            return isPasswordCorrect ? user : null;
         }
 
         public async Task<bool> IsExistByEmailAsync(string email)
@@ -80,15 +87,6 @@ namespace Infrastructure.Repositories
             return user;
         }
 
-        public async Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password)
-        {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed);
-            if (user is null)
-                return null;
-
-            var isPasswordCorrect = await userManager.CheckPasswordAsync(user, password);
-            return isPasswordCorrect ? user : null;
-        }
 
         public async Task RemoveUnConfirmedUsersAsync()
         {

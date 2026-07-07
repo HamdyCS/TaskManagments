@@ -1,4 +1,5 @@
 using Application.common.Emails;
+using Domain.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,9 +10,7 @@ namespace Application.Common.Emails
     {
         public required string OtpCode { get; set; }
 
-        public required string OtpType { get; set; }
-
-        public required string FullName { get; set; }
+        public required OtpPurpose OtpPurpose { get; set; }
 
         public required int Valid_Minutes { get; set; }
     }
