@@ -20,8 +20,6 @@ namespace Infrastructure.Services
             {
                 case OtpPurpose.ForgetPassword:
                     return "Forget Password";
-                case OtpPurpose.ResetPassword:
-                    return "Reset Password";
                 default:
                     return "Unknown";
             }
