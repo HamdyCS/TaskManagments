@@ -36,7 +36,7 @@ namespace Application.Features.Auth.Commands.SendPasswordResetEmail
             if(token is null)
             {
                 logger.LogWarning("Password reset token not generated for user with id {UserId}", request.UserId);
-                return UserErrors.ResetPasswordFailed;
+                return UserErrors.ResetPasswordFailed(request.UserId);
             }
 
             var encodedToken = WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(token));

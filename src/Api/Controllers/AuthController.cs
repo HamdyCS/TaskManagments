@@ -1,10 +1,12 @@
 ﻿using Api.Extensions;
+using Application.Features.Auth.Commands.ChangeEmail;
 using Application.Features.Auth.Commands.CreateToken;
 using Application.Features.Auth.Commands.ForgetPassword;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.ResendOtp;
 using Application.Features.Auth.Commands.ResetPassword;
+using Application.Features.Auth.Commands.SendEmailChangeEmail;
 using Application.Features.Auth.Commands.SendOtp;
 using Application.Features.Auth.Commands.SendPasswordResetEmail;
 using Application.Features.Users;
@@ -204,6 +206,36 @@ namespace Api.Controllers
 
 
             var result = await mediator.Send(new ResetPasswordCommand(resetPasswordDto,UserId: userId));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        //change email
+
+        [HttpPost("change-email/send-email", Name = "SendChangeEmail")]
+        public async Task<IActionResult> SendChangeEmail([FromQuery] string email)
+        {
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+
+            var result = await mediator.Send(new SendChangeEmailCommand(email, userId));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpPost("change-email", Name = "ChangeEmail")]
+        public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto changeEmailDto)
+        {
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+
+            var result = await mediator.Send(new ChangeEmailCommand(changeEmailDto, UserId: userId));
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());

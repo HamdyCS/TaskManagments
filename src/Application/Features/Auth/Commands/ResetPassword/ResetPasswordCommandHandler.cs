@@ -36,7 +36,7 @@ namespace Application.Features.Auth.Commands.ResetPassword
             if(!result)
             {
                 logger.LogWarning("Failed to reset password for user with Id {UserId}", request.UserId);
-                return UserErrors.ResetPasswordFailed;
+                return UserErrors.ResetPasswordFailed(request.UserId);
             }
 
             logger.LogInformation("Password reseted for user with Id {UserId} successfully", request.UserId);

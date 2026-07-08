@@ -113,6 +113,50 @@ namespace Infrastructure.Services
             }
         }
 
+        public async Task SendChnageEmailAsync(ChangeEmailContent changeEmailContent)
+        {
+            try
+            {
+                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Common/Templates", "ChangeEmail.html");
+                string htmlTemplate = await System.IO.File.ReadAllTextAsync(filePath);
+
+
+                htmlTemplate = htmlTemplate.Replace("{UserName}", changeEmailContent.FullName);
+                htmlTemplate = htmlTemplate.Replace("{ChangeEmailLink}", changeEmailContent.Url);
+
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Task Managements", mailOptions.Email));
+                message.To.Add(new MailboxAddress("", changeEmailContent.To));
+                message.Subject = "Change Your Email link";
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = htmlTemplate,
+                    TextBody = "Your Change Email link is: " + changeEmailContent.Url,
+                };
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(mailOptions.Host, mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
+
+                    await client.AuthenticateAsync(mailOptions.Email, mailOptions.AppPassword);
+
+                    await client.SendAsync(message);
+
+                    await client.DisconnectAsync(true);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error on Send email {Email}, Error {error}", changeEmailContent.To, ex.Message);
+            }
+        }
+
         public async Task SendOtpEmailAsync(OtpEmailContent otpEmailContent)
         {
             try

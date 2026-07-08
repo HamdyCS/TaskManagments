@@ -145,6 +145,18 @@ namespace Infrastructure
             services.AddSingleton<IConfirmationEmailQueue, ConfirmationEmailQueue>();
             services.AddSingleton<IOtpEmailQueue, OtpEmailQueue>();
             services.AddSingleton<IResetPasswordEmailQueue, ResetPasswordEmailQueue>();
+            services.AddSingleton<IChangeEmailQueue, ChangeEmailQueue>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddBackgroundServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHostedService<ConfirmationEmailBgService>();
+            services.AddHostedService<RemoveUnConfirmedUsersBgService>();
+            services.AddHostedService<OtpEmailBgService>();
+            services.AddHostedService<ResetPasswordEmailBgService>();
+            services.AddHostedService<ChangeEmailBgService>();
 
             return services;
         }
@@ -163,23 +175,6 @@ namespace Infrastructure
             services.AddTransient<IMailService, MailService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IOtpService, OtpService>();
-
-            return services;
-        }
-
-        public static IServiceCollection AddBackgroundServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddHostedService<ConfirmationEmailBgService>();
-            services.AddHostedService<RemoveUnConfirmedUsersBgService>();
-            services.AddHostedService<OtpEmailBgService>();
-            services.AddHostedService<ResetPasswordEmailBgService>();
-
-            //add redis cache
-            services.AddStackExchangeRedisCache(opt =>
-            {
-                opt.Configuration = configuration.GetConnectionString("Redis");
-                opt.InstanceName = "RedisCache";
-            });
 
             return services;
         }

@@ -127,5 +127,17 @@ namespace Infrastructure.Repositories
             var resetPasswordResult = await userManager.ResetPasswordAsync(user, token, newPassword);
             return resetPasswordResult.Succeeded;
         }
+
+        public async Task<string> GenerateChangeEmailTokenAsync(User user,string newEmail)
+        {
+            var token = await userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+            return token;
+        }
+
+        public async Task<bool> ChangeEmailAsync(User user, string token, string newEmail)
+        {
+            var changeEmailResult = await userManager.ChangeEmailAsync(user, newEmail,token);
+            return changeEmailResult.Succeeded;
+        }
     }
 }

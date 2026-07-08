@@ -8,22 +8,22 @@ namespace Application.Common.Errors
 {
     public static class UserErrors
     {
-        public static Error EmailAlreadyExist(string email) => 
+        public static Error EmailAlreadyExist(string email) =>
             Error.Conflict("User_EmailAlreadyExist", $"Email {email} already exist");
 
-        public static Error UserNotFoundById(string id) => 
+        public static Error UserNotFoundById(string id) =>
             Error.NotFound("User_NotFound", $"User not found with id {id}");
 
-        public static Error UserNotFoundByEmail(string email) => 
+        public static Error UserNotFoundByEmail(string email) =>
             Error.NotFound("User_NotFound", $"User not found with email {email}");
 
-        public static Error RegisterFailed => 
+        public static Error RegisterFailed =>
             Error.Failure("User_RegisterFailed", "User register failed");
 
-        public static Error ConfirmEmailFailed(string email) => 
+        public static Error ConfirmEmailFailed(string email) =>
             Error.Failure("User_ConfirmEmailFailed", $"User confirm email {email} failed");
 
-        public static Error UserAlreadyConfirmed(string email) => 
+        public static Error UserAlreadyConfirmed(string email) =>
             Error.Conflict("User_AlreadyConfirmed", $"User email {email} already confirmed");
 
         public static Error UpdateUserFailed(string userId)
@@ -32,7 +32,10 @@ namespace Application.Common.Errors
         public static Error UpdatedPasswordFailedByEmail(string email)
             => Error.Failure("User_UpdatedPasswordFailed", $"Failed update password for user with email {email}");
 
-        public static Error ResetPasswordFailed
-            => Error.Failure("User_ResetPasswordFailed", "Failed reset password");
+        public static Error ResetPasswordFailed(string userId)
+            => Error.Failure("User_ResetPasswordFailed", $"Failed reset password for user with id {userId}");
+        public static Error ChangeEmailFailed(string userId)
+            => Error.Failure("User_ChangeEmailFailed", $"Failed change email for user with id {userId}");
+
     }
 }
