@@ -1,19 +1,18 @@
 ﻿using Api.Extensions;
-using Application.Features.Auth.Commands;
 using Application.Features.Auth.Commands.CreateToken;
+using Application.Features.Auth.Commands.ForgetPassword;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
+using Application.Features.Auth.Commands.ResendOtp;
+using Application.Features.Auth.Commands.SendOtp;
 using Application.Features.Users;
 using Application.Features.Users.Commands.RegisterNewUser;
 using Application.Features.Users.Commands.UpdateUser;
-using Application.Features.Users.Queries;
 using Application.Features.Users.Queries.GetUserById;
 using Domain.Common.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -70,7 +69,7 @@ namespace Api.Controllers
             var refreshToken = Request.GetValueFromCookie("refresh_token");
 
             if (string.IsNullOrEmpty(refreshToken))
-                return Unauthorized();    
+                return Unauthorized();
 
             var result = await mediator.Send(new CreateTokenCommand(refreshToken));
 
@@ -98,9 +97,9 @@ namespace Api.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-           var result = await mediator.Send(new LogoutCommand(refreshToken, userId));
+            var result = await mediator.Send(new LogoutCommand(refreshToken, userId));
 
-            if(result.IsError)
+            if (result.IsError)
                 return result.Errors.ToProblemDetailsObjectResult();
 
             //Remove auth info from cookies
@@ -126,7 +125,7 @@ namespace Api.Controllers
         }
 
 
-        [HttpPut("",Name = "UpdateAuthUser")]
+        [HttpPut("", Name = "UpdateAuthUser")]
         public async Task<IActionResult> UpdateAuthUser([FromBody] UpdateUserDto updateUserDto)
         {
             //get user Id
@@ -137,13 +136,42 @@ namespace Api.Controllers
             var result = await mediator.Send(new UpdateUserCommand(userId, updateUserDto));
 
             return result.Match<IActionResult>(value =>
-                CreatedAtRoute("",new
+                CreatedAtRoute("", new
                 {
 
-                },value),
+                }, value),
                  errors => errors.ToProblemDetailsObjectResult()
             );
         }
 
+        [HttpPost("forget-password/send-otp", Name = "SendOtpForForgetPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendOtpForForgetPassword([FromBody] SendOtpDto sendOtpDto)
+        {
+            var result = await mediator.Send(new SendOtpCommand(sendOtpDto, OtpPurpose.ForgetPassword));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpPost("forget-password/resend-otp", Name = "ResendOtpForForgetPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendOtpForForgetPassword([FromBody] ResendOtpDto resendOtpDto)
+        {
+            var result = await mediator.Send(new ResendOtpCommand(resendOtpDto, OtpPurpose.ForgetPassword));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpPost("forget-password", Name = "ForgetPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordDto forgetPasswordDto)
+        {
+            var result = await mediator.Send(new ForgetPasswordCommand(forgetPasswordDto));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
     }
 }

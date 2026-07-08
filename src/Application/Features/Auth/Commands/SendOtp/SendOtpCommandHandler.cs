@@ -1,4 +1,5 @@
 using Application.Common.Emails;
+using Application.Common.Errors;
 using Application.Common.Interfaces.Channels;
 using Application.Common.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,21 @@ namespace Application.Features.Auth.Commands.SendOtp
         {
             logger.LogInformation("Starting send otp to user with email {Email}", request.SendOtpDto.Email);
 
+
+            //getting last otp
+
+            logger.LogInformation("Getting last otp of user with email {Email}", request.SendOtpDto.Email);
+            var lastOtp = await cacheService.GetAsync<OtpDto>($"otp:{request.OtpPurpose}:{request.SendOtpDto.Email}");
+
+            //check if last otp is not used and not expired and is for the same purpose
+            if (lastOtp is not null && !lastOtp.IsUsed && lastOtp.ExpiresAt > DateTime.UtcNow
+                && lastOtp.OtpPurposeId == (byte)request.OtpPurpose)
+            {
+                logger.LogWarning("Already sent otp");
+                return OtpErrors.OtpAlreadySent(request.SendOtpDto.Email);
+            }
+
+            //create otp
             var otp = otpService.GenerateOtp();
             var hashedOtp = otpService.HashOtp(otp);
 
@@ -33,7 +49,7 @@ namespace Application.Features.Auth.Commands.SendOtp
             var otpDto = new OtpDto
             {
                 CreadtedAt = DateTime.UtcNow,
-                OtpPurpose = (byte)request.OtpPurpose,
+                OtpPurposeId = (byte)request.OtpPurpose,
                 Email = request.SendOtpDto.Email,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(lifeTimeInMinutes),
                 HashOtp = hashedOtp,
@@ -42,7 +58,7 @@ namespace Application.Features.Auth.Commands.SendOtp
 
             //saved to cache
             logger.LogInformation("Saving otp to cache for user with email {Email}", request.SendOtpDto.Email);
-            await cacheService.SetAsync($"otp:{request.SendOtpDto.Email}", otpDto, TimeSpan.FromMinutes(lifeTimeInMinutes),true);
+            await cacheService.SetAsync($"otp:{request.OtpPurpose}:{request.SendOtpDto.Email}", otpDto, TimeSpan.FromMinutes(lifeTimeInMinutes),true);
 
             logger.LogInformation("Add otp to queue for user with email {Email}", request.SendOtpDto.Email);
             await otpEmailQueue.EnqueueAsync(new OtpEmailContent
@@ -53,7 +69,7 @@ namespace Application.Features.Auth.Commands.SendOtp
                 Valid_Minutes = lifeTimeInMinutes
             });
 
-            logger.LogInformation("Send otp to user with email {Email} Succssfully", request.SendOtpDto.Email);
+            logger.LogInformation("Send otp to user with email {Email} Successfully", request.SendOtpDto.Email);
             
             return true;
         }

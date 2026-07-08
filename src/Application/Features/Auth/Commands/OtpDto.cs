@@ -13,7 +13,7 @@ namespace Application.Features.Auth.Commands
 
         public DateTime ExpiresAt { get; set; }
 
-        public byte OtpPurpose { get; set; }
+        public byte OtpPurposeId { get; set; }
 
         public bool IsUsed { get; set; }
 

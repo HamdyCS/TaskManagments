@@ -20,16 +20,16 @@ namespace Application.Features.Auth.Commands.ResendOtp
             var otp = otpService.GenerateOtp();
             var hashedOtp = otpService.HashOtp(otp);
 
-            logger.LogInformation("Getting last otp of user with email {Email}", request.ResendOtpDto.Email);
+            logger.LogInformation("Getting last otp has same purpose of user with email {Email}", request.ResendOtpDto.Email);
 
-            var lastOtp = await cacheService.GetAsync<OtpDto>($"otp:{request.ResendOtpDto.Email}");
+            var lastOtp = await cacheService.GetAsync<OtpDto>($"otp:{request.OtpPurpose}:{request.ResendOtpDto.Email}");
 
             //check if last otp is not used and not expired and is for the same purpose
-            if (lastOtp is not null && (!lastOtp.IsUsed && lastOtp.ExpiresAt < DateTime.UtcNow 
-                && lastOtp.OtpPurpose == (byte)request.OtpPurpose))
+            if (lastOtp is not null && !lastOtp.IsUsed && lastOtp.ExpiresAt > DateTime.UtcNow 
+                && lastOtp.OtpPurposeId == (byte)request.OtpPurpose)
             {
-                logger.LogInformation("Removing last otp of user with email {Email}", request.ResendOtpDto.Email);
-                await cacheService.RemoveAsync($"otp:{request.ResendOtpDto.Email}");
+                logger.LogInformation("Removing last otp has same purpose of user with email {Email}", request.ResendOtpDto.Email);
+                await cacheService.RemoveAsync($"otp:{request.OtpPurpose}:{request.ResendOtpDto.Email}",true);
             }
 
             var result = await mediator.Send(new SendOtpCommand(new SendOtpDto { Email = request.ResendOtpDto.Email }, request.OtpPurpose));
@@ -37,7 +37,7 @@ namespace Application.Features.Auth.Commands.ResendOtp
                 return result.Errors;
 
 
-            logger.LogInformation("Resend otp to user with email {Email} Succssfully", request.ResendOtpDto.Email);
+            logger.LogInformation("Resend otp to user with email {Email} Successfully", request.ResendOtpDto.Email);
 
             return true;
         }

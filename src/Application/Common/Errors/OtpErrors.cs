@@ -10,12 +10,15 @@ namespace Application.Common.Errors
             Error.NotFound("Otp_NotFound", $"Otp not found with email {email}");
 
         public static Error OtpExpired(string otp) => 
-            Error.Unauthorized("Otp_Expired", $"Otp expired with otp {otp}");
+            Error.Unauthorized("Otp_Expired", $"Otp {otp} expired");
 
         public static Error OtpAlreadyUsed(string otp) => 
-            Error.Conflict("Otp_AlreadyUsed", $"Otp already used with otp {otp}");
+            Error.Conflict("Otp_AlreadyUsed", $"Otp {otp} already used");
 
         public static Error OtpInvalid(string otp) => 
-            Error.Unauthorized("Otp_Invalid", $"Otp invalid with otp {otp}");
+            Error.Unauthorized("Otp_Invalid", $"Otp {otp} invalid");
+
+        public static Error OtpAlreadySent(string email) =>
+            Error.Conflict("Otp_AlreadySent", $"Otp already send to user with email {email}");
     }
 }

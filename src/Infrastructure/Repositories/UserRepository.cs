@@ -87,7 +87,6 @@ namespace Infrastructure.Repositories
             return user;
         }
 
-
         public async Task RemoveUnConfirmedUsersAsync()
         {
             var expiredUnConfirmedUsers = await GetExpiredUnConfirmedUsersAsync();
@@ -104,6 +103,17 @@ namespace Infrastructure.Repositories
         public void UpdateUser(User user)
         {
             context.Users.Update(user);
+        }
+
+        public async Task<bool> UpdatePasswordAsync(User user, string newPassword)
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+
+            if (string.IsNullOrEmpty(token))
+                return false;
+
+            var resetPasswordResult = await userManager.ResetPasswordAsync(user, token, newPassword);
+            return resetPasswordResult.Succeeded;
         }
     }
 }

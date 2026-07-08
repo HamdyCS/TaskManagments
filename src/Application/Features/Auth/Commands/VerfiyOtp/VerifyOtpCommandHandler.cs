@@ -21,14 +21,21 @@ namespace Application.Features.Auth.Commands.VerfiyOtp
 
             logger.LogInformation("Getting otp from cache for user with email {Email}", request.VerifyOtpDto.Email);
 
-            var otpDto = await cacheService.GetAsync<OtpDto>($"otp:{request.VerifyOtpDto.Email}");
+            var otpDto = await cacheService.GetAsync<OtpDto>($"otp:{request.OtpPurpose}:{request.VerifyOtpDto.Email}");
             if (otpDto is null)
             {
                 logger.LogWarning("Otp not found in cache for user with email {Email}", request.VerifyOtpDto.Email);
                 return OtpErrors.OtpNotFound(request.VerifyOtpDto.Email);
             }
 
-            if (otpDto.OtpPurpose != (byte)request.OtpPurpose)
+            //verify otp code
+            if (!otpService.VerifyOtp(request.VerifyOtpDto.Otp, otpDto.HashOtp))
+            {
+                logger.LogWarning("Invalid otp for user with email {Email}", request.VerifyOtpDto.Email);
+                return OtpErrors.OtpInvalid(request.VerifyOtpDto.Otp);
+            }
+
+            if (otpDto.OtpPurposeId != (byte)request.OtpPurpose)
             {
                 logger.LogWarning("Invalid otp for user with email {Email}", request.VerifyOtpDto.Email);
                 return OtpErrors.OtpInvalid(request.VerifyOtpDto.Otp);
@@ -40,19 +47,13 @@ namespace Application.Features.Auth.Commands.VerfiyOtp
                 return OtpErrors.OtpExpired(request.VerifyOtpDto.Otp);
             }
 
-            //verify otp code
-            if (!otpService.VerifyOtp(otpDto.HashOtp, request.VerifyOtpDto.Otp))
-            {
-                logger.LogWarning("Invalid otp for user with email {Email}", request.VerifyOtpDto.Email);
-                return OtpErrors.OtpInvalid(request.VerifyOtpDto.Otp);
-            }
 
             //remove otp from cache
             logger.LogInformation("Removing otp from cache for user with email {Email}", request.VerifyOtpDto.Email);
-            await cacheService.RemoveAsync($"otp:{request.VerifyOtpDto.Email}");
+            await cacheService.RemoveAsync($"otp:{request.VerifyOtpDto.Email}",true);
            
 
-            logger.LogInformation("Checking otp for user with email {Email} Succssfully", request.VerifyOtpDto.Email);
+            logger.LogInformation("Checking otp for user with email {Email} successfully", request.VerifyOtpDto.Email);
             return true;
         }
     }

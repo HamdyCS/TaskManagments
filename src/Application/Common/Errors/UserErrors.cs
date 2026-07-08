@@ -23,11 +23,14 @@ namespace Application.Common.Errors
         public static Error ConfirmEmailFailed(string email) => 
             Error.Failure("User_ConfirmEmailFailed", $"User confirm email {email} failed");
 
-        internal static Error UserAlreadyConfirmed(string email) => 
+        public static Error UserAlreadyConfirmed(string email) => 
             Error.Conflict("User_AlreadyConfirmed", $"User email {email} already confirmed");
 
-        internal static Error UpdateUserFailed(string userId)
+        public static Error UpdateUserFailed(string userId)
             => Error.Failure("User_UpdateFailed", $"Failed update user with id {userId}");
-       
+
+        public static Error UpdatedPasswordFailedByEmail(string email)
+            => Error.Failure("User_UpdatedPasswordFailed", $"Failed update password for user with email {email}");
+
     }
 }

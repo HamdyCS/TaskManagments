@@ -23,5 +23,7 @@ namespace Application.Common.Interfaces.Repositories
         Task RemoveUnConfirmedUsersAsync();
 
         void UpdateUser(User user);
+
+        Task<bool> UpdatePasswordAsync(User user, string newPassword);
     }   
 }
