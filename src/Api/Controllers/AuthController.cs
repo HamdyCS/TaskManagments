@@ -4,7 +4,9 @@ using Application.Features.Auth.Commands.ForgetPassword;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.ResendOtp;
+using Application.Features.Auth.Commands.ResetPassword;
 using Application.Features.Auth.Commands.SendOtp;
+using Application.Features.Auth.Commands.SendPasswordResetEmail;
 using Application.Features.Users;
 using Application.Features.Users.Commands.RegisterNewUser;
 using Application.Features.Users.Commands.UpdateUser;
@@ -144,6 +146,9 @@ namespace Api.Controllers
             );
         }
 
+
+        //forget password
+
         [HttpPost("forget-password/send-otp", Name = "SendOtpForForgetPassword")]
         [AllowAnonymous]
         public async Task<IActionResult> SendOtpForForgetPassword([FromBody] SendOtpDto sendOtpDto)
@@ -169,6 +174,36 @@ namespace Api.Controllers
         public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordDto forgetPasswordDto)
         {
             var result = await mediator.Send(new ForgetPasswordCommand(forgetPasswordDto));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        //reset password
+
+        [HttpPost("reset-password/send-email", Name = "SendPasswordResetEmail")]
+        public async Task<IActionResult> SendPasswordResetEmail()
+        {
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+
+            var result = await mediator.Send(new SendPasswordResetEmailCommand(userId));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpPost("reset-password", Name = "ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            var userId = User.GetUserId();
+            if(string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+
+            var result = await mediator.Send(new ResetPasswordCommand(resetPasswordDto,UserId: userId));
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());

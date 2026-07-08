@@ -25,5 +25,7 @@ namespace Application.Common.Interfaces.Repositories
         void UpdateUser(User user);
 
         Task<bool> UpdatePasswordAsync(User user, string newPassword);
+        Task<string> GeneratePasswordResetTokenAsync(User user);
+        Task<bool> ResetPasswordAsync(User user, string token, string newPassword);
     }   
 }

@@ -144,6 +144,8 @@ namespace Infrastructure
         {
             services.AddSingleton<IConfirmationEmailQueue, ConfirmationEmailQueue>();
             services.AddSingleton<IOtpEmailQueue, OtpEmailQueue>();
+            services.AddSingleton<IResetPasswordEmailQueue, ResetPasswordEmailQueue>();
+
             return services;
         }
 
@@ -170,6 +172,7 @@ namespace Infrastructure
             services.AddHostedService<ConfirmationEmailBgService>();
             services.AddHostedService<RemoveUnConfirmedUsersBgService>();
             services.AddHostedService<OtpEmailBgService>();
+            services.AddHostedService<ResetPasswordEmailBgService>();
 
             //add redis cache
             services.AddStackExchangeRedisCache(opt =>

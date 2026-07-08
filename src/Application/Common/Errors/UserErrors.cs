@@ -32,5 +32,7 @@ namespace Application.Common.Errors
         public static Error UpdatedPasswordFailedByEmail(string email)
             => Error.Failure("User_UpdatedPasswordFailed", $"Failed update password for user with email {email}");
 
+        public static Error ResetPasswordFailed
+            => Error.Failure("User_ResetPasswordFailed", "Failed reset password");
     }
 }

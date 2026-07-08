@@ -10,5 +10,6 @@ namespace Application.Common.Interfaces.Services
         Task SendConfirmationEmailAsync(ConfirmationEmailContent confirmationEmailContent);
 
         Task SendOtpEmailAsync(OtpEmailContent otpEmailContent);
+        Task SendResetPasswordEmailAsync(ResetPasswordEmailContent resetPasswordEmailContent);
     }
 }

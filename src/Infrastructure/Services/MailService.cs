@@ -69,6 +69,50 @@ namespace Infrastructure.Services
             }
         }
 
+        public async Task SendResetPasswordEmailAsync(ResetPasswordEmailContent resetPasswordEmailContent)
+        {
+            try
+            {
+                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Common/Templates", "ResetPasswordEmail.html");
+                string htmlTemplate = await System.IO.File.ReadAllTextAsync(filePath);
+
+
+                htmlTemplate = htmlTemplate.Replace("{UserName}", resetPasswordEmailContent.FullName);
+                htmlTemplate = htmlTemplate.Replace("{ResetPasswordLink}", resetPasswordEmailContent.Url);
+
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Task Managements", mailOptions.Email));
+                message.To.Add(new MailboxAddress("", resetPasswordEmailContent.To));
+                message.Subject = "Reset Your Password link";
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = htmlTemplate,
+                    TextBody = "Your Reset password link is: " + resetPasswordEmailContent.Url,
+                };
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(mailOptions.Host, mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
+
+                    await client.AuthenticateAsync(mailOptions.Email, mailOptions.AppPassword);
+
+                    await client.SendAsync(message);
+
+                    await client.DisconnectAsync(true);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error on Send email {Email}, Error {error}", resetPasswordEmailContent.To, ex.Message);
+            }
+        }
+
         public async Task SendOtpEmailAsync(OtpEmailContent otpEmailContent)
         {
             try

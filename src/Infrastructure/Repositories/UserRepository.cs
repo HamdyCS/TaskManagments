@@ -21,7 +21,7 @@ namespace Infrastructure.Repositories
             {
                 return (user.Email, null);
             }
-            
+
 
             //generate token
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -112,6 +112,18 @@ namespace Infrastructure.Repositories
             if (string.IsNullOrEmpty(token))
                 return false;
 
+            var resetPasswordResult = await userManager.ResetPasswordAsync(user, token, newPassword);
+            return resetPasswordResult.Succeeded;
+        }
+
+        public async Task<string> GeneratePasswordResetTokenAsync(User user)
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            return token;
+        }
+
+        public async Task<bool> ResetPasswordAsync(User user, string token, string newPassword)
+        {
             var resetPasswordResult = await userManager.ResetPasswordAsync(user, token, newPassword);
             return resetPasswordResult.Succeeded;
         }
