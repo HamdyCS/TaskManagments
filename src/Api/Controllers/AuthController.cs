@@ -213,11 +213,11 @@ namespace Api.Controllers
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             var userId = User.GetUserId();
-            if(string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
 
-            var result = await mediator.Send(new ResetPasswordCommand(resetPasswordDto,UserId: userId));
+            var result = await mediator.Send(new ResetPasswordCommand(resetPasswordDto, UserId: userId));
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());
@@ -285,6 +285,12 @@ namespace Api.Controllers
                 return Unauthorized();
 
             var result = await mediator.Send(new DeleteAccountCommand(deleteAccountDto, userId));
+
+            if (!result.IsError)
+            {
+                //Remove auth info from cookies
+                Response.RemoveAuthInfoFromCookie();
+            }
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());
