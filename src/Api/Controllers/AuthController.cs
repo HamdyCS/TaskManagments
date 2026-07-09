@@ -275,7 +275,7 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
-        [HttpPost("delete-account", Name = "DeleteAccount")]
+        [HttpDelete("delete-account", Name = "DeleteAccount")]
         [AllowAnonymous]
         public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountDto deleteAccountDto)
         {
