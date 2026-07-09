@@ -20,6 +20,8 @@ namespace Infrastructure.Services
             {
                 case OtpPurpose.ForgetPassword:
                     return "Forget Password";
+                case OtpPurpose.DeleteAccount:
+                    return "Delete Account";
                 default:
                     return "Unknown";
             }

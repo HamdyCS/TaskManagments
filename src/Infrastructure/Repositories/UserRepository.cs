@@ -43,7 +43,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetExpiredUnConfirmedUsersAsync()
         {
-            var ExpiredUsers = await context.Users.Where(u => !u.EmailConfirmed
+            var ExpiredUsers = await context.Users.Where(u => !u.EmailConfirmed && !u.IsDeleted
             && u.CreatedAt.AddHours(24) >= DateTime.UtcNow).ToListAsync();
 
             return ExpiredUsers;
@@ -51,17 +51,19 @@ namespace Infrastructure.Repositories
 
         public async Task<User?> GetConfirmedUserByEmailAsync(string email)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed == true);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed && !u.IsDeleted);
             return user;
         }
+
         public async Task<User?> GetConfirmedUserByIdAsync(string id)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id && u.EmailConfirmed == true);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id && u.EmailConfirmed && !u.IsDeleted);
             return user;
         }
+
         public async Task<User?> GetConfirmedByEmailAndPasswordAsync(string email, string password)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && u.EmailConfirmed && !u.IsDeleted);
             if (user is null)
                 return null;
 
@@ -71,19 +73,19 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> IsExistByEmailAsync(string email)
         {
-            var isExist = await context.Users.AnyAsync(u => u.Email == email);
+            var isExist = await context.Users.AnyAsync(u => u.Email == email && !u.IsDeleted);
             return isExist;
         }
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
             return user;
         }
 
         public async Task<User?> GetByIdAsync(string userId)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
             return user;
         }
 
@@ -128,7 +130,7 @@ namespace Infrastructure.Repositories
             return resetPasswordResult.Succeeded;
         }
 
-        public async Task<string> GenerateChangeEmailTokenAsync(User user,string newEmail)
+        public async Task<string> GenerateChangeEmailTokenAsync(User user, string newEmail)
         {
             var token = await userManager.GenerateChangeEmailTokenAsync(user, newEmail);
             return token;
@@ -136,8 +138,19 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> ChangeEmailAsync(User user, string token, string newEmail)
         {
-            var changeEmailResult = await userManager.ChangeEmailAsync(user, newEmail,token);
+            var changeEmailResult = await userManager.ChangeEmailAsync(user, newEmail, token);
             return changeEmailResult.Succeeded;
+        }
+
+        public async Task<bool> DeleteAsync(User user)
+        {
+            //update user
+            user.IsDeleted = true;
+            user.DeletedAt = DateTime.UtcNow;
+
+            var result = await userManager.UpdateAsync(user);
+
+            return result.Succeeded;
         }
     }
 }

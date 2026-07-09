@@ -1,6 +1,7 @@
 ﻿using Api.Extensions;
 using Application.Features.Auth.Commands.ChangeEmail;
 using Application.Features.Auth.Commands.CreateToken;
+using Application.Features.Auth.Commands.DeleteAccount;
 using Application.Features.Auth.Commands.ForgetPassword;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
@@ -181,6 +182,7 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
+
         //reset password
 
         [HttpPost("reset-password/send-email", Name = "SendPasswordResetEmail")]
@@ -211,6 +213,7 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
+
         //change email
 
         [HttpPost("change-email/send-email", Name = "SendChangeEmail")]
@@ -236,6 +239,42 @@ namespace Api.Controllers
 
 
             var result = await mediator.Send(new ChangeEmailCommand(changeEmailDto, UserId: userId));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+
+        //Delete account
+
+        [HttpPost("delete-account/send-otp", Name = "SendOtpForDeleteAccount")]
+        public async Task<IActionResult> SendOtpForDeleteAccount([FromBody] SendOtpDto sendOtpDto)
+        {
+            var result = await mediator.Send(new SendOtpCommand(sendOtpDto, OtpPurpose.DeleteAccount));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpPost("delete-account/resend-otp", Name = "ResendOtpForDeleteAccount")]
+        public async Task<IActionResult> ResendOtpForDeleteAccount([FromBody] ResendOtpDto resendOtpDto)
+        {
+            var result = await mediator.Send(new ResendOtpCommand(resendOtpDto, OtpPurpose.DeleteAccount));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpPost("delete-account", Name = "DeleteAccount")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountDto deleteAccountDto)
+        {
+            //get user Id
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await mediator.Send(new DeleteAccountCommand(deleteAccountDto, userId));
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());

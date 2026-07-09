@@ -37,5 +37,7 @@ namespace Application.Common.Errors
         public static Error ChangeEmailFailed(string userId)
             => Error.Failure("User_ChangeEmailFailed", $"Failed change email for user with id {userId}");
 
+        public static Error DeleteUserFailed(string userId)
+            => Error.Failure("User_DeleteFailed", $"Failed delete user with id {userId}");
     }
 }

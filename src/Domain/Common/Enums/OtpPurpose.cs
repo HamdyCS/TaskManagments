@@ -7,6 +7,6 @@ namespace Domain.Common.Enums
     public enum OtpPurpose
     {
         ForgetPassword = 1,
-
+        DeleteAccount
     }
 }
