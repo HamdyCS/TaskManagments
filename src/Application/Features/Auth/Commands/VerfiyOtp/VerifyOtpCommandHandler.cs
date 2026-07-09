@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Features.Auth.Commands.VerfiyOtp
+namespace Application.Features.Auth.Commands.VerifyOtp
 {
     public class VerfiyOtpCommandHandler(ICacheService cacheService, IOtpService otpService,
         IConfiguration configuration, IOtpEmailQueue otpEmailQueue,
@@ -50,7 +50,7 @@ namespace Application.Features.Auth.Commands.VerfiyOtp
 
             //remove otp from cache
             logger.LogInformation("Removing otp from cache for user with email {Email}", request.VerifyOtpDto.Email);
-            await cacheService.RemoveAsync($"otp:{request.VerifyOtpDto.Email}",true);
+            await cacheService.RemoveAsync($"otp:{request.OtpPurpose}:{request.VerifyOtpDto.Email}",true);
            
 
             logger.LogInformation("Checking otp for user with email {Email} successfully", request.VerifyOtpDto.Email);

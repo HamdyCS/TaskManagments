@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Features.Auth.Commands.VerfiyOtp
+namespace Application.Features.Auth.Commands.VerifyOtp
 {
     public class VerifyOtpDto
     {

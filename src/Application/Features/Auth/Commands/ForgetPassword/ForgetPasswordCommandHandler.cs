@@ -1,6 +1,6 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
-using Application.Features.Auth.Commands.VerfiyOtp;
+using Application.Features.Auth.Commands.VerifyOtp;
 using Domain.Common.Enums;
 using Microsoft.Extensions.Logging;
 using System;
