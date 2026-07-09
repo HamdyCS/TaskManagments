@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Domain.Common.Pagination;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -39,5 +40,6 @@ namespace Application.Common.Interfaces.Repositories
 
         Task<bool> ChangeEmailAsync(User user, string token, string newEmail);
         Task<bool> DeleteAsync(User user);
+        Task<PaginationResult<User>> GetAllUsers(int pageNumber, int pageSize);
     }  
 }

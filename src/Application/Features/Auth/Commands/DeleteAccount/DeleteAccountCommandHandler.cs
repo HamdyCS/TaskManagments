@@ -48,7 +48,7 @@ namespace Application.Features.Auth.Commands.DeleteAccount
 
             if (!isUserDeleted)
             {
-                logger.LogError("Failed to Delete user with Id {UserId}", request.UserId);
+                logger.LogWarning("Failed to Delete user with Id {UserId}", request.UserId);
                 return UserErrors.DeleteUserFailed(request.UserId);
             }
 

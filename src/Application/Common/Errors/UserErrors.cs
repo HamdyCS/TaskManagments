@@ -39,5 +39,8 @@ namespace Application.Common.Errors
 
         public static Error DeleteUserFailed(string userId)
             => Error.Failure("User_DeleteFailed", $"Failed delete user with id {userId}");
+
+        public static Error UserCanNotDeleteItself(string userId)
+            => Error.Conflict("User_CannotDeleteItself", $"User with Id {userId} cannot delete itself");
     }
 }

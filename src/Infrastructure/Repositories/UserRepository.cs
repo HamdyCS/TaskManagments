@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repositories;
+using Domain.Common.Pagination;
 using Domain.Entities;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +44,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetExpiredUnConfirmedUsersAsync()
         {
-            var ExpiredUsers = await context.Users.Where(u => !u.EmailConfirmed && !u.IsDeleted
+            var ExpiredUsers = await context.Users.Where(u => !u.EmailConfirmed
             && u.CreatedAt.AddHours(24) >= DateTime.UtcNow).ToListAsync();
 
             return ExpiredUsers;
@@ -151,6 +152,16 @@ namespace Infrastructure.Repositories
             var result = await userManager.UpdateAsync(user);
 
             return result.Succeeded;
+        }
+
+        public async Task<PaginationResult<User>> GetAllUsers(int pageNumber,int pageSize)
+        {
+            var query = context.Users.Where(u => !u.IsDeleted);
+
+            var totalCount = await query.CountAsync();
+            var users = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PaginationResult<User>(users, totalCount, pageNumber, pageSize);
         }
     }
 }
