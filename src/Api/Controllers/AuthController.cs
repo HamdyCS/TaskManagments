@@ -37,6 +37,16 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
+        [HttpPost("register-admin", Name = "RegisterAdmin")]
+        [Authorize(Roles = nameof(Role.Admin))]
+        public async Task<ActionResult<RegisterUserResultDto>> RegisterAdmin([FromBody] RegisterUserDto registerUserDto)
+        {
+            var result = await mediator.Send(new RegisterUserCommand(registerUserDto, Role.Admin));
+
+            return result.Match(value => Ok(value),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
 
         [HttpPost("confirm-email", Name = "ConfirmEmail")]
         [AllowAnonymous]
