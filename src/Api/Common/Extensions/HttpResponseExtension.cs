@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 
-namespace Api.Extensions
+namespace Api.Common.Extensions
 {
     public static class HttpResponseExtension
     {

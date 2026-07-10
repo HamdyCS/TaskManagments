@@ -18,7 +18,7 @@ namespace Application.Features.Auth.Commands.ChangeEmail
             //get user
             logger.LogInformation("Getting user By Id {UserId}", request.UserId);
 
-            var user = await unitOfWork.userRepository.GetByIdAsync(request.UserId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(request.UserId);
 
             if (user is null)
             {
@@ -28,7 +28,7 @@ namespace Application.Features.Auth.Commands.ChangeEmail
 
             //check if email exists
             logger.LogInformation("Checking if email {NewEmail} exists", request.ChangeEmailDto.NewEmail);
-            var emailExists = await unitOfWork.userRepository.IsExistByEmailAsync(request.ChangeEmailDto.NewEmail);
+            var emailExists = await unitOfWork.UserRepository.IsExistByEmailAsync(request.ChangeEmailDto.NewEmail);
 
             if (emailExists)
             {
@@ -41,7 +41,7 @@ namespace Application.Features.Auth.Commands.ChangeEmail
 
             var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.ChangeEmailDto.Token));
 
-            var result = await unitOfWork.userRepository.ChangeEmailAsync(user, decodedToken, request.ChangeEmailDto.NewEmail);
+            var result = await unitOfWork.UserRepository.ChangeEmailAsync(user, decodedToken, request.ChangeEmailDto.NewEmail);
 
             if(!result)
             {

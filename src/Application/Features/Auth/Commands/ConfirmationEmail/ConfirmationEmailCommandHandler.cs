@@ -25,7 +25,7 @@ namespace Application.Features.Users.Commands.RegisterNewUser
 
 
             logger.LogInformation("Get user by email {Email}", request.email);
-            var user = await unitOfWork.userRepository.GetByEmailAsync(request.email);
+            var user = await unitOfWork.UserRepository.GetByEmailAsync(request.email);
             if (user is null)
             {
                 logger.LogWarning("Not found user with email {Email}", request.email);
@@ -43,7 +43,7 @@ namespace Application.Features.Users.Commands.RegisterNewUser
 
             var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.token));
             //confirm email
-            var result = await unitOfWork.userRepository.ConfirmUserAsync(user, decodedToken);
+            var result = await unitOfWork.UserRepository.ConfirmUserAsync(user, decodedToken);
 
             if (!result)
             {

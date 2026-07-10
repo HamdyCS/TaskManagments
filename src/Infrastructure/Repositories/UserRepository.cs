@@ -1,14 +1,20 @@
+using Application.Common.Exceptions;
 using Application.Common.Interfaces.Repositories;
+using Domain.Common.Enums;
 using Domain.Common.Pagination;
 using Domain.Entities;
 using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
+using System.Security.Claims;
 
 
 namespace Infrastructure.Repositories
 {
-    public class UserRepository(AppDbContext context, UserManager<User> userManager) : IUserRepository
+    public class UserRepository(AppDbContext context, UserManager<User> userManager
+        , SignInManager<User> signInManager) : IUserRepository
     {
         public async Task<(string email, string? token)> AddNewUserAsync(User user, string password)
         {
@@ -154,7 +160,7 @@ namespace Infrastructure.Repositories
             return result.Succeeded;
         }
 
-        public async Task<PaginationResult<User>> GetAllUsers(int pageNumber,int pageSize)
+        public async Task<PaginationResult<User>> GetAllUsers(int pageNumber, int pageSize)
         {
             var query = context.Users.Where(u => !u.IsDeleted);
 
@@ -162,6 +168,81 @@ namespace Infrastructure.Repositories
             var users = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
             return new PaginationResult<User>(users, totalCount, pageNumber, pageSize);
+        }
+
+        public AuthenticationProperties GenerateExternalAuthProperty(Provider provider, string redirectUrl)
+        {
+            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider.ToString(), redirectUrl);
+            return properties;
+        }
+
+        public async Task<User?> GetOrCreateExternalUserAsync(Role roleOnCreate)
+        {
+            //get external login info
+            ExternalLoginInfo? loginInfo = await signInManager.GetExternalLoginInfoAsync();
+            if (loginInfo is null)
+                return null;
+
+            //get user
+            var user = await userManager.FindByLoginAsync(loginInfo.LoginProvider, loginInfo.ProviderKey);
+            if (user is not null)
+            {
+                return user;
+            }
+
+            //get email
+            var email = loginInfo.Principal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+                return null;
+
+
+            //get user by email
+            var userByEmail = await GetByEmailAsync(email);
+            if (userByEmail is not null)
+            {
+                var addUserByEmailToLoginResult = await userManager.AddLoginAsync(userByEmail, loginInfo);
+                return addUserByEmailToLoginResult.Succeeded ? userByEmail : null;
+            }
+
+            //start transaction
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                //create user
+
+                var userToCreate = new User()
+                {
+                    UserName = new MailAddress(email).User,
+                    Email = email,
+                    EmailConfirmed = true,
+                    RoleId = (short)roleOnCreate,
+                    FirstName = loginInfo.Principal.FindFirstValue(ClaimTypes.GivenName) ?? string.Empty,
+                    LastName = loginInfo.Principal.FindFirstValue(ClaimTypes.Surname) ?? string.Empty,
+                };
+
+                var result = await userManager.CreateAsync(userToCreate);
+
+                if (!result.Succeeded)
+                    return null;
+
+                //add login
+                var addToLoginResult = await userManager.AddLoginAsync(userToCreate, loginInfo);
+                if (!addToLoginResult.Succeeded)
+                    return null;
+
+                //commit transaction
+                await transaction.CommitAsync();
+
+                return userToCreate;
+            }
+            catch (Exception ex)
+            {
+                //rollback
+                await transaction.RollbackAsync();
+                throw new DatabaseOperationException(ex);
+            }
+
         }
     }
 }

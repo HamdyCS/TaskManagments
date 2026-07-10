@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Api.Extensions" />
+    <Using Include="Api.Common.Extensions" />
     <Using Include="Domain.Common.Enums" />
     <Using Include="MediatR" />
     <Using Include="Microsoft.AspNetCore.Authorization" />

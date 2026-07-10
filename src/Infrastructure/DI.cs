@@ -10,14 +10,18 @@ using Infrastructure.Common.Options;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace Infrastructure
@@ -40,6 +44,9 @@ namespace Infrastructure
 
             //add Mail Options
             services.AddMailOptions(configuration);
+
+            //add login with google
+            services.AddGoogleAuth(configuration);
 
             //add jwt
             services.AddJwt(configuration);
@@ -79,6 +86,7 @@ namespace Infrastructure
                 .AddSignInManager<SignInManager<User>>()
                 .AddDefaultTokenProviders();
 
+            services.AddAuthentication().AddIdentityCookies();
             return services;
         }
 
@@ -104,7 +112,14 @@ namespace Infrastructure
             else
                 services.AddSingleton(jwtOptions);
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+                opt.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+
+            }).AddJwtBearer(opt =>
             {
                 opt.SaveToken = true;
 
@@ -135,7 +150,7 @@ namespace Infrastructure
                         return Task.CompletedTask;
                     }
                 };
-            });
+            }).AddCookie();
 
             return services;
         }
@@ -186,6 +201,18 @@ namespace Infrastructure
             {
                 opt.Configuration = configuration.GetConnectionString("Redis");
                 opt.InstanceName = "RedisCache";
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection AddGoogleAuth(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddAuthentication().AddGoogle(opt =>
+            {
+                opt.ClientId = configuration["Authentication:Google:ClientId"]!;
+                opt.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
+
             });
 
             return services;

@@ -18,7 +18,7 @@ namespace Application.Features.Auth.Commands.ResetPassword
             //get user
             logger.LogInformation("Getting user By Id {UserId}", request.UserId);
 
-            var user = await unitOfWork.userRepository.GetByIdAsync(request.UserId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(request.UserId);
 
             if (user is null)
             {
@@ -31,7 +31,7 @@ namespace Application.Features.Auth.Commands.ResetPassword
 
             var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.ResetPasswordDto.Token));
 
-            var result = await unitOfWork.userRepository.ResetPasswordAsync(user, decodedToken, request.ResetPasswordDto.NewPassword);
+            var result = await unitOfWork.UserRepository.ResetPasswordAsync(user, decodedToken, request.ResetPasswordDto.NewPassword);
 
             if(!result)
             {

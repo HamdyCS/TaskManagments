@@ -9,11 +9,11 @@ namespace Domain.Entities
 {
     public class User : IdentityUser, ISoftDelete
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public short RoleId { get; set; }
 
-        public DateOnly DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

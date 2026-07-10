@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Api.Extensions
+namespace Api.Common.Extensions
 {
     public static class ErrorExtension
     {

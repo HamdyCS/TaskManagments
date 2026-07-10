@@ -15,7 +15,7 @@ namespace Application.Features.Users.Queries.GetUserById
             logger.LogInformation("Starting Update user with id {UserId}", request.UserId);
 
             //get user
-            var user = await unitOfWork.userRepository.GetByIdAsync(request.UserId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(request.UserId);
             if (user is null)
             {
                 logger.LogWarning("User with id {UserId} not found", request.UserId);
@@ -30,7 +30,7 @@ namespace Application.Features.Users.Queries.GetUserById
 
             //update user
             logger.LogInformation("Updating user with id {UserId}", request.UserId);
-            unitOfWork.userRepository.UpdateUser(user);
+            unitOfWork.UserRepository.UpdateUser(user);
 
 
             //save changes

@@ -1,4 +1,5 @@
 ﻿
+using Api.Common.Extensions;
 using Application.Common.Dtos;
 using Application.Features.Auth.Commands.DeleteAccount;
 using Application.Features.Auth.Commands.DeleteUser;

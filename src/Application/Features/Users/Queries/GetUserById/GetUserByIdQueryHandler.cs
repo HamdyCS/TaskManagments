@@ -15,7 +15,7 @@ namespace Application.Features.Users.Queries.GetUserById
             logger.LogInformation("Starting Get user by Id {UserId}", request.userId);
 
             //get user
-            var user = await unitOfWork.userRepository.GetByIdAsync(request.userId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(request.userId);
             if(user is null)
             {
                 logger.LogWarning("User with id {UserId} not found", request.userId);

@@ -23,7 +23,7 @@ namespace Infrastructure.BackgroundServices
                     var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
                     logger.LogInformation("RemoveUnConfirmedUsersBgService( service is running removing un confirmation users. Time = {TimeNow})", DateTime.UtcNow);
-                    await unitOfWork.userRepository.RemoveUnConfirmedUsersAsync();
+                    await unitOfWork.UserRepository.RemoveUnConfirmedUsersAsync();
 
 
                     var rowsAffected = await unitOfWork.SaveChangesAsync();

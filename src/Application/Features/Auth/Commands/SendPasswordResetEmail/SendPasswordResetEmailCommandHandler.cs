@@ -21,7 +21,7 @@ namespace Application.Features.Auth.Commands.SendPasswordResetEmail
 
             //get user
             logger.LogInformation("Getting user with id {UserId}", request.UserId);
-            var user = await unitOfWork.userRepository.GetByIdAsync(request.UserId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(request.UserId);
 
             if(user is null)
             {
@@ -31,7 +31,7 @@ namespace Application.Features.Auth.Commands.SendPasswordResetEmail
 
             //generate password reset token
             logger.LogInformation("Generating password reset token for user with id {UserId}", request.UserId);
-            var token =await unitOfWork.userRepository.GeneratePasswordResetTokenAsync(user);
+            var token =await unitOfWork.UserRepository.GeneratePasswordResetTokenAsync(user);
 
             if(token is null)
             {

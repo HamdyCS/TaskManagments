@@ -17,7 +17,7 @@ namespace Application.Features.Auth.Commands.Login
             logger.LogInformation("Starting login for user with email {Email}", request.loginDto.Email);
 
             //get user by email and password
-            var user = await unitOfWork.userRepository.GetConfirmedByEmailAndPasswordAsync(request.loginDto.Email, request.loginDto.Password);
+            var user = await unitOfWork.UserRepository.GetConfirmedByEmailAndPasswordAsync(request.loginDto.Email, request.loginDto.Password);
 
             if(user is null)
             {

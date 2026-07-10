@@ -27,7 +27,7 @@ namespace Application.Features.Users.Commands.RegisterNewUser
 
             //check if email is already in use
             logger.LogInformation("Checking if email {Email} is already in use", registerNewUserDto.Email);
-            var isEmailExist = await unitOfWork.userRepository.IsExistByEmailAsync(registerNewUserDto.Email);
+            var isEmailExist = await unitOfWork.UserRepository.IsExistByEmailAsync(registerNewUserDto.Email);
             if (isEmailExist)
             {
                 logger.LogWarning("Email {Email} is already in use", registerNewUserDto.Email);
@@ -43,7 +43,7 @@ namespace Application.Features.Users.Commands.RegisterNewUser
             logger.LogInformation("Adding new user with email {Email} to database", registerNewUserDto.Email);
 
             //add new user
-            var result = await unitOfWork.userRepository.AddNewUserAsync(user, registerNewUserDto.Password);
+            var result = await unitOfWork.UserRepository.AddNewUserAsync(user, registerNewUserDto.Password);
 
             if (result.token is null)
             {

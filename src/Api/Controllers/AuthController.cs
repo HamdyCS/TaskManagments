@@ -1,9 +1,12 @@
-﻿using Api.Extensions;
+﻿using Api.Common.Extensions;
+using Api.Common.Origins;
 using Application.Features.Auth.Commands.ChangeEmail;
+using Application.Features.Auth.Commands.CreateExternalAuthProperty;
 using Application.Features.Auth.Commands.CreateToken;
 using Application.Features.Auth.Commands.DeleteAccount;
 using Application.Features.Auth.Commands.ForgetPassword;
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.LoginByProvider;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.ResendOtp;
 using Application.Features.Auth.Commands.ResetPassword;
@@ -294,6 +297,46 @@ namespace Api.Controllers
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpGet("login-user-with-google", Name = "LoginUserWithGoogle")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginUserWithGoogle([FromQuery] string returnUrl)
+        {
+            if(!AllowOrigin.IsAllowed(returnUrl))
+                return BadRequest("Return url is not allowed");
+
+            var redirectUrl = Url.Action(nameof(LoginUserByProviderCallback), "Auth", new { returnUrl }, Request.Scheme);
+            
+
+            var result = await mediator.Send(new CreateExternalAuthPropertyCommand(Provider.Google, redirectUrl));
+            if(result.IsError)
+                return result.Errors.ToProblemDetailsObjectResult();
+
+            return Challenge(result.Value,Provider.Google.ToString());
+        }
+
+        [HttpGet("login-user-by-provider-callback", Name = "LoginUserByProviderCallback")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginUserByProviderCallback([FromQuery] string returnUrl, [FromQuery] string? remoteError)
+        {
+            if(string.IsNullOrEmpty(returnUrl))
+                return BadRequest("Return url invalid");
+
+            if (!AllowOrigin.IsAllowed(returnUrl))
+                return BadRequest("Return url is not allowed");
+
+            if (!string.IsNullOrEmpty(remoteError))
+                return BadRequest(remoteError);
+
+            //login
+            var loginResult = await mediator.Send(new LoginByProviderCommand(Role.User));
+            if (loginResult.IsError)
+                return loginResult.Errors.ToProblemDetailsObjectResult();
+
+            //Add auth info to cookies
+            Response.AddAuthInfoToCookie(loginResult.Value.AccessToken, loginResult.Value.RefreshToken);
+            return Redirect(returnUrl);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Application.Features.Users.Queries.GetAllUsers
             logger.LogInformation("Starting get all users");
 
             logger.LogInformation("Getting all users from db");
-            var paginationResult = await unitOfWork.userRepository.GetAllUsers(request.PaginationRequestDto.PageNumber, request.PaginationRequestDto.PageSize);
+            var paginationResult = await unitOfWork.UserRepository.GetAllUsers(request.PaginationRequestDto.PageNumber, request.PaginationRequestDto.PageSize);
             var paginationResultDto = paginationResult.Adapt<PaginationResultDto<UserDto>>();
 
             return paginationResultDto;

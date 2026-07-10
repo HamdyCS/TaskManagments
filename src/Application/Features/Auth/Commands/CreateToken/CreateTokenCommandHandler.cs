@@ -20,7 +20,7 @@ namespace Application.Features.Auth.Commands.CreateToken
             //get refresh token
 
             logger.LogInformation("Getting refresh token from db for user");
-            var refreshToken = await unitOfWork.refreshTokenRepository.GetByTokenAsync(request.refreshToken);
+            var refreshToken = await unitOfWork.RefreshTokenRepository.GetByTokenAsync(request.refreshToken);
 
             if(refreshToken is null)
             {
@@ -36,7 +36,7 @@ namespace Application.Features.Auth.Commands.CreateToken
 
             //get user
             logger.LogInformation("Getting user with Id {UserId} from db", refreshToken.UserId);
-            var user = await unitOfWork.userRepository.GetByIdAsync(refreshToken.UserId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(refreshToken.UserId);
             if (user is null)
             {
                 logger.LogInformation("User with Id {UserId} not found", refreshToken.UserId);

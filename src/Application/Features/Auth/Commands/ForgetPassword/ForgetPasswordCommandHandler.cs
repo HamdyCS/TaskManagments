@@ -17,7 +17,7 @@ namespace Application.Features.Auth.Commands.ForgetPassword
             logger.LogInformation("Starting forget password for user with email {Email}", request.ForgetPasswordDto.Email);
 
 
-            var user = await unitOfWork.userRepository.GetByEmailAsync(request.ForgetPasswordDto.Email);
+            var user = await unitOfWork.UserRepository.GetByEmailAsync(request.ForgetPasswordDto.Email);
             if(user is null)
             {
                 logger.LogWarning("User with email {Email} not found", request.ForgetPasswordDto.Email);
@@ -44,7 +44,7 @@ namespace Application.Features.Auth.Commands.ForgetPassword
             //update password
 
             logger.LogInformation("Updating password for user with email {Email}", request.ForgetPasswordDto.Email);
-            var isPasswordUpdated = await unitOfWork.userRepository.UpdatePasswordAsync(user, request.ForgetPasswordDto.NewPassword);
+            var isPasswordUpdated = await unitOfWork.UserRepository.UpdatePasswordAsync(user, request.ForgetPasswordDto.NewPassword);
 
             if(!isPasswordUpdated)
             {

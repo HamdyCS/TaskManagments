@@ -12,15 +12,15 @@ namespace Infrastructure.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext context;
-        public IUserRepository userRepository { get; private set; }
+        public IUserRepository UserRepository { get; private set; }
 
-        public IRefreshTokenRepository refreshTokenRepository { get; private set; }
+        public IRefreshTokenRepository RefreshTokenRepository { get; private set; }
 
         public UnitOfWork(AppDbContext context,IUserRepository userRepository,IRefreshTokenRepository refreshTokenRepository)
         {
             this.context = context;
-            this.userRepository = userRepository;
-            this.refreshTokenRepository = refreshTokenRepository;
+            this.UserRepository = userRepository;
+            this.RefreshTokenRepository = refreshTokenRepository;
         }
 
 

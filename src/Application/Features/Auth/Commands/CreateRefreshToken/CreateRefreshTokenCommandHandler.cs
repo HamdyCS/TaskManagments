@@ -18,18 +18,18 @@ namespace Application.Features.Auth.Commands.CreateRefreshToken
         {
             logger.LogInformation("Starting Create Refresh Token to user with Id {UserId}", request.userId);
 
-            var user = await unitOfWork.userRepository.GetByIdAsync(request.userId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(request.userId);
             if (user is null)
                 return UserErrors.UserNotFoundById(request.userId);
 
             //get active refresh token
 
             logger.LogInformation("Get active refresh token of user with Id {UserId}", request.userId);
-            var activeRefreshToken = await unitOfWork.refreshTokenRepository.GetActiveRefreshTokenAsync(request.userId);
+            var activeRefreshToken = await unitOfWork.RefreshTokenRepository.GetActiveRefreshTokenAsync(request.userId);
             if (activeRefreshToken is not null)
             {
                 activeRefreshToken.IsRevoked = true;
-                unitOfWork.refreshTokenRepository.Update(activeRefreshToken);
+                unitOfWork.RefreshTokenRepository.Update(activeRefreshToken);
 
                 //change active refresh token to revoked
 
@@ -59,7 +59,7 @@ namespace Application.Features.Auth.Commands.CreateRefreshToken
 
             //save to db
             logger.LogInformation("Add new refresh token of user with Id {UserId} to db", request.userId);
-            unitOfWork.refreshTokenRepository.Add(newRefreshToken);
+            unitOfWork.RefreshTokenRepository.Add(newRefreshToken);
             var isNewRefreshTokenSaved = await unitOfWork.SaveChangesAsync(cancellationToken) > 0;
 
             if (!isNewRefreshTokenSaved)

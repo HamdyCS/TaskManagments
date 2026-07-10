@@ -19,7 +19,7 @@ namespace Application.Features.Auth.Commands.DeleteAccount
 
 
             logger.LogInformation("Getting user with Id {UserId}", request.UserId);
-            var user = await unitOfWork.userRepository.GetByIdAsync(request.UserId);
+            var user = await unitOfWork.UserRepository.GetByIdAsync(request.UserId);
             if (user is null)
             {
                 logger.LogWarning("User with Id {UserId} not found", request.UserId);
@@ -44,7 +44,7 @@ namespace Application.Features.Auth.Commands.DeleteAccount
             //delete user
 
             logger.LogInformation("Deleting user with Id {UserId}", request.UserId);
-            var isUserDeleted = await unitOfWork.userRepository.DeleteAsync(user);
+            var isUserDeleted = await unitOfWork.UserRepository.DeleteAsync(user);
 
             if (!isUserDeleted)
             {
