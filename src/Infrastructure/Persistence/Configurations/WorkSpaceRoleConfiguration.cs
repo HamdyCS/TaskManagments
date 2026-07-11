@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.Configurations
 {
-    public class WorkSpaceRoleConfiguration : IEntityTypeConfiguration<WorkSpaceRole>
+    public class WorkSpaceRoleConfiguration : IEntityTypeConfiguration<WorkSpaceRoleEntity>
     {
-        public void Configure(EntityTypeBuilder<WorkSpaceRole> builder)
+        public void Configure(EntityTypeBuilder<WorkSpaceRoleEntity> builder)
         {
             builder.ToTable("WorkSpaceRoles");
 
@@ -17,17 +17,17 @@ namespace Infrastructure.Persistence.Configurations
             //Member
 
             builder.HasData(
-                new WorkSpaceRole
+                new WorkSpaceRoleEntity
                 {
                     Id = 1,
                     Name = "WorkspaceOwner"
                 },
-                new WorkSpaceRole
+                new WorkSpaceRoleEntity
                 {
                     Id = 2,
                     Name = "ProjectManager"
                 },
-                new WorkSpaceRole
+                new WorkSpaceRoleEntity
                 {
                     Id = 3,
                     Name = "Member"

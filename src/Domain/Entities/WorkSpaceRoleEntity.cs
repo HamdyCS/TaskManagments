@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class WorkSpaceRole
+    public class WorkSpaceRoleEntity
     {
         public short Id { get; set; }
         public string Name { get; set; }

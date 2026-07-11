@@ -13,6 +13,6 @@ namespace Domain.Entities
 
         public virtual WorkSpace WorkSpace { get; set; }
         public virtual User User { get; set; }
-        public virtual WorkSpaceRole WorkSpaceRole { get; set; }
+        public virtual WorkSpaceRoleEntity WorkSpaceRole { get; set; }
     }
 }
