@@ -21,7 +21,7 @@ namespace Infrastructure.Persistence
         public virtual DbSet<TaskComment> TaskComments{ get; set; }
         public virtual DbSet<TaskPriority> TaskPriorities{ get; set; }
         public virtual DbSet<WorkSpace> WorkSpaces{ get; set; }
-        public virtual DbSet<WorkSpaceRole> WorkSpaceRoles{ get; set; }
+        public virtual DbSet<WorkSpaceRoleEntity> WorkSpaceRoles{ get; set; }
         public virtual DbSet<WorkSpaceUser> WorkSpaceUsers{ get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)

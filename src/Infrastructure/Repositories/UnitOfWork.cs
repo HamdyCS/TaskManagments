@@ -12,16 +12,26 @@ namespace Infrastructure.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext context;
+
+        public UnitOfWork(AppDbContext context, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, 
+            IWorkSpaceRepository workSpaceRepository, IWorkSpaceUserRepository workSpaceUserRepository)
+        {
+            this.context = context;
+            UserRepository = userRepository;
+            RefreshTokenRepository = refreshTokenRepository;
+            WorkSpaceRepository = workSpaceRepository;
+            WorkSpaceUserRepository = workSpaceUserRepository;
+        }
+
         public IUserRepository UserRepository { get; private set; }
 
         public IRefreshTokenRepository RefreshTokenRepository { get; private set; }
 
-        public UnitOfWork(AppDbContext context,IUserRepository userRepository,IRefreshTokenRepository refreshTokenRepository)
-        {
-            this.context = context;
-            this.UserRepository = userRepository;
-            this.RefreshTokenRepository = refreshTokenRepository;
-        }
+        public IWorkSpaceRepository WorkSpaceRepository { get; private set; }
+
+        public IWorkSpaceUserRepository WorkSpaceUserRepository { get; private set; }
+
+       
 
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)

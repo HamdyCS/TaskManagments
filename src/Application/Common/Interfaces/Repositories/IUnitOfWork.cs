@@ -8,6 +8,10 @@ namespace Application.Common.Interfaces.Repositories
     {
         IUserRepository UserRepository { get; }
         IRefreshTokenRepository RefreshTokenRepository { get; }
+        IWorkSpaceRepository WorkSpaceRepository { get; }
+
+        IWorkSpaceUserRepository WorkSpaceUserRepository { get; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitTransactionAsync(CancellationToken cancellationToken = default);
