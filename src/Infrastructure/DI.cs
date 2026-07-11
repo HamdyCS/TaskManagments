@@ -192,6 +192,7 @@ namespace Infrastructure
             services.AddTransient<IMailService, MailService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IOtpService, OtpService>();
+            services.AddScoped<IWorkSpaceUserService, WorkSpaceUserService>();
 
             return services;
         }

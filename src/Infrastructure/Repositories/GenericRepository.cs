@@ -98,10 +98,10 @@ namespace Infrastructure.Repositories
             return new PaginationResult<T>(data, totalCount, pageNumber, pageSize);
         }
 
-        public T GetByIdAsync(long id)
+        public async Task<T> GetByIdAsync(long id)
         {
 
-            var entity = context.Set<T>().Find(id);
+            var entity = await context.Set<T>().FindAsync(id);
             return entity;
         }
 
@@ -123,5 +123,6 @@ namespace Infrastructure.Repositories
             context.Set<T>().UpdateRange(entities);
         }
 
+        
     }
 }

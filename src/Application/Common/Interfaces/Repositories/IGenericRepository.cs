@@ -11,7 +11,7 @@ namespace Application.Common.Interfaces.Repositories
         //get
         Task<PaginationResult<T>> GetAllAsync(int pageNumber, int pageSize);
 
-        T GetByIdAsync(long id);
+        Task<T> GetByIdAsync(long id);
 
         //add
         void Add(T entity);

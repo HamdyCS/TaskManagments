@@ -12,9 +12,13 @@ namespace Domain.Entities
         public string Description { get; set; }
         public string CreatedById { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public string? LastUpdatedById { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
 
         public virtual User CreatedBy { get; set; }
+        public virtual User LastUpdatedBy { get; set; }
+
         public virtual ICollection<WorkSpaceUser> WorkSpaceUsers { get; set; }
         public virtual ICollection<Project> Projects { get; set; }
         public bool IsDeleted { get; set; }

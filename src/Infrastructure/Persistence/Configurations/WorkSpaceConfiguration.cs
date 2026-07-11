@@ -17,6 +17,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(w => w.Description).IsRequired(false).HasMaxLength(500); // Allow Null
 
             builder.Property(w => w.CreatedAt).HasDefaultValueSql("GETDATE()");
+            builder.Property(w => w.LastUpdatedById).IsRequired(false);
             builder.Property(w => w.LastUpdatedAt).IsRequired(false); // Allow Null
             builder.Property(w => w.IsDeleted).HasDefaultValue(false);
 
@@ -26,6 +27,11 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasOne(w => w.CreatedBy)
                 .WithMany(u => u.CreatedWorkSpaces)
                 .HasForeignKey(w => w.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(w => w.LastUpdatedBy)
+                .WithMany()
+                .HasForeignKey(w => w.LastUpdatedById)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

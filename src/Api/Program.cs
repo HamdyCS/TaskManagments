@@ -24,6 +24,10 @@ builder.Services
     .AddInfrastructure(builder.Configuration)
     .AddApplication(builder.Configuration);
 
+//add policies
+builder.Services.AddPolicies();
+
+
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
