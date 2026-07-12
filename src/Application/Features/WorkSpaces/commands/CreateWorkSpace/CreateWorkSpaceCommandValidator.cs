@@ -9,11 +9,8 @@ namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
     {
         public CreateWorkSpaceCommandValidator()
         {
-            RuleFor(x=>x.CreateWorkSpaceDto.Name)
+            RuleFor(x => x.CreateWorkSpaceDto.Name)
                 .NotEmpty().WithMessage("Name is required");
-
-            RuleFor(x => x.CreateWorkSpaceDto.Description)
-               .NotEmpty().WithMessage("Description is required");
 
             RuleFor(x => x.CreateBy)
                 .NotEmpty().WithMessage("CreateBy is required");

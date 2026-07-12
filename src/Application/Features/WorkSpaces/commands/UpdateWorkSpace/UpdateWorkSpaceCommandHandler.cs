@@ -24,7 +24,7 @@ namespace Application.Features.WorkSpaces.commands.UpdateWorkSpace
             if(workSpace is null)
             {
                 logger.LogWarning("Workspace with id {WorkSpaceId} not found", workSpaceId);
-                return WorkSpaceError.WorkSpaceNotFoundById(workSpaceId);
+                return WorkSpaceErrors.WorkSpaceNotFoundById(workSpaceId);
             }
 
             //update workspace
@@ -42,7 +42,7 @@ namespace Application.Features.WorkSpaces.commands.UpdateWorkSpace
             if(!isAddedWorkUpdated)
             {
                 logger.LogWarning("Failed to update workspace with id {WorkSpaceId} by user with id {UserId}", workSpaceId, updateBy);
-                return WorkSpaceError.UpdateWorkSpaceFailed(workSpaceId, updateBy);
+                return WorkSpaceErrors.UpdateWorkSpaceFailed(workSpaceId, updateBy);
             }
 
             

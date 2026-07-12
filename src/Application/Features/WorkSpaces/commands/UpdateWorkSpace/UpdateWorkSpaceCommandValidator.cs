@@ -12,9 +12,6 @@ namespace Application.Features.WorkSpaces.commands.UpdateWorkSpace
             RuleFor(x=>x.UpdateWorkSpaceDto.Name)
                 .NotEmpty().WithMessage("Name is required");
 
-            RuleFor(x => x.UpdateWorkSpaceDto.Description)
-               .NotEmpty().WithMessage("Description is required");
-
             RuleFor(x => x.UpdateBy)
                 .NotEmpty().WithMessage("UpdateBy is required");
 

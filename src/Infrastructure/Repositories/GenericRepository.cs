@@ -100,7 +100,6 @@ namespace Infrastructure.Repositories
 
         public async Task<T> GetByIdAsync(long id)
         {
-
             var entity = await context.Set<T>().FindAsync(id);
             return entity;
         }

@@ -4,6 +4,6 @@ using System.Text;
 
 namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
 {
-    public record CreateWorkSpaceDto(string Name, string Description);
+    public record CreateWorkSpaceDto(string Name, string? Description);
       
 }

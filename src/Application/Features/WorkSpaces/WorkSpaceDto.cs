@@ -5,5 +5,5 @@ using System.Text;
 namespace Application.Features.WorkSpaces
 {
     public record WorkSpaceDto(long Id, string Name, string Description, string CreatedById, 
-        DateTime CreatedAt, DateTime? LastUpdatedAt);
+        DateTime CreatedAt, string LastUpdatedById,DateTime? LastUpdatedAt);
 }

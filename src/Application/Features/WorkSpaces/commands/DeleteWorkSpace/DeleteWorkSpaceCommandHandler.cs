@@ -18,7 +18,7 @@ namespace Application.Features.WorkSpaces.commands.DeleteWorkSpace
             if (workSpace is null)
             {
                 logger.LogWarning("Workspace with id {WorkSpaceId} not found", workSpaceId);
-                return WorkSpaceError.WorkSpaceNotFoundById(workSpaceId);
+                return WorkSpaceErrors.WorkSpaceNotFoundById(workSpaceId);
             }
 
             //delete workspace
@@ -32,7 +32,7 @@ namespace Application.Features.WorkSpaces.commands.DeleteWorkSpace
             if (!isDeletedWorkSpace)
             {
                 logger.LogWarning("Failed to delete workspace with id {WorkSpaceId} by user with id {UserId}", workSpaceId, deleteBy);
-                return WorkSpaceError.DeleteWorkSpaceFailed(workSpaceId, deleteBy);
+                return WorkSpaceErrors.DeleteWorkSpaceFailed(workSpaceId, deleteBy);
             }
 
 

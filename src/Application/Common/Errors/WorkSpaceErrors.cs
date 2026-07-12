@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Application.Common.Errors
 {
-    public static class WorkSpaceError
+    public static class WorkSpaceErrors
     {
         public static Error 
             WorkSpaceNotFoundById(long id) =>

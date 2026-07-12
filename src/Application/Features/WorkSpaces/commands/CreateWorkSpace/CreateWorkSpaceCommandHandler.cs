@@ -20,6 +20,7 @@ namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
             logger.LogInformation("Starting create workspace for user with id {UserId}", createBy);
 
             var workSpace = createWorkSpaceDto.Adapt<WorkSpace>();
+            workSpace.CreatedById = createBy;
             workSpace.CreatedAt = DateTime.UtcNow;
 
             await unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -34,7 +35,7 @@ namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
             if(!isAddedWorkAdded)
             {
                 logger.LogWarning("Failed to add workspace for user with id {UserId}", createBy);
-                return WorkSpaceError.CreateWorkSpaceFailed(createBy);
+                return WorkSpaceErrors.CreateWorkSpaceFailed(createBy);
             }
 
             //add user to workspace
@@ -51,7 +52,7 @@ namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
             if(!isAddedUserToWorkspace)
             {
                 logger.LogWarning("Failed to add user to workspace for user with id {UserId}", createBy);
-                return WorkSpaceError.CreateWorkSpaceFailed(createBy);
+                return WorkSpaceErrors.CreateWorkSpaceFailed(createBy);
             }
 
             await unitOfWork.CommitTransactionAsync(cancellationToken);
