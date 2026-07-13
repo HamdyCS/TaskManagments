@@ -16,11 +16,15 @@ namespace Infrastructure.Repositories
 
         public IRefreshTokenRepository RefreshTokenRepository { get; private set; }
 
-        public UnitOfWork(AppDbContext context,IUserRepository userRepository,IRefreshTokenRepository refreshTokenRepository)
+        public INotificationRepository NotificationRepository { get; private set; }
+
+        public UnitOfWork(AppDbContext context,IUserRepository userRepository,IRefreshTokenRepository refreshTokenRepository,
+            INotificationRepository notificationRepository)
         {
             this.context = context;
             this.UserRepository = userRepository;
             this.RefreshTokenRepository = refreshTokenRepository;
+            this.NotificationRepository = notificationRepository;
         }
 
 
