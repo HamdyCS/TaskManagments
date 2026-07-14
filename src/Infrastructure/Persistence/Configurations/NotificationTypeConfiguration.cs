@@ -34,6 +34,13 @@ namespace Infrastructure.Persistence.Configurations
                 {
                     Id = 3,
                     Name = "DueDateReminder"
+                },new NotificationType
+                {
+                    Id = 4,
+                    Name = "TaskDeleted"
+                },new NotificationType{ 
+                    Id = 5,
+                    Name = "WorkSpaceInvite"
                 });
         }
     }

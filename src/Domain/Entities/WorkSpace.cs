@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class WorkSpace : ISoftDelete
+    public class WorkSpace : ISoftDelete, IBaseEntity
     {
         public long Id { get; set; }
         public string Name { get; set; }

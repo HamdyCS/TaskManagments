@@ -1,10 +1,11 @@
+using Domain.Common.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Domain.Entities
 {
-    public class TaskComment
+    public class TaskComment : IBaseEntity
     {
         public long Id { get; set; }
         public string Comment { get; set; }
