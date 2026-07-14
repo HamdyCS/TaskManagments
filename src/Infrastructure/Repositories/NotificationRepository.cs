@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Repositories;
 using Domain.Common.Pagination;
 using Domain.Entities;
 using Infrastructure.Persistence;
+ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,26 +11,34 @@ namespace Infrastructure.Repositories
 {
     public class NotificationRepository(AppDbContext context) : GenericRepository<Notification>(context), INotificationRepository
     {
-        public async Task<Notification?> GeNotificationByIdAndUserIdAsync(long Id, string userId)
+        public async Task<Notification?> GetNotificationByIdAndUserIdAsync(long Id, string userId)
         {
             var notification = await GetByFilterAsync(n => n.Id == Id && n.NotifyToId == userId);
             return notification;
         }
 
-        public Task<PaginationResult<Notification>> GetAllUnReadUserNotificationsAsync(string userId)
+        public async Task<PaginationResult<Notification>> GetAllUnReadUserNotificationsAsync(string userId,int pageNumber, int pageSize)
         {
-            var notifications = 
-                GetAllByFilterAsync(n => n.NotifyToId == userId && !n.IsRead);
+            var query = context.Notifications.Where(n => n.NotifyToId == userId && !n.IsRead);
 
-            return notifications;
+            var totalCount = await query.CountAsync();
+
+            var notifications = query.
+                OrderByDescending(n => n.CreatedAt).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PaginationResult<Notification>(notifications, totalCount, pageNumber, pageSize);
         }
 
-        public Task<PaginationResult<Notification>> GetAllUserNotificationsAsync(string userId)
+        public async Task<PaginationResult<Notification>> GetAllUserNotificationsAsync(string userId, int pageNumber, int pageSize)
         {
-            var notifications = 
-                GetAllByFilterAsync(n => n.NotifyToId == userId);
+            var query = context.Notifications.Where(n => n.NotifyToId == userId);
 
-            return notifications;
+            var totalCount = await query.CountAsync();
+
+            var notifications = query.
+                OrderByDescending(n => n.CreatedAt).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PaginationResult<Notification>(notifications, totalCount, pageNumber, pageSize);
         }
     }
 }

@@ -7,11 +7,11 @@ namespace Application.Common.Interfaces.Repositories
 {
     public interface INotificationRepository : IGenericRepository<Notification>
     {
-        public Task<PaginationResult<Notification>> GetAllUserNotificationsAsync(string userId);
+        public Task<PaginationResult<Notification>> GetAllUserNotificationsAsync(string userId, int pageNumber, int pageSize);
 
-        public Task<PaginationResult<Notification>> GetAllUnReadUserNotificationsAsync(string userId);
+        public Task<PaginationResult<Notification>> GetAllUnReadUserNotificationsAsync(string userId,int pageNumber,int pageSize);
 
-        public Task<Notification?> GeNotificationByIdAndUserIdAsync(long Id,string userId);
+        public Task<Notification?> GetNotificationByIdAndUserIdAsync(long Id,string userId);
 
     }
 }

@@ -17,5 +17,8 @@ namespace Application.Common.Errors
 
         public static Error UpdateNotificationToReadFailed(long id, string userId) =>
             Error.Failure("Notification_UpdateToReadFailed", $"Failed update notification with id {id} to read for user with id {userId}");
+
+        public static Error NotificationAlreadyRead(long id, string userId) =>
+            Error.Conflict("Notification_AlreadyRead", $"Notification with id {id} already read for user with id {userId}");
     }
 }

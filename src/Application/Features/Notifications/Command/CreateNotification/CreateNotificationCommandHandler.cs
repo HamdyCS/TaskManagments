@@ -30,7 +30,7 @@ namespace Application.Features.Notifications.Command.CreateNotification
                 return NotificationErrors.CreateNotificationFailed(createNotificationDto.NotifyToId);
             }
 
-            logger.LogInformation("Successfully created notification for user with id {UserId}", createNotificationDto.NotifyToId);
+            logger.LogInformation("Created notification for user with id {UserId} successfully", createNotificationDto.NotifyToId);
             return notification.Adapt<NotificationDto>();
         }
     }
