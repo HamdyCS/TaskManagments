@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class WorkSpaceInvite
+    public class WorkSpaceInvite : IBaseEntity
     {
         public long Id { get; set; }
 
