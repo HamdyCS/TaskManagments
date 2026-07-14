@@ -44,7 +44,8 @@ namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
             {
                 UserId = createBy,
                 WorkSpaceId = workSpace.Id,
-                WorkSpaceRoleId = (int)WorkSpaceRole.Owner
+                WorkSpaceRoleId = (int)WorkSpaceRole.Owner,
+                CreatedAt = DateTime.UtcNow
             };
 
             unitOfWork.WorkSpaceUserRepository.Add(workspaceUser);

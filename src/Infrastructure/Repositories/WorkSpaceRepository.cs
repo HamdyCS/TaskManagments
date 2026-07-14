@@ -12,6 +12,7 @@ namespace Infrastructure.Repositories
     public class WorkSpaceRepository(AppDbContext context) : GenericRepository<WorkSpace>(context), IWorkSpaceRepository
     {
         public async Task<PaginationResult<WorkSpace>> GetAllUserWorkSpaces(string userId, int pageNumber, int pageSize) 
-            => await GetAllByFilterAsync(x => x.CreatedById == userId, pageNumber, pageSize);
+            => await GetAllByFilterAsync(w => w.CreatedById == userId, pageNumber, pageSize,
+                w => w.CreatedAt);
     }
 }

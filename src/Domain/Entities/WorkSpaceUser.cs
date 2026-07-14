@@ -11,7 +11,7 @@ namespace Domain.Entities
         public long WorkSpaceId { get; set; }
         public string UserId { get; set; }
         public short WorkSpaceRoleId { get; set; }
-
+        public DateTime CreatedAt { get; set; }
         public virtual WorkSpace WorkSpace { get; set; }
         public virtual User User { get; set; }
         public virtual WorkSpaceRoleEntity WorkSpaceRole { get; set; }
