@@ -36,6 +36,7 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany().HasForeignKey(x => x.InviteStatusId);
 
            
+            builder.HasQueryFilter(x => !x.WorkSpace.IsDeleted);
         }
     }
 }
