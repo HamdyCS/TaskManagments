@@ -1,3 +1,4 @@
+using Domain.Common.Enums;
 using Domain.Common.Interfaces;
 using System;
 using System.Collections.Generic;

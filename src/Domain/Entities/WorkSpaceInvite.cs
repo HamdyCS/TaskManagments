@@ -1,3 +1,4 @@
+using Domain.Common.Enums;
 using Domain.Common.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace Domain.Entities
 
         public virtual User InitedTo { get; set; }
 
-        public virtual WorkSpaceInviteStatus InviteStatus { get; set; }
+        public virtual WorkSpaceInviteStatus WorkSpaceInviteStatus { get; set; }
 
         public virtual ICollection<Notification> Notifications { get; set; }
     }

@@ -11,17 +11,13 @@ namespace Infrastructure.Persistence
     public class AppDbContext : IdentityDbContext<User>
     {
         public virtual DbSet<Notification> Notifications { get; set; }
-        public virtual DbSet<NotificationType> NotificationTypes { get; set; }
         public virtual DbSet<Project> Projects { get; set; }
         public virtual DbSet<ProjectTask> ProjectTasks{ get; set; }
-        public virtual DbSet<ProjectTaskStatus> ProjectTaskStatuses{ get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens{ get; set; }
         public virtual DbSet<TaskAssignment> TaskAssignments{ get; set; }
         public virtual DbSet<TaskAttachment> TaskAttachments{ get; set; }
         public virtual DbSet<TaskComment> TaskComments{ get; set; }
-        public virtual DbSet<TaskPriority> TaskPriorities{ get; set; }
         public virtual DbSet<WorkSpace> WorkSpaces{ get; set; }
-        public virtual DbSet<WorkSpaceRole> WorkSpaceRoles{ get; set; }
         public virtual DbSet<WorkSpaceUser> WorkSpaceUsers{ get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
