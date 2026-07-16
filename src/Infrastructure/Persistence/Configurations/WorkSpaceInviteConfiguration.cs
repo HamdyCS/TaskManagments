@@ -21,7 +21,6 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(x => x.InvitedById).IsRequired(true);
             builder.Property(x => x.CreatedAt).IsRequired(true);
             builder.Property(x => x.ExpiresAt).IsRequired(true);
-            builder.Property(x => x.InviteStatusId).IsRequired(true);
 
             builder.HasOne(x => x.InvitedBy)
                 .WithMany().HasForeignKey(x => x.InvitedById).OnDelete(DeleteBehavior.NoAction);
