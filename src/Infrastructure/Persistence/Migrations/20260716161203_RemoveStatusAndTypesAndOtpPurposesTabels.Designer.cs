@@ -4,6 +4,7 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260716161203_RemoveStatusAndTypesAndOtpPurposesTabels")]
+    partial class RemoveStatusAndTypesAndOtpPurposesTabels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -463,9 +466,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("LastUpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("LastUpdatedById")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -474,8 +474,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
-
-                    b.HasIndex("LastUpdatedById");
 
                     b.ToTable("WorkSpaces", (string)null);
                 });
@@ -522,75 +520,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("WorkSpaceInvites", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.WorkSpaceInviteStatus", b =>
-                {
-                    b.Property<short>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WorkSpaceInviteStatuses", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (short)1,
-                            Name = "Pending"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            Name = "Accepted"
-                        },
-                        new
-                        {
-                            Id = (short)3,
-                            Name = "Rejected"
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Entities.WorkSpaceRoleEntity", b =>
-                {
-                    b.Property<short>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WorkSpaceRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (short)1,
-                            Name = "WorkspaceOwner"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            Name = "ProjectManager"
-                        },
-                        new
-                        {
-                            Id = (short)3,
-                            Name = "Member"
-                        });
-                });
-
             modelBuilder.Entity("Domain.Entities.WorkSpaceUser", b =>
                 {
                     b.Property<long>("WorkSpaceId")
@@ -598,9 +527,6 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -907,14 +833,7 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", "LastUpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("LastUpdatedById")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("CreatedBy");
-
-                    b.Navigation("LastUpdatedBy");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkSpaceInvite", b =>
@@ -956,12 +875,6 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany("WorkSpaceUsers")
                         .HasForeignKey("WorkSpaceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.WorkSpaceRoleEntity", "WorkSpaceRole")
-                        .WithMany("WorkSpaceUsers")
-                        .HasForeignKey("WorkSpaceRoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1067,16 +980,6 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.WorkSpaceInvite", b =>
                 {
                     b.Navigation("Notifications");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WorkSpaceInviteStatus", b =>
-                {
-                    b.Navigation("WorkSpaceInvites");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WorkSpaceRoleEntity", b =>
-                {
-                    b.Navigation("WorkSpaceUsers");
                 });
 #pragma warning restore 612, 618
         }
