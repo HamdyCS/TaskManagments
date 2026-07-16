@@ -34,6 +34,7 @@ namespace Infrastructure.Persistence.Configurations
 
 
            
+            builder.HasQueryFilter(x => !x.WorkSpace.IsDeleted);
         }
     }
 }

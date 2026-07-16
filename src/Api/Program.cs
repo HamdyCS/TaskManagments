@@ -1,8 +1,11 @@
 using Api.ExceptionHandler;
+using Api.Hubs.Notification;
 using Application;
+using Application.Common.Interfaces.Services;
 using Infrastructure;
 using Serilog;
 using Serilog.Enrichers.Span;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +20,18 @@ builder.Host.UseSerilog((context, loggerConfiguration) =>
     .ReadFrom.Configuration(context.Configuration)
     .Enrich.WithSpan();
 });
+
+//convert enum to string and reverse
+builder.Services.ConfigureHttpJsonOptions(opt =>
+{
+    opt.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+//add signalR
+builder.Services.AddSignalR();
+
+//add hub services
+builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
 
 
 //app services
@@ -43,5 +58,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+//map hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

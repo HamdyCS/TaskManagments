@@ -180,6 +180,7 @@ namespace Infrastructure
         {
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IWorkSpaceRepository, WorkSpaceRepository>();
             services.AddScoped<IWorkSpaceUserRepository, WorkSpaceUsersRepository>();
 
