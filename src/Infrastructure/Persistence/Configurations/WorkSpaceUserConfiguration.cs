@@ -25,10 +25,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasForeignKey(wu => wu.WorkSpaceId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(wu => wu.WorkSpaceRole)
-                .WithMany(r => r.WorkSpaceUsers)
-                .HasForeignKey(wu => wu.WorkSpaceRoleId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             //quey filter
             builder.HasQueryFilter(wu => !wu.WorkSpace.IsDeleted);

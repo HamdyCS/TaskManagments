@@ -43,10 +43,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasForeignKey(n => n.WorkSpaceInviteId);
                
 
-            builder.HasOne(n => n.NotificationType)
-                .WithMany(nt => nt.Notifications)
-                .HasForeignKey(n => n.NotificationTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }
