@@ -1,5 +1,7 @@
 using Api.ExceptionHandler;
+using Api.Hubs.Notification;
 using Application;
+using Application.Common.Interfaces.Services;
 using Infrastructure;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -25,6 +27,13 @@ builder.Services.ConfigureHttpJsonOptions(opt =>
     opt.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+//add signalR
+builder.Services.AddSignalR();
+
+//add hub services
+builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
+
+
 //app services
 builder.Services
     .AddInfrastructure(builder.Configuration)
@@ -45,5 +54,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+//map hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

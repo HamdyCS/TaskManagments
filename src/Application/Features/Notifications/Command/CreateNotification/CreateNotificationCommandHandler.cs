@@ -1,5 +1,6 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Mapster;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,7 +10,7 @@ using System.Text;
 namespace Application.Features.Notifications.Command.CreateNotification
 {
     public class CreateNotificationCommandHandler(IUnitOfWork unitOfWork,
-        ILogger<CreateNotificationCommandHandler> logger) : IRequestHandler<CreateNotificationCommand, ErrorOr<NotificationDto>>
+        ILogger<CreateNotificationCommandHandler> logger, INotificationHubService notificationHubService) : IRequestHandler<CreateNotificationCommand, ErrorOr<NotificationDto>>
     {
         public async Task<ErrorOr<NotificationDto>> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
         {
@@ -29,6 +30,10 @@ namespace Application.Features.Notifications.Command.CreateNotification
                 logger.LogWarning("Failed to create notification for user with id {UserId}", createNotificationDto.NotifyToId);
                 return NotificationErrors.CreateNotificationFailed(createNotificationDto.NotifyToId);
             }
+
+            //send notification to user
+            var newNotificationDto = notification.Adapt<NotificationDto>();
+            await notificationHubService.SendNotificationToUserAsync(notification.NotifyToId, newNotificationDto, cancellationToken);
 
             logger.LogInformation("Created notification for user with id {UserId} successfully", createNotificationDto.NotifyToId);
             return notification.Adapt<NotificationDto>();
