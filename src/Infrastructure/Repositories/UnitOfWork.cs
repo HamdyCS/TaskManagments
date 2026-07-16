@@ -13,14 +13,16 @@ namespace Infrastructure.Repositories
     {
         private readonly AppDbContext context;
 
-        public UnitOfWork(AppDbContext context, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, 
-            IWorkSpaceRepository workSpaceRepository, IWorkSpaceUserRepository workSpaceUserRepository)
+        public UnitOfWork(AppDbContext context, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository
+            , IWorkSpaceRepository workSpaceRepository, IWorkSpaceUserRepository workSpaceUserRepository
+            , INotificationRepository notificationRepository)
         {
             this.context = context;
             UserRepository = userRepository;
             RefreshTokenRepository = refreshTokenRepository;
             WorkSpaceRepository = workSpaceRepository;
             WorkSpaceUserRepository = workSpaceUserRepository;
+            NotificationRepository = notificationRepository;
         }
 
         public IUserRepository UserRepository { get; private set; }
@@ -31,8 +33,7 @@ namespace Infrastructure.Repositories
 
         public IWorkSpaceUserRepository WorkSpaceUserRepository { get; private set; }
 
-       
-
+        public INotificationRepository NotificationRepository { get; private set; }
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {

@@ -25,6 +25,6 @@ namespace Infrastructure.Repositories
             => await GetAllByFilterAsync(wu => wu.WorkSpaceId == workSpaceId, pageNumber, pageSize,wu=>wu.CreatedAt);
 
         public async Task<bool> IsUserHasWorkSpaceRoleAsync(string userId, long workSpaceId,WorkSpaceRole role)
-            => await context.WorkSpaceUsers.AnyAsync(wu => wu.UserId == userId && wu.WorkSpaceId == workSpaceId && wu.WorkSpaceRoleId == (short)role);
+            => await context.WorkSpaceUsers.AnyAsync(wu => wu.UserId == userId && wu.WorkSpaceId == workSpaceId && wu.WorkSpaceRole == role);
     }
 }
