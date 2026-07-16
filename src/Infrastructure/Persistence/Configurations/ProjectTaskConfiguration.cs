@@ -30,16 +30,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasForeignKey(t => t.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(t => t.TaskStatus)
-                .WithMany(s => s.Tasks)
-                .HasForeignKey(t => t.TaskStatusId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(t => t.TaskPriority)
-                .WithMany(p => p.Tasks)
-                .HasForeignKey(t => t.TaskPriorityId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasOne(t => t.CreatedBy)
                 .WithMany(u => u.CreatedTasks)
                 .HasForeignKey(t => t.CreatedById)

@@ -32,8 +32,6 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasOne(x => x.WorkSpace)
                 .WithMany().HasForeignKey(x => x.WorkSpaceId);
 
-            builder.HasOne(x => x.InviteStatus)
-                .WithMany().HasForeignKey(x => x.InviteStatusId);
 
            
             builder.HasQueryFilter(x => !x.WorkSpace.IsDeleted);

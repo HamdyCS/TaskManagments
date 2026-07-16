@@ -1,3 +1,4 @@
+using Domain.Common.Enums;
 using Domain.Common.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Domain.Entities
         public DateTime? LastUpdatedAt { get; set; }
 
         public virtual Project Project { get; set; }
-        public virtual ProjectTaskStatus TaskStatus { get; set; }
+        public virtual TaskStatus TaskStatus { get; set; }
         public virtual TaskPriority TaskPriority { get; set; }
         public virtual User CreatedBy { get; set; }
 
