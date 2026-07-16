@@ -3,6 +3,7 @@ using Application;
 using Infrastructure;
 using Serilog;
 using Serilog.Enrichers.Span;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,11 @@ builder.Host.UseSerilog((context, loggerConfiguration) =>
     .Enrich.WithSpan();
 });
 
+//convert enum to string and reverse
+builder.Services.ConfigureHttpJsonOptions(opt =>
+{
+    opt.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 //app services
 builder.Services

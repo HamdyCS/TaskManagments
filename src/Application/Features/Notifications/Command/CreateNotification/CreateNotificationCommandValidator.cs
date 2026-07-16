@@ -18,8 +18,8 @@ namespace Application.Features.Notifications.Command.CreateNotification
             RuleFor(p => p.CreateNotificationDto.Message)
                .NotEmpty().WithMessage("Message is required.");
 
-            RuleFor(p => p.CreateNotificationDto.NotificationTypeId)
-            .NotEmpty().WithMessage("NotificationTypeId is required.");
+            RuleFor(p => p.CreateNotificationDto.NotificationType)
+            .NotNull().WithMessage("NotificationTypeId is required.");
         }
     }
 }
