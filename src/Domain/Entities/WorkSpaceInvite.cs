@@ -20,15 +20,13 @@ namespace Domain.Entities
 
         public DateTime ExpiresAt { get; set; }
 
-        public short InviteStatusId { get; set; }
-
+        public WorkSpaceInviteStatus WorkSpaceInviteStatus { get; set; }
         public virtual WorkSpace WorkSpace { get; set; }
 
         public virtual User InvitedBy { get; set; }
 
         public virtual User InitedTo { get; set; }
 
-        public virtual WorkSpaceInviteStatus WorkSpaceInviteStatus { get; set; }
 
         public virtual ICollection<Notification> Notifications { get; set; }
     }
