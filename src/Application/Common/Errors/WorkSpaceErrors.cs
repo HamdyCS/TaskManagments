@@ -21,5 +21,11 @@ namespace Application.Common.Errors
 
         public static Error AddUserToWorkSpaceFailed(string userId, long workSpaceId)
             => Error.Failure("WorkSpace_AddUserFailed", $"Failed adding user with id {userId} to WorkSpace with id {workSpaceId}");
+
+        public static Error UserAlreadyInWorkspace(string userId, long workSpaceId)
+            => Error.Conflict("WorkSpace_UserAlreadyInWorkspace", $"User with id {userId} already in WorkSpace with id {workSpaceId}");
+
+        public static Error UserAlreadyInWorkspaceByEmail(string email, long workSpaceId)
+           => Error.Conflict("WorkSpace_UserAlreadyInWorkspace", $"User with email {email} already in WorkSpace with id {workSpaceId}");
     }
 }

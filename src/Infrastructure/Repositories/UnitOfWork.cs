@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories
 
         public UnitOfWork(AppDbContext context, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository
             , IWorkSpaceRepository workSpaceRepository, IWorkSpaceUserRepository workSpaceUserRepository
-            , INotificationRepository notificationRepository)
+            , INotificationRepository notificationRepository, IWorkSpaceInviteRepository workSpaceInviteRepository)
         {
             this.context = context;
             UserRepository = userRepository;
@@ -23,6 +23,7 @@ namespace Infrastructure.Repositories
             WorkSpaceRepository = workSpaceRepository;
             WorkSpaceUserRepository = workSpaceUserRepository;
             NotificationRepository = notificationRepository;
+            this.WorkSpaceInviteRepository = workSpaceInviteRepository;
         }
 
         public IUserRepository UserRepository { get; private set; }
@@ -34,6 +35,8 @@ namespace Infrastructure.Repositories
         public IWorkSpaceUserRepository WorkSpaceUserRepository { get; private set; }
 
         public INotificationRepository NotificationRepository { get; private set; }
+
+        public IWorkSpaceInviteRepository WorkSpaceInviteRepository { get; private set; }
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {

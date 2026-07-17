@@ -183,6 +183,7 @@ namespace Infrastructure
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IWorkSpaceRepository, WorkSpaceRepository>();
             services.AddScoped<IWorkSpaceUserRepository, WorkSpaceUsersRepository>();
+            services.AddScoped<IWorkSpaceInviteRepository, WorkSpaceInviteRepository>();
 
             return services;
         }

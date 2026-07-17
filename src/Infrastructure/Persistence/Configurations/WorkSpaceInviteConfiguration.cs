@@ -17,7 +17,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasIndex(w => new { w.WorkSpaceId, w.InvitedById });
 
             builder.Property(x => x.WorkSpaceId).IsRequired(true);
-            builder.Property(x => x.InitedToId).IsRequired(true);
+            builder.Property(x => x.InvitedToId).IsRequired(true);
             builder.Property(x => x.InvitedById).IsRequired(true);
             builder.Property(x => x.CreatedAt).IsRequired(true);
             builder.Property(x => x.ExpiresAt).IsRequired(true);
@@ -26,7 +26,7 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany().HasForeignKey(x => x.InvitedById).OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(x=>x.InitedTo)
-                .WithMany().HasForeignKey(x=>x.InitedToId).OnDelete(DeleteBehavior.NoAction);
+                .WithMany().HasForeignKey(x=>x.InvitedToId).OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(x => x.WorkSpace)
                 .WithMany().HasForeignKey(x => x.WorkSpaceId);

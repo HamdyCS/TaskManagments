@@ -8,5 +8,6 @@ namespace Application.Common.Interfaces.Repositories
     public interface IWorkSpaceRepository : IGenericRepository<WorkSpace>
     {
         Task<PaginationResult<WorkSpace>> GetAllUserWorkSpaces(string userId, int pageNumber, int pageSize);
+        Task<string?> GetWorkSpaceNameAsync(long workSpaceId);
     }
 }

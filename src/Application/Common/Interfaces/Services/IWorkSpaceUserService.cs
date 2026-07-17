@@ -9,5 +9,7 @@ namespace Application.Common.Interfaces.Services
     {
         Task<bool> IsInWorkSpaceAsync(string userId, long workSpaceId);
         Task<bool> IsUserHasWorkSpaceRoleAsync(string userId, long workSpaceId ,WorkSpaceRole workSpaceRole);
+
+        Task<bool> AddUserToWorkSpaceAsync(string userId, long workSpaceId, WorkSpaceRole workSpaceRole);
     }
 }

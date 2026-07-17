@@ -19,6 +19,7 @@ namespace Infrastructure.Persistence
         public virtual DbSet<TaskComment> TaskComments{ get; set; }
         public virtual DbSet<WorkSpace> WorkSpaces{ get; set; }
         public virtual DbSet<WorkSpaceUser> WorkSpaceUsers{ get; set; }
+        public virtual DbSet<WorkSpaceInvite> WorkSpaceInvites { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
