@@ -6,6 +6,8 @@ using Application.Features.WorkSpaces.commands.GetAllUserWorkSpaces;
 using Application.Features.WorkSpaces.commands.GetAllWorkSpaces;
 using Application.Features.WorkSpaces.commands.GetWorkSpaceById;
 using Application.Features.WorkSpaces.commands.UpdateWorkSpace;
+using Application.Features.WorkSpaceUsers;
+using Application.Features.WorkSpaceUsers.queries.GetAllWorkSpaceUsers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -63,6 +65,26 @@ namespace Api.Controllers
 
             return getAllUserWorkSpacesResult.Match(value => Ok(value), errors =>
             errors.ToProblemDetailsObjectResult());
+        }
+
+
+        [HttpGet("{id}/all-users", Name = "GetAllWorkSpaceUsers")]
+        public async Task<ActionResult<PaginationResultDto<WorkSpaceUserDto>>> GetAllWorkSpaceUsers([FromRoute] long id,[FromQuery] PaginationRequestDto paginationRequestDto)
+        {
+            //check if user is admin
+            var isAdmin = User.IsInRole(nameof(Role.Admin));
+            if (!isAdmin)
+            {
+                //check if user is in workSpace
+               var isInWorkSpaceUsers = await authorizationService.AuthorizeAsync(User, id, "WorkSpaceUser");
+                if (!isInWorkSpaceUsers.Succeeded)
+                    return Forbid();
+            }
+
+           var result = await mediator.Send(new GetAllWorkSpaceUsersQuery(id, paginationRequestDto));
+
+            return result.Match(value => Ok(value),
+                errors => errors.ToProblemDetailsObjectResult());
         }
 
 
