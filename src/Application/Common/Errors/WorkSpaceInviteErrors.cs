@@ -1,4 +1,5 @@
-﻿using Domain.Common.Enums;
+﻿using Application.Features.WorkSpaceInvites;
+using Domain.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,7 +35,11 @@ namespace Application.Common.Errors
         public static Error WorkSpaceInviteIsNotPendingByInviteTo(long workSpaceInviteId, string inviteToId) =>
             Error.Conflict("WorkSpaceInvite_AlreadyAccepted", $"WorkSpaceInvite with id {workSpaceInviteId} is not pending for invited user with id {inviteToId}");
 
-        public static Error WorkSpaceInviteExpired(long workSpaceInviteId, string inviteToId)
-        => Error.Validation("WorkSpaceInvite_Expired", $"WorkSpaceInvite with id {workSpaceInviteId} is expired for user with id {inviteToId}");
+        public static Error WorkSpaceInviteExpired(long workSpaceInviteId, string inviteToId) => 
+            Error.Validation("WorkSpaceInvite_Expired", $"WorkSpaceInvite with id {workSpaceInviteId} is expired for user with id {inviteToId}");
+
+        public static Error UserCannotInviteHimself(string inviteToEmail) =>
+            Error.Validation("WorkSpaceInvite_CannotInviteHimself", $"User with email {inviteToEmail} cannot invite himself");
+       
     }
 }

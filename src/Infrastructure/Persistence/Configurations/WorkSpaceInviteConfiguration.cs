@@ -25,15 +25,15 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasOne(x => x.InvitedBy)
                 .WithMany().HasForeignKey(x => x.InvitedById).OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(x=>x.InitedTo)
-                .WithMany().HasForeignKey(x=>x.InvitedToId).OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(x => x.InvitedTo)
+                .WithMany().HasForeignKey(x => x.InvitedToId).OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(x => x.WorkSpace)
                 .WithMany().HasForeignKey(x => x.WorkSpaceId);
 
 
-           
-            builder.HasQueryFilter(x => !x.WorkSpace.IsDeleted);
+            builder.HasQueryFilter(x => !x.WorkSpace.IsDeleted && !x.IsDeleted);
+
         }
     }
 }

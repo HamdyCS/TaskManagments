@@ -9,11 +9,11 @@ using System.Text;
 
 namespace Application.Features.WorkSpaceInvites.Queries.GetAllUserInvites
 {
-    public class GetInviteByIdAndInviteToIdQueryHandler(IUnitOfWork unitOfWork
-        , ILogger<GetInviteByIdAndInviteToIdQueryHandler> logger)
-        : IRequestHandler<GetInviteByIdAndInviteToIdQuery, ErrorOr<PaginationResultDto<WorkSpaceInviteDto>>>
+    public class GetAllUserInvitesQueryHandler(IUnitOfWork unitOfWork
+        , ILogger<GetAllUserInvitesQueryHandler> logger)
+        : IRequestHandler<GetAllUserInvitesQuery, ErrorOr<PaginationResultDto<WorkSpaceInviteDto>>>
     {
-        public async Task<ErrorOr<PaginationResultDto<WorkSpaceInviteDto>>> Handle(GetInviteByIdAndInviteToIdQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<PaginationResultDto<WorkSpaceInviteDto>>> Handle(GetAllUserInvitesQuery request, CancellationToken cancellationToken)
         {
             var inviteToId = request.InviteToId;
 

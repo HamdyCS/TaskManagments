@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class WorkSpaceInvite : IBaseEntity
+    public class WorkSpaceInvite : IBaseEntity,ISoftDelete
     {
         public long Id { get; set; }
 
@@ -28,11 +28,13 @@ namespace Domain.Entities
         public bool IsExpired => DateTime.UtcNow > ExpiresAt;
 
         public WorkSpaceInviteStatus WorkSpaceInviteStatus { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
         public virtual WorkSpace WorkSpace { get; set; }
 
         public virtual User InvitedBy { get; set; }
 
-        public virtual User InitedTo { get; set; }
+        public virtual User InvitedTo { get; set; }
 
 
         public virtual ICollection<Notification> Notifications { get; set; }

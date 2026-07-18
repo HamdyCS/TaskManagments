@@ -11,7 +11,7 @@ namespace Application.Features.WorkSpaceInvites
 
         public long WorkSpaceId { get; set; }
 
-        public string InitedToId { get; set; }
+        public string InvitedToId { get; set; }
 
         public string InvitedById { get; set; }
 

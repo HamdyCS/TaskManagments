@@ -21,11 +21,20 @@ builder.Host.UseSerilog((context, loggerConfiguration) =>
     .Enrich.WithSpan();
 });
 
-//convert enum to string and reverse
+//Configure enum serialization as strings
+
+//For minimal api
 builder.Services.ConfigureHttpJsonOptions(opt =>
 {
     opt.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+//For controllers
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter());
+});
+
 
 //add signalR
 builder.Services.AddSignalR();

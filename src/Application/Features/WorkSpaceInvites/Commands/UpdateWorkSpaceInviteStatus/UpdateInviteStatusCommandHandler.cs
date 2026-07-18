@@ -26,7 +26,7 @@ namespace Application.Features.WorkSpaceInvites.Commands.UpdateWorkSpaceInviteSt
             logger.LogInformation("Starting updating workspace invite with Id {WorkSpaceInviteId} to status {WorkSpaceInviteStatus} for invite to user with Id {InviteToId}", workSpaceInviteId, workSpaceInviteStatus, inviteToId);
 
             //get workspace invite
-            var workSpaceInvite = await unitOfWork.WorkSpaceInviteRepository.GetWorkSpaceInviteByIdAndInviteByIdAsync(workSpaceInviteId, inviteToId);
+            var workSpaceInvite = await unitOfWork.WorkSpaceInviteRepository.GetWorkSpaceInviteByIdAndInviteToIdAsync(workSpaceInviteId, inviteToId);
             if (workSpaceInvite is null)
             {
                 logger.LogWarning("WorkSpaceInvite with Id {WorkSpaceInviteId} not found for invite to user with Id {InviteToId}", workSpaceInviteId, inviteToId);

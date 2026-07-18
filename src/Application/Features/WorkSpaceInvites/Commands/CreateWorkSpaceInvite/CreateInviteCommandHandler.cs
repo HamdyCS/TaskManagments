@@ -32,6 +32,21 @@ namespace Application.Features.WorkSpaceInvites.Commands.CreateWorkSpaceInvite
                 return UserErrors.UserNotFoundByEmail(createWorkSpaceInviteDto.InviteToEmail);
             }
 
+            //is user invited by self
+            if(inviteToUser.Id == createBy)
+            {
+                logger.LogWarning("User with email {InviteToEmail} cannot invite his self", createWorkSpaceInviteDto.InviteToEmail);
+                return WorkSpaceInviteErrors.UserCannotInviteHimself(createWorkSpaceInviteDto.InviteToEmail);
+            }
+
+            //get workspace
+            var workspace = await unitOfWork.WorkSpaceRepository.GetByIdAsync(createWorkSpaceInviteDto.WorkSpaceId);
+            if (workspace is null)
+            {
+                logger.LogWarning("Workspace with Id {WorkSpaceId} not found", createWorkSpaceInviteDto.WorkSpaceId);
+                return WorkSpaceErrors.WorkSpaceNotFoundById(createWorkSpaceInviteDto.WorkSpaceId);
+            }
+            
             //is user already in workspace
             var isUserInWorkspace = await unitOfWork.WorkSpaceUserRepository.IsUserExistInWorkSpaceAsync(inviteToUser.Id, createWorkSpaceInviteDto.WorkSpaceId);
             if (isUserInWorkspace)
@@ -61,6 +76,7 @@ namespace Application.Features.WorkSpaceInvites.Commands.CreateWorkSpaceInvite
             newWorkSpaceInvite.InvitedById = createBy;
             newWorkSpaceInvite.CreatedAt = DateTime.UtcNow;
             newWorkSpaceInvite.WorkSpaceInviteStatus = WorkSpaceInviteStatus.Pending;
+            newWorkSpaceInvite.InvitedToId = inviteToUser.Id;
 
             var inviteLifeTimeDays = configuration.GetValue<long>("WorkSpaceInvite:LifeTimeDays");
             newWorkSpaceInvite.ExpiresAt = DateTime.UtcNow.AddDays(inviteLifeTimeDays);

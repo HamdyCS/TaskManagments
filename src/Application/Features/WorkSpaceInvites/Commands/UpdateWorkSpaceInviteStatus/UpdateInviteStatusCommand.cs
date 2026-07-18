@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Application.Features.WorkSpaceInvites.Commands.UpdateWorkSpaceInviteStatus
 {
-    public sealed record UpdateInviteStatusCommand(long WorkSpaceInviteId, string InviteToId,WorkSpaceInviteStatus WorkSpaceInviteStatus,
-        string UserId) : IRequest<ErrorOr<bool>>;
+    public sealed record UpdateInviteStatusCommand(long WorkSpaceInviteId, string InviteToId
+        ,WorkSpaceInviteStatus WorkSpaceInviteStatus) : IRequest<ErrorOr<bool>>;
     
 }

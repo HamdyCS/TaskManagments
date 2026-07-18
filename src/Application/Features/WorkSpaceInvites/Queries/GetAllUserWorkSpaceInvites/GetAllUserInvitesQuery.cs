@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Application.Features.WorkSpaceInvites.Queries.GetAllUserInvites
 {
-    public sealed record GetInviteByIdAndInviteToIdQuery(string InviteToId,PaginationRequestDto PaginationRequest):
+    public sealed record GetAllUserInvitesQuery(string InviteToId,PaginationRequestDto PaginationRequest):
         IRequest<ErrorOr<PaginationResultDto<WorkSpaceInviteDto>>>;
     
 }

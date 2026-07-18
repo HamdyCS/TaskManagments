@@ -14,10 +14,11 @@ namespace Infrastructure.Repositories
         , IWorkSpaceInviteRepository
     {
         public Task<PaginationResult<WorkSpaceInvite>> GetAllWorkSpaceInvitesByInviteToIdAsync(string inviteToId, int pageNumber, int pageSize)
-            => GetAllByFilterAsync(wi => wi.InvitedToId == inviteToId, pageNumber, pageSize, wi => wi.CreatedAt);
+            => GetAllByFilterAsync(wi => wi.InvitedToId == inviteToId
+            , pageNumber, pageSize, wi => wi.CreatedAt);
 
         public Task<PaginationResult<WorkSpaceInvite>> GetAllWorkSpaceInvitesByInviteByIdAsync(string inviteById, int pageNumber, int pageSize)
-           => GetAllByFilterAsync(wi => wi.InvitedToId == inviteById, pageNumber, pageSize, wi => wi.CreatedAt);
+           => GetAllByFilterAsync(wi => wi.InvitedById == inviteById, pageNumber, pageSize, wi => wi.CreatedAt);
 
         public async Task<WorkSpaceInvite?> GetWorkSpaceInviteByIdAndInviteByIdAsync(long workSpaceInviteId, string inviteById)
             => await context.WorkSpaceInvites.FirstOrDefaultAsync(wi => wi.Id == workSpaceInviteId
@@ -29,6 +30,6 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> IsUserHasValidWorkSpaceInviteByStatusAsync(string userId, long workSpaceId, WorkSpaceInviteStatus status) => await context.WorkSpaceInvites.AnyAsync(
                 wi => wi.WorkSpaceId == workSpaceId && wi.WorkSpaceInviteStatus == status
-                && wi.InvitedToId == userId && !wi.IsExpired);
+                && wi.InvitedToId == userId && wi.ExpiresAt > DateTime.UtcNow);
     }
 }
