@@ -21,7 +21,7 @@ namespace Application.Features.Notifications.Command.GetAllUnReadUserNotificatio
             logger.LogInformation("Starting get notifications for user with id {UserId}", userId);
 
             var notifications = await unitOfWork.NotificationRepository
-                .GetAllUserNotificationsAsync(userId, pageNumber, pageSize);
+                .GetAllUnReadUserNotificationsAsync(userId, pageNumber, pageSize);
 
             logger.LogInformation("Get notifications for user with id {UserId} successfully",userId);
 
