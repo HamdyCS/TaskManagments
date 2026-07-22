@@ -12,6 +12,7 @@ namespace Application.Common.Interfaces.Repositories
         INotificationRepository NotificationRepository { get; }
         IWorkSpaceUserRepository WorkSpaceUserRepository { get; }
         IWorkSpaceInviteRepository WorkSpaceInviteRepository { get; }
+        IProjectRepository ProjectRepository { get; }
 
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
