@@ -16,7 +16,7 @@ namespace Domain.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime Deadline { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
-        public TaskStatus TaskStatus { get; set; }
+        public ProjectTaskStatus TaskStatus { get; set; }
         public TaskPriority TaskPriority { get; set; }
 
         public virtual Project Project { get; set; }
