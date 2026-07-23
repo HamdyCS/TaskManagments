@@ -362,6 +362,16 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-#Files
 
+#claude
 .claude
+CLAUDE.md
+
+#OpenCode
+.opencode
+AGENTS.md
+opencode.json
+
+#specfiy
+.specify
+specs

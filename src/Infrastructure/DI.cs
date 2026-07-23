@@ -180,8 +180,11 @@ namespace Infrastructure
         {
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IWorkSpaceRepository, WorkSpaceRepository>();
             services.AddScoped<IWorkSpaceUserRepository, WorkSpaceUsersRepository>();
+            services.AddScoped<IWorkSpaceInviteRepository, WorkSpaceInviteRepository>();
+            services.AddScoped<IProjectRepository, ProjectRepository>();
 
             return services;
         }
@@ -192,6 +195,8 @@ namespace Infrastructure
             services.AddTransient<IMailService, MailService>();
             services.AddSingleton<ITokenService, TokenService>();
             services.AddSingleton<IOtpService, OtpService>();
+            services.AddScoped<IWorkSpaceUserService, WorkSpaceUserService>();
+            services.AddScoped<IWorkSpaceService, WorkSpaceService>();
 
             return services;
         }

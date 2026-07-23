@@ -22,9 +22,17 @@ namespace Infrastructure.Repositories
             FirstOrDefaultAsync(wu => wu.UserId == userId && wu.WorkSpaceId == workSpaceId);
 
         public async Task<PaginationResult<WorkSpaceUser>> GetWorkSpaceUsersAsync(long workSpaceId, int pageNumber, int pageSize)
-            => await GetAllByFilterAsync(wu => wu.WorkSpaceId == workSpaceId, pageNumber, pageSize);
+        {
+            var query = context.WorkSpaceUsers.Include(wu => wu.User)
+                .Where(wu => wu.WorkSpaceId == workSpaceId).OrderBy(wu => wu.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+            var workSpaceUsers = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PaginationResult<WorkSpaceUser>(workSpaceUsers, totalCount, pageNumber, pageSize);
+        }
 
         public async Task<bool> IsUserHasWorkSpaceRoleAsync(string userId, long workSpaceId,WorkSpaceRole role)
-            => await context.WorkSpaceUsers.AnyAsync(wu => wu.UserId == userId && wu.WorkSpaceId == workSpaceId && wu.WorkSpaceRoleId == (short)role);
+            => await context.WorkSpaceUsers.AnyAsync(wu => wu.UserId == userId && wu.WorkSpaceId == workSpaceId && wu.WorkSpaceRole == role);
     }
 }

@@ -20,6 +20,10 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(n => n.IsRead).HasDefaultValue(false);
             builder.Property(n => n.ReadAt).IsRequired(false); // تم تصحيحه من ReadedAt ويقبل Null
 
+            builder.Property(n => n.TaskId).IsRequired(false);
+            builder.Property(n => n.WorkSpaceInviteId).IsRequired(false);
+           
+
             //composite index with filter
             builder.HasIndex(n=>new {n.NotifyToId,n.CreatedAt})
                 .HasFilter("[IsRead] = 0");
@@ -32,16 +36,14 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.HasOne(n => n.Task)
                 .WithMany(t => t.Notifications)
-                .HasForeignKey(n => n.TaskId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(n => n.TaskId);
 
-            builder.HasOne(n => n.NotificationType)
-                .WithMany(nt => nt.Notifications)
-                .HasForeignKey(n => n.NotificationTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(n => n.WorkSpaceInvite)
+                .WithMany(w => w.Notifications)
+                .HasForeignKey(n => n.WorkSpaceInviteId);
+               
 
-            //query filter
-            builder.HasQueryFilter(wu => !wu.Task.IsDeleted);
+
         }
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.Persistence.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -45,8 +45,8 @@ namespace Infrastructure.Persistence.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<short>("NotificationTypeId")
-                        .HasColumnType("smallint");
+                    b.Property<int>("NotificationType")
+                        .HasColumnType("int");
 
                     b.Property<string>("NotifyToId")
                         .IsRequired()
@@ -55,7 +55,7 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("TaskId")
+                    b.Property<long?>("TaskId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Title")
@@ -63,51 +63,19 @@ namespace Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<long?>("WorkSpaceInviteId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("NotificationTypeId");
-
                     b.HasIndex("TaskId");
+
+                    b.HasIndex("WorkSpaceInviteId");
 
                     b.HasIndex("NotifyToId", "CreatedAt")
                         .HasFilter("[IsRead] = 0");
 
                     b.ToTable("Notifications", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.NotificationType", b =>
-                {
-                    b.Property<short>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("NotificationTypes", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (short)1,
-                            Name = "TaskAssigned"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            Name = "CommentAdded"
-                        },
-                        new
-                        {
-                            Id = (short)3,
-                            Name = "DueDateReminder"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Project", b =>
@@ -142,10 +110,18 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("LastUpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("LastUpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<long>("WorkSpaceId")
                         .HasColumnType("bigint");
@@ -154,7 +130,13 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedById");
 
+                    b.HasIndex("LastUpdatedById");
+
                     b.HasIndex("WorkSpaceId", "CreatedAt");
+
+                    b.HasIndex("WorkSpaceId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Projects", (string)null);
                 });
@@ -202,72 +184,19 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<long>("ProjectId")
                         .HasColumnType("bigint");
 
-                    b.Property<short>("TaskPriorityId")
-                        .HasColumnType("smallint");
+                    b.Property<int>("TaskPriority")
+                        .HasColumnType("int");
 
-                    b.Property<short>("TaskStatusId")
-                        .HasColumnType("smallint");
+                    b.Property<int>("TaskStatus")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
 
-                    b.HasIndex("TaskPriorityId");
-
-                    b.HasIndex("TaskStatusId");
-
                     b.HasIndex("ProjectId", "CreatedAt");
 
                     b.ToTable("Tasks", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProjectTaskStatus", b =>
-                {
-                    b.Property<short>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProjectTaskStatuses", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (short)1,
-                            Name = "Backlog"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            Name = "Todo"
-                        },
-                        new
-                        {
-                            Id = (short)3,
-                            Name = "InProgress"
-                        },
-                        new
-                        {
-                            Id = (short)4,
-                            Name = "Review"
-                        },
-                        new
-                        {
-                            Id = (short)5,
-                            Name = "Done"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
@@ -421,50 +350,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("TaskComments", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.TaskPriority", b =>
-                {
-                    b.Property<short>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TaskPriorities", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (short)1,
-                            Name = "Low"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            Name = "Medium"
-                        },
-                        new
-                        {
-                            Id = (short)3,
-                            Name = "High"
-                        },
-                        new
-                        {
-                            Id = (short)4,
-                            Name = "Critical"
-                        });
-                });
-
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -583,6 +468,9 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("LastUpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("LastUpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -592,41 +480,57 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedById");
 
+                    b.HasIndex("LastUpdatedById");
+
                     b.ToTable("WorkSpaces", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.WorkSpaceRole", b =>
+            modelBuilder.Entity("Domain.Entities.WorkSpaceInvite", b =>
                 {
-                    b.Property<short>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvitedById")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("InvitedToId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("WorkSpaceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("WorkSpaceInviteStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkSpaceRole")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkSpaceRoles", (string)null);
+                    b.HasIndex("InvitedById");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = (short)1,
-                            Name = "WorkspaceOwner"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            Name = "ProjectManager"
-                        },
-                        new
-                        {
-                            Id = (short)3,
-                            Name = "Member"
-                        });
+                    b.HasIndex("InvitedToId");
+
+                    b.HasIndex("WorkSpaceId", "InvitedById");
+
+                    b.ToTable("WorkSpaceInvites", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkSpaceUser", b =>
@@ -637,20 +541,21 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<short>("WorkSpaceRoleId")
-                        .HasColumnType("smallint");
+                    b.Property<int>("WorkSpaceRole")
+                        .HasColumnType("int");
 
                     b.HasKey("WorkSpaceId", "UserId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("WorkSpaceRoleId");
 
                     b.ToTable("WorkSpaceUsers", (string)null);
                 });
@@ -806,12 +711,6 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Notification", b =>
                 {
-                    b.HasOne("Domain.Entities.NotificationType", "NotificationType")
-                        .WithMany("Notifications")
-                        .HasForeignKey("NotificationTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.User", "NotifyTo")
                         .WithMany("Notifications")
                         .HasForeignKey("NotifyToId")
@@ -820,15 +719,17 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasOne("Domain.Entities.ProjectTask", "Task")
                         .WithMany("Notifications")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TaskId");
 
-                    b.Navigation("NotificationType");
+                    b.HasOne("Domain.Entities.WorkSpaceInvite", "WorkSpaceInvite")
+                        .WithMany("Notifications")
+                        .HasForeignKey("WorkSpaceInviteId");
 
                     b.Navigation("NotifyTo");
 
                     b.Navigation("Task");
+
+                    b.Navigation("WorkSpaceInvite");
                 });
 
             modelBuilder.Entity("Domain.Entities.Project", b =>
@@ -839,6 +740,11 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.User", "LastUpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("LastUpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Domain.Entities.WorkSpace", "WorkSpace")
                         .WithMany("Projects")
                         .HasForeignKey("WorkSpaceId")
@@ -846,6 +752,8 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("LastUpdatedBy");
 
                     b.Navigation("WorkSpace");
                 });
@@ -864,25 +772,9 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TaskPriority", "TaskPriority")
-                        .WithMany("Tasks")
-                        .HasForeignKey("TaskPriorityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.ProjectTaskStatus", "TaskStatus")
-                        .WithMany("Tasks")
-                        .HasForeignKey("TaskStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Project");
-
-                    b.Navigation("TaskPriority");
-
-                    b.Navigation("TaskStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
@@ -961,7 +853,41 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.User", "LastUpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("LastUpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("LastUpdatedBy");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WorkSpaceInvite", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "InvitedBy")
+                        .WithMany()
+                        .HasForeignKey("InvitedById")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "InvitedTo")
+                        .WithMany()
+                        .HasForeignKey("InvitedToId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.WorkSpace", "WorkSpace")
+                        .WithMany()
+                        .HasForeignKey("WorkSpaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InvitedBy");
+
+                    b.Navigation("InvitedTo");
+
+                    b.Navigation("WorkSpace");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkSpaceUser", b =>
@@ -978,17 +904,9 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.WorkSpaceRole", "WorkSpaceRole")
-                        .WithMany("WorkSpaceUsers")
-                        .HasForeignKey("WorkSpaceRoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("User");
 
                     b.Navigation("WorkSpace");
-
-                    b.Navigation("WorkSpaceRole");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1042,11 +960,6 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Entities.NotificationType", b =>
-                {
-                    b.Navigation("Notifications");
-                });
-
             modelBuilder.Entity("Domain.Entities.Project", b =>
                 {
                     b.Navigation("Tasks");
@@ -1061,16 +974,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("TaskAttachments");
 
                     b.Navigation("TaskComments");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProjectTaskStatus", b =>
-                {
-                    b.Navigation("Tasks");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TaskPriority", b =>
-                {
-                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -1101,9 +1004,9 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("WorkSpaceUsers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.WorkSpaceRole", b =>
+            modelBuilder.Entity("Domain.Entities.WorkSpaceInvite", b =>
                 {
-                    b.Navigation("WorkSpaceUsers");
+                    b.Navigation("Notifications");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,3 +1,4 @@
+using Domain.Common.Enums;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,12 +16,18 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.Property(p => p.Name).IsRequired().HasMaxLength(150);
             builder.Property(p => p.Description).IsRequired(false).HasMaxLength(500); // Allow Null
+            builder.Property(p => p.Status).HasDefaultValue(ProjectStatus.Active);
 
             builder.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()");
+            builder.Property(p => p.LastUpdatedById).IsRequired(false);
             builder.Property(p => p.LastUpdatedAt).IsRequired(false); // Allow Null
             builder.Property(p => p.IsDeleted).HasDefaultValue(false);
 
             builder.HasQueryFilter(p => !p.IsDeleted);
+
+            // Unique index on (WorkSpaceId, Name) where IsDeleted=false
+            builder.HasIndex(p => new { p.WorkSpaceId, p.Name })
+                .IsUnique().HasFilter("[IsDeleted] = 0");
 
             //composite index
             builder.HasIndex(p => new { p.WorkSpaceId, p.CreatedAt });
@@ -33,6 +40,11 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasOne(p => p.CreatedBy)
                 .WithMany(u => u.CreatedProjects)
                 .HasForeignKey(p => p.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(p => p.LastUpdatedBy)
+                .WithMany()
+                .HasForeignKey(p => p.LastUpdatedById)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -9,8 +9,11 @@ namespace Application.Common.Interfaces.Repositories
         IUserRepository UserRepository { get; }
         IRefreshTokenRepository RefreshTokenRepository { get; }
         IWorkSpaceRepository WorkSpaceRepository { get; }
-
+        INotificationRepository NotificationRepository { get; }
         IWorkSpaceUserRepository WorkSpaceUserRepository { get; }
+        IWorkSpaceInviteRepository WorkSpaceInviteRepository { get; }
+        IProjectRepository ProjectRepository { get; }
+
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
