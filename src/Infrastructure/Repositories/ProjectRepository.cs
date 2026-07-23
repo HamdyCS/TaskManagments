@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repositories;
+using Domain.Common.Enums;
 using Domain.Common.Pagination;
 using Domain.Entities;
 using Infrastructure.Persistence;
@@ -31,5 +32,16 @@ namespace Infrastructure.Repositories
 
         public async Task<Project?> GetByIdAndWorkSpaceIdAsync(long projectId, long workSpaceId)
             => await GetByFilterAsync(p => p.Id == projectId && p.WorkSpaceId == workSpaceId);
+
+        public async Task<int> UpdateStatusAsync(long projectId, long workSpaceId, string userId, ProjectStatus status)
+        {
+            return await context.Projects
+                .Where(p => p.Id == projectId && p.WorkSpaceId == workSpaceId && !p.IsDeleted)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.Status, status)
+                    .SetProperty(p => p.LastUpdatedAt, DateTime.UtcNow)
+                    .SetProperty(p => p.LastUpdatedById, userId));
+
+        }
     }
 }

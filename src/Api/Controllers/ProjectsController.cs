@@ -3,6 +3,7 @@ using Application.Features.Projects;
 using Application.Features.Projects.Commands.CreateProject;
 using Application.Features.Projects.Commands.DeleteProject;
 using Application.Features.Projects.Commands.UpdateProject;
+using Application.Features.Projects.Commands.UpdateProjectStatus;
 using Application.Features.Projects.Queries.GetAllProjects;
 using Application.Features.Projects.Queries.GetProjectById;
 using Domain.Entities;
@@ -117,6 +118,26 @@ namespace Api.Controllers
             if (!hasPermission) return Forbid();
 
             var result = await mediator.Send(new UpdateProjectCommand(updateProjectDto, workspaceId, projectId, userId));
+
+            return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpPatch("{projectId}/status", Name = "UpdateProjectStatus")]
+        public async Task<IActionResult> UpdateProjectStatus(
+            [FromRoute] long workspaceId,
+            [FromRoute] long projectId,
+            [FromBody] UpdateProjectStatusDto updateProjectStatusDto)
+        {
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var hasPermission = await _IsAdminOrOwnerOrProductManagerAsync(workspaceId);
+            if (!hasPermission)
+                return Forbid();
+
+            var result = await mediator.Send(new UpdateProjectStatusCommand(updateProjectStatusDto, workspaceId, projectId, userId));
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());
