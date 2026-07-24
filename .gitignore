@@ -375,3 +375,6 @@ opencode.json
 #specfiy
 .specify
 specs
+
+#env
+.env
