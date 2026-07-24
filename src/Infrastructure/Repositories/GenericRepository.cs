@@ -19,17 +19,17 @@ namespace Infrastructure.Repositories
             this.context = context;
         }
 
-        public void Add(T entity)
+        public virtual void Add(T entity)
         {
             context.Set<T>().Add(entity);
         }
 
-        public void AddRange(IEnumerable<T> entities)
+        public virtual void AddRange(IEnumerable<T> entities)
         {
             context.Set<T>().AddRange(entities);
         }
 
-        public void Delete(T entity)
+        public virtual void Delete(T entity)
         {
 
             //check if entity is ISoftDelete
@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories
 
         }
 
-        public void DeleteRange(IEnumerable<T> entities)
+        public virtual void DeleteRange(IEnumerable<T> entities)
         {
 
             //هل يمكن تحويل T => ISoftDelete
@@ -74,7 +74,7 @@ namespace Infrastructure.Repositories
             context.Set<T>().RemoveRange(entities);
         }
 
-        public async Task<PaginationResult<T>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
+        public virtual async Task<PaginationResult<T>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
         {
 
             var totalCount = await context.Set<T>().CountAsync();
@@ -85,7 +85,7 @@ namespace Infrastructure.Repositories
             return new PaginationResult<T>(data, totalCount, pageNumber, pageSize);
         }
 
-        protected async Task<PaginationResult<T>> GetAllByFilterAsync<TKey>(Expression<Func<T, bool>> predicate, int pageNumber = 1, int pageSize = 1,
+        protected virtual async Task<PaginationResult<T>> GetAllByFilterAsync<TKey>(Expression<Func<T, bool>> predicate, int pageNumber = 1, int pageSize = 1,
             Expression<Func<T, TKey>>? orderBy = null)
         {
 
@@ -102,26 +102,26 @@ namespace Infrastructure.Repositories
             return new PaginationResult<T>(data, totalCount, pageNumber, pageSize);
         }
 
-        public async Task<T> GetByIdAsync(long id)
+        public virtual async Task<T> GetByIdAsync(long id)
         {
             var entity = await context.Set<T>().FindAsync(id);
             return entity;
         }
 
-        protected async Task<T> GetByFilterAsync(Expression<Func<T, bool>> predicate)
+        protected virtual async Task<T> GetByFilterAsync(Expression<Func<T, bool>> predicate)
         {
 
             var entity = await context.Set<T>().FirstOrDefaultAsync(predicate);
             return entity;
         }
 
-        public void Update(T entity)
+        public virtual void Update(T entity)
         {
 
             context.Set<T>().Update(entity);
         }
 
-        public void UpdateRange(IEnumerable<T> entities)
+        public virtual void UpdateRange(IEnumerable<T> entities)
         {
             context.Set<T>().UpdateRange(entities);
         }
