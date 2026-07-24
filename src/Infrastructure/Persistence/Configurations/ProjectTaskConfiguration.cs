@@ -14,11 +14,18 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(t => t.Id).ValueGeneratedOnAdd();
 
             builder.Property(t => t.Name).IsRequired().HasMaxLength(200);
-            builder.Property(t => t.Description).IsRequired(false).HasMaxLength(1000); // Allow Null
+            builder.Property(t => t.Description).IsRequired(false).HasMaxLength(2000); // Allow Null
 
             builder.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()");
+         
+            builder.Property(t => t.LastUpdatedById).IsRequired(false); // Allow Null
             builder.Property(t => t.LastUpdatedAt).IsRequired(false); // Allow Null
             builder.Property(t => t.IsDeleted).HasDefaultValue(false);
+
+            builder.HasOne(t => t.LastUpdatedBy).WithMany()
+                .HasForeignKey(t => t.LastUpdatedById);
+
+         
 
             builder.HasQueryFilter(t => !t.IsDeleted);
 

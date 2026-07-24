@@ -185,6 +185,8 @@ namespace Infrastructure
             services.AddScoped<IWorkSpaceUserRepository, WorkSpaceUsersRepository>();
             services.AddScoped<IWorkSpaceInviteRepository, WorkSpaceInviteRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
+            services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddScoped<ITaskAssignmentRepository, TaskAssignmentRepository>();
 
             return services;
         }

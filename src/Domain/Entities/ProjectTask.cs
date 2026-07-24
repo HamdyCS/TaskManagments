@@ -14,13 +14,17 @@ namespace Domain.Entities
         public long ProjectId { get; set; }
         public string CreatedById { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime Deadline { get; set; }
+        public DateTime? Deadline { get; set; }
+
+        public string? LastUpdatedById { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
         public ProjectTaskStatus TaskStatus { get; set; }
         public TaskPriority TaskPriority { get; set; }
 
         public virtual Project Project { get; set; }
         public virtual User CreatedBy { get; set; }
+        public virtual User LastUpdatedBy { get; set; }
+
 
         public virtual ICollection<TaskAssignment> TaskAssignments { get; set; }
         public virtual ICollection<TaskComment> TaskComments { get; set; }
