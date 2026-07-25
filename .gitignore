@@ -378,3 +378,6 @@ specs
 
 #env
 .env
+
+#plan
+plans
