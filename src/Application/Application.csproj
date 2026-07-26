@@ -4,6 +4,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Include="Features\Tasks\commands\ChangeTaskStatus\ChangeTaskStatusCommand.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ErrorOr" Version="2.1.1" />

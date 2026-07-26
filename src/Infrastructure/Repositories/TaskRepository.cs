@@ -65,7 +65,7 @@ namespace Infrastructure.Repositories
 
         public async Task<PaginationResult<ProjectTask>> GetByProjectIdAndUserIdAsync(long projectId, string userId, int pageNumber, int pageSize)
         {
-            var query = context.Set<ProjectTask>().Include(t=>t.TaskAssignments)
+            var query = context.Set<ProjectTask>().Include(t => t.TaskAssignments)
                 .Include(t => t.TaskAttachments)
                 .Where(t => t.ProjectId == projectId && t.TaskAssignments.Any(a => a.AssignedToId == userId && a.IsActive));
 
@@ -133,9 +133,14 @@ namespace Infrastructure.Repositories
             => context.ProjectTasks.Include(t => t.TaskAssignments).Include(t => t.TaskAttachments)
             .FirstOrDefaultAsync(t => t.Id == id && t.ProjectId == projectId);
 
-        public Task<ProjectTask?> GetByIdAndWorkSpaceIdAndProjectIdAsync(long id,long workSpaceId ,long projectId)
-           => context.ProjectTasks.Include(t => t.TaskAssignments).Include(t=>t.TaskAttachments)
+        public Task<ProjectTask?> GetByIdAndWorkSpaceIdAndProjectIdAsync(long id, long workSpaceId, long projectId)
+           => context.ProjectTasks.Include(t => t.TaskAssignments).Include(t => t.TaskAttachments)
            .FirstOrDefaultAsync(t => t.Id == id && t.Project.WorkSpaceId == workSpaceId && t.ProjectId == projectId);
+
+        public Task<ProjectTask?> GetByIdAndWorkSpaceIdAndProjectIdAndAssignedToIdAsync(long id, long workSpaceId, long projectId,string assignedToId)
+             => context.ProjectTasks.Include(t => t.TaskAssignments).Include(t => t.TaskAttachments)
+           .FirstOrDefaultAsync(t => t.Id == id && t.Project.WorkSpaceId == workSpaceId && t.ProjectId == projectId
+           && t.TaskAssignments.Any(a => a.AssignedToId == assignedToId && a.IsActive));
 
     }
 }

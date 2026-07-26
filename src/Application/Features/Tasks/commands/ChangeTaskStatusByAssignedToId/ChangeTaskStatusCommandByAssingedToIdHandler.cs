@@ -7,18 +7,18 @@ using ErrorOr;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Tasks.Commands.ChangeTaskStatus
+namespace Application.Features.Tasks.Commands.ChangeTaskStatusByAssignedToId
 {
-    public class ChangeTaskStatusCommandHandler(
+    public class ChangeTaskStatusCommandByAssingedToIdHandler(
         IUnitOfWork unitOfWork,
         IMediator mediator,
-        ILogger<ChangeTaskStatusCommandHandler> logger) : IRequestHandler<ChangeTaskStatusCommand, ErrorOr<TaskDto>>
+        ILogger<ChangeTaskStatusCommandByAssingedToIdHandler> logger) : IRequestHandler<ChangeTaskStatusCommandByAssignedToId, ErrorOr<TaskDto>>
     {
-     
+      
 
-        public async Task<ErrorOr<TaskDto>> Handle(ChangeTaskStatusCommand request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<TaskDto>> Handle(ChangeTaskStatusCommandByAssignedToId request, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Starting ChangeTaskStatus for task {TaskId} in project {ProjectId} by user with id {UserId}", request.TaskId, request.ProjectId, request.UserId);
+            logger.LogInformation("Starting ChangeTaskStatus for task {TaskId} in project {ProjectId} by user with id {UserId}", request.TaskId, request.ProjectId, request.AssignedToId);
 
             // Verify project belongs to workspace
             var project = await unitOfWork.ProjectRepository.GetByIdAndWorkSpaceIdAsync(request.ProjectId, request.WorkSpaceId);
@@ -27,7 +27,7 @@ namespace Application.Features.Tasks.Commands.ChangeTaskStatus
 
             //get task
             var task = await unitOfWork.TaskRepository
-                .GetByIdAndWorkSpaceIdAndProjectIdAsync(request.TaskId, request.WorkSpaceId, request.ProjectId);
+                .GetByIdAndWorkSpaceIdAndProjectIdAndAssignedToIdAsync(request.TaskId, request.WorkSpaceId, request.ProjectId, request.AssignedToId);
 
             //check if task exists
             if (task is null)
@@ -39,9 +39,10 @@ namespace Application.Features.Tasks.Commands.ChangeTaskStatus
                 return TaskErrors.InvalidStatusTransition(task.TaskStatus, request.ChangeTaskStatusDto.Status);
             }
 
+            // Update task status
             task.TaskStatus = request.ChangeTaskStatusDto.Status;
             task.LastUpdatedAt = DateTime.UtcNow;
-            task.LastUpdatedById = request.UserId;
+            task.LastUpdatedById = request.AssignedToId;
 
             unitOfWork.TaskRepository.Update(task);
             await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -59,7 +60,7 @@ namespace Application.Features.Tasks.Commands.ChangeTaskStatus
                     NotificationType.TaskStatusUpdated)), cancellationToken);
             }
 
-            logger.LogInformation("ChangeTaskStatus for task {TaskId} in project {ProjectId} by user with id {UserId} successfully", request.TaskId, request.ProjectId, request.UserId);
+            logger.LogInformation("ChangeTaskStatus for task {TaskId} in project {ProjectId} by user with id {UserId} successfully", request.TaskId, request.ProjectId, request.AssignedToId);
 
             return task.Adapt<TaskDto>();
         }
