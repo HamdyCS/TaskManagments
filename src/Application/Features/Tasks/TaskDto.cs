@@ -1,3 +1,4 @@
+using Application.Features.TaskAttachments;
 using Domain.Common.Enums;
 
 namespace Application.Features.Tasks
@@ -14,5 +15,6 @@ namespace Application.Features.Tasks
         string? LastUpdatedById,
         long ProjectId,
         string CreatedById,
-        List<TaskAssignmentDto> Assignments);
+        List<TaskAssignmentDto> Assignments,
+        List<TaskAttachmentDto> TaskAttachments);
 }

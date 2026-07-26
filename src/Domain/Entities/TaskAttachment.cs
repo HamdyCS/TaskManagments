@@ -9,10 +9,13 @@ namespace Domain.Entities
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public string Url { get; set; }
+        public string Path { get; set; }
         public long TaskId { get; set; }
+        public string CreatedById { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public virtual ProjectTask Task { get; set; }
+
+        public virtual User CreatedBy { get; set; }
     }
 }

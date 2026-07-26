@@ -15,7 +15,9 @@ namespace Infrastructure.Repositories
 
         public async Task<PaginationResult<ProjectTask>> GetAllByProjectIdAsync(long projectId, int pageNumber, int pageSize)
         {
-            var query = context.Set<ProjectTask>().Include(t => t.TaskAssignments).Where(t => t.ProjectId == projectId);
+            var query = context.Set<ProjectTask>()
+                .Include(t => t.TaskAssignments).Where(t => t.ProjectId == projectId)
+                .Include(t => t.TaskAttachments);
             var totalCount = await query.CountAsync();
             var data = await query
                 .Skip((pageNumber - 1) * pageSize)
@@ -28,6 +30,7 @@ namespace Infrastructure.Repositories
         public async Task<PaginationResult<ProjectTask>> GetAllFilteredAsync(long projectId, int pageNumber, int pageSize, ProjectTaskStatus? status, TaskPriority? priority, string? searchTerm, string? sortBy, string? sortOrder)
         {
             var query = context.Set<ProjectTask>().Include(t => t.TaskAssignments)
+                .Include(t => t.TaskAttachments)
                 .Where(t => t.ProjectId == projectId);
 
             if (status.HasValue)
@@ -63,6 +66,7 @@ namespace Infrastructure.Repositories
         public async Task<PaginationResult<ProjectTask>> GetByProjectIdAndUserIdAsync(long projectId, string userId, int pageNumber, int pageSize)
         {
             var query = context.Set<ProjectTask>().Include(t=>t.TaskAssignments)
+                .Include(t => t.TaskAttachments)
                 .Where(t => t.ProjectId == projectId && t.TaskAssignments.Any(a => a.AssignedToId == userId && a.IsActive));
 
             var totalCount = await query.CountAsync();
@@ -78,7 +82,9 @@ namespace Infrastructure.Repositories
         public async Task<PaginationResult<ProjectTask>> GetByProjectIdAndUserIdFilteredAsync(long projectId, string userId, int pageNumber, int pageSize, ProjectTaskStatus? status, TaskPriority? priority, string? searchTerm, string? sortBy, string? sortOrder)
         {
             var query = context.Set<ProjectTask>().Include(t => t.TaskAssignments)
-                .Where(t => t.ProjectId == projectId && t.TaskAssignments.Any(a => a.AssignedToId == userId && a.IsActive));
+                .Include(t => t.TaskAttachments)
+                .Where(t => t.ProjectId == projectId && t.TaskAssignments
+                .Any(a => a.AssignedToId == userId && a.IsActive));
 
             if (status.HasValue)
                 query = query.Where(t => t.TaskStatus == status.Value);
@@ -124,8 +130,12 @@ namespace Infrastructure.Repositories
         }
 
         public Task<ProjectTask?> GetByIdAndProjectIdAsync(long id, long projectId)
-            => context.ProjectTasks.Include(t => t.TaskAssignments)
+            => context.ProjectTasks.Include(t => t.TaskAssignments).Include(t => t.TaskAttachments)
             .FirstOrDefaultAsync(t => t.Id == id && t.ProjectId == projectId);
+
+        public Task<ProjectTask?> GetByIdAndWorkSpaceIdAndProjectIdAsync(long id,long workSpaceId ,long projectId)
+           => context.ProjectTasks.Include(t => t.TaskAssignments).Include(t=>t.TaskAttachments)
+           .FirstOrDefaultAsync(t => t.Id == id && t.Project.WorkSpaceId == workSpaceId && t.ProjectId == projectId);
 
     }
 }

@@ -1,8 +1,10 @@
+using Api.Common.Servcies;
 using Api.ExceptionHandler;
 using Api.Hubs.Notification;
 using Application;
 using Application.Common.Interfaces.Services;
 using Infrastructure;
+using Microsoft.AspNetCore.StaticFiles;
 using Serilog;
 using Serilog.Enrichers.Span;
 using System.Text.Json.Serialization;
@@ -43,10 +45,16 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
 
 
+//add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IFileUrlService, FileUrlService>();
+
 //app services
 builder.Services
     .AddInfrastructure(builder.Configuration)
     .AddApplication(builder.Configuration);
+
 
 //add policies
 builder.Services.AddPolicies();
@@ -57,14 +65,15 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 
 
-var app = builder.Build();
 
+var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseStaticFiles();
 
 app.MapControllers();
 

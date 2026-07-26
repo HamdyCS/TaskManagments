@@ -187,6 +187,7 @@ namespace Infrastructure
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
             services.AddScoped<ITaskAssignmentRepository, TaskAssignmentRepository>();
+            services.AddScoped<ITaskAttachmentRepository, TaskAttachmentRepository>();
 
             return services;
         }
@@ -199,6 +200,7 @@ namespace Infrastructure
             services.AddSingleton<IOtpService, OtpService>();
             services.AddScoped<IWorkSpaceUserService, WorkSpaceUserService>();
             services.AddScoped<IWorkSpaceService, WorkSpaceService>();
+            services.AddScoped<IFileStorageService, FileStorageService>();
 
             return services;
         }

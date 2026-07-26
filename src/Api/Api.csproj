@@ -29,4 +29,8 @@
     <Using Include="Microsoft.AspNetCore.Authorization" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>
