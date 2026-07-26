@@ -1,6 +1,7 @@
 using Application.Common.Dtos;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Domain.Common.Enums;
 using Domain.Common.Pagination;
 using Domain.Entities;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Features.Tasks.Queries.GetAllProjectTasks
 {
     public class GetAllProjectTasksQueryHandler(
+        IFileUrlService fileUrlService,
         IUnitOfWork unitOfWork,
         ILogger<GetAllProjectTasksQueryHandler> logger) : IRequestHandler<GetAllProjectTasksQuery, ErrorOr<PaginationResultDto<TaskDto>>>
     {
@@ -47,6 +49,15 @@ namespace Application.Features.Tasks.Queries.GetAllProjectTasks
             }
 
             var dtoResult = result.Adapt<PaginationResultDto<TaskDto>>();
+            foreach (var item in dtoResult.Data)
+            {
+
+               item.Attachments.ForEach(attachment =>
+               {
+                   //attachment.Url now = the Path of the attachment, we need to convert it to a full URL
+                   attachment.Url = fileUrlService.GetUrl(attachment.Url);
+               });
+            }
 
             logger.LogInformation("GetAllProjectTasks for project {ProjectId} completed successfully", request.ProjectId);
 

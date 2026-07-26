@@ -1,6 +1,7 @@
 using Application.Common.Dtos;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Domain.Common.Pagination;
 using Domain.Entities;
 using ErrorOr;
@@ -10,6 +11,7 @@ using MediatR;
 namespace Application.Features.Tasks.Queries.GetMyTasks
 {
     public class GetMyTasksQueryHandler(
+        IFileUrlService fileUrlService,
         IUnitOfWork unitOfWork,
         ILogger<GetMyTasksQueryHandler> logger) : IRequestHandler<GetMyTasksQuery, ErrorOr<PaginationResultDto<TaskDto>>>
     {
@@ -47,6 +49,14 @@ namespace Application.Features.Tasks.Queries.GetMyTasks
             }
 
             var dtoResult = result.Adapt<PaginationResultDto<TaskDto>>();
+            foreach (var item in dtoResult.Data)
+            {
+                item.Attachments.ForEach(attachment =>
+                {
+                    //attachment.Url now = the Path of the attachment, we need to convert it to a full URL
+                    attachment.Url = fileUrlService.GetUrl(attachment.Url);
+                });
+            }
 
             logger.LogInformation("GetMyTasks for user {UserId} in project {ProjectId} completed successfully", request.UserId, request.ProjectId);
 

@@ -1,5 +1,6 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using ErrorOr;
 using Mapster;
 using MediatR;
@@ -7,6 +8,7 @@ using MediatR;
 namespace Application.Features.Tasks.Queries.GetTaskById
 {
     public class GetTaskByIdQueryHandler(
+        IFileUrlService fileUrlService,
         IUnitOfWork unitOfWork,
         ILogger<GetTaskByIdQueryHandler> logger) : IRequestHandler<GetTaskByIdQuery, ErrorOr<TaskDto>>
     {
@@ -25,7 +27,13 @@ namespace Application.Features.Tasks.Queries.GetTaskById
 
             logger.LogInformation("GetTaskById with id {TaskId} in project {ProjectId} completed successfully", request.TaskId, request.ProjectId);
 
-            return task.Adapt<TaskDto>();
+            var taskDto = task.Adapt<TaskDto>();
+            taskDto.Attachments.ForEach(attachment =>
+            {
+                //attachment.Url now = the Path of the attachment, we need to convert it to a full URL
+                attachment.Url = fileUrlService.GetUrl(attachment.Url);
+            });
+            return taskDto;
         }
     }
 }
