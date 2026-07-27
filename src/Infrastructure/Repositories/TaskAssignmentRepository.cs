@@ -18,13 +18,6 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(ta => ta.TaskId == taskId && ta.AssignedToId == userId && ta.IsActive);
         }
 
-        public async Task<List<TaskAssignment>> GetActiveAssignmentsByTaskIdAsync(long taskId)
-        {
-            return await context.Set<TaskAssignment>()
-                .Where(ta => ta.TaskId == taskId && ta.IsActive)
-                .ToListAsync();
-        }
-
         public async Task<bool> HasActiveAssignmentAsync(long taskId, string userId)
         {
             return await context.Set<TaskAssignment>()

@@ -244,5 +244,12 @@ namespace Infrastructure.Repositories
             }
 
         }
+
+        public async Task<string?> GetUserFullNameAsync(string userId, CancellationToken cancellationToken)
+           => await context.Users.Where(u => u.Id == userId && !u.IsDeleted)
+            .Select(u => u.FirstName + " " + u.LastName)
+            .FirstOrDefaultAsync(cancellationToken);
+
+
     }
 }

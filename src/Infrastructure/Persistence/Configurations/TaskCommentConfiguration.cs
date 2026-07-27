@@ -15,6 +15,7 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.Property(tc => tc.Comment).IsRequired().HasMaxLength(2000);
             builder.Property(tc => tc.CreatedAt).HasDefaultValueSql("GETDATE()");
+            builder.Property(tc => tc.LastUpdatedAt).IsRequired(false);
 
             //composite index
             builder.HasIndex(tc => tc.TaskId);
@@ -31,6 +32,7 @@ namespace Infrastructure.Persistence.Configurations
 
             //query filter
             builder.HasQueryFilter(wu => !wu.Task.IsDeleted);
+            builder.HasQueryFilter(wu => !wu.IsDeleted);
         }
     }
 }

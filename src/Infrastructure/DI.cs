@@ -188,6 +188,7 @@ namespace Infrastructure
             services.AddScoped<ITaskRepository, TaskRepository>();
             services.AddScoped<ITaskAssignmentRepository, TaskAssignmentRepository>();
             services.AddScoped<ITaskAttachmentRepository, TaskAttachmentRepository>();
+            services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
 
             return services;
         }

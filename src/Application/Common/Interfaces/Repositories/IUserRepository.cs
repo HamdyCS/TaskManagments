@@ -45,5 +45,6 @@ namespace Application.Common.Interfaces.Repositories
         Task<PaginationResult<User>> GetAllUsers(int pageNumber, int pageSize);
         Task<User?> GetOrCreateExternalUserAsync(Role roleOnCreate);
         AuthenticationProperties GenerateExternalAuthProperty(Provider provider, string redirectUrl);
+        Task<string?> GetUserFullNameAsync(string userId, CancellationToken cancellationToken);
     }  
 }

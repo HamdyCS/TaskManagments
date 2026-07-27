@@ -17,7 +17,8 @@ namespace Infrastructure.Repositories
             , IWorkSpaceRepository workSpaceRepository, IWorkSpaceUserRepository workSpaceUserRepository
             , INotificationRepository notificationRepository, IWorkSpaceInviteRepository workSpaceInviteRepository
             , IProjectRepository projectRepository, ITaskRepository taskRepository
-            , ITaskAssignmentRepository taskAssignmentRepository, ITaskAttachmentRepository taskAttachmentRepository)
+            , ITaskAssignmentRepository taskAssignmentRepository, ITaskAttachmentRepository taskAttachmentRepository
+            , ITaskCommentRepository taskCommentRepository)
         {
             this.context = context;
             UserRepository = userRepository;
@@ -30,6 +31,7 @@ namespace Infrastructure.Repositories
             this.TaskRepository = taskRepository;
             this.TaskAssignmentRepository = taskAssignmentRepository;
             this.TaskAttachmentRepository = taskAttachmentRepository;
+            this.TaskCommentRepository = taskCommentRepository;
         }
 
         public IUserRepository UserRepository { get; private set; }
@@ -51,6 +53,8 @@ namespace Infrastructure.Repositories
         public ITaskAssignmentRepository TaskAssignmentRepository { get; private set; }
 
         public ITaskAttachmentRepository TaskAttachmentRepository { get; private set; }
+
+        public ITaskCommentRepository TaskCommentRepository { get; private set; }
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
