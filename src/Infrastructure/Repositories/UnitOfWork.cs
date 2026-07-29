@@ -18,20 +18,21 @@ namespace Infrastructure.Repositories
             , INotificationRepository notificationRepository, IWorkSpaceInviteRepository workSpaceInviteRepository
             , IProjectRepository projectRepository, ITaskRepository taskRepository
             , ITaskAssignmentRepository taskAssignmentRepository, ITaskAttachmentRepository taskAttachmentRepository
-            , ITaskCommentRepository taskCommentRepository)
+            , ITaskCommentRepository taskCommentRepository, IReportRepository reportRepository)
         {
             this.context = context;
-            UserRepository = userRepository;
-            RefreshTokenRepository = refreshTokenRepository;
-            WorkSpaceRepository = workSpaceRepository;
-            WorkSpaceUserRepository = workSpaceUserRepository;
-            NotificationRepository = notificationRepository;
+            this.UserRepository = userRepository;
+            this.RefreshTokenRepository = refreshTokenRepository;
+            this.WorkSpaceRepository = workSpaceRepository;
+            this.WorkSpaceUserRepository = workSpaceUserRepository;
+            this.NotificationRepository = notificationRepository;
             this.WorkSpaceInviteRepository = workSpaceInviteRepository;
             this.ProjectRepository = projectRepository;
             this.TaskRepository = taskRepository;
             this.TaskAssignmentRepository = taskAssignmentRepository;
             this.TaskAttachmentRepository = taskAttachmentRepository;
             this.TaskCommentRepository = taskCommentRepository;
+            this.ReportRepository = reportRepository;
         }
 
         public IUserRepository UserRepository { get; private set; }
@@ -55,6 +56,8 @@ namespace Infrastructure.Repositories
         public ITaskAttachmentRepository TaskAttachmentRepository { get; private set; }
 
         public ITaskCommentRepository TaskCommentRepository { get; private set; }
+
+        public IReportRepository ReportRepository { get; private set; }
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {

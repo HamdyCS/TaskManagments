@@ -6,6 +6,8 @@ namespace Application.Common.Dtos
 {
     public class MemberPerformance
     {
+        public string Id { get; set; }
+        public string Name { get; set; }
         public int AssignedCount { get; set; }
         public int InProgressCount { get; set; }
         public int DoneCount { get; set; }

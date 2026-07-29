@@ -17,6 +17,7 @@ namespace Application.Common.Interfaces.Repositories
         ITaskAssignmentRepository TaskAssignmentRepository { get; }
         ITaskAttachmentRepository TaskAttachmentRepository { get; }
         ITaskCommentRepository TaskCommentRepository { get; }
+        IReportRepository ReportRepository { get; }
 
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

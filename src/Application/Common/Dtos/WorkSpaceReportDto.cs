@@ -23,5 +23,7 @@ namespace Application.Common.Dtos
         public int TotalReviewTasks { get; set; }
         public int TotalDoneTasks { get; set; }
 
+        public IEnumerable<MemberPerformance> MemberPerformances { get; set; }
+
     }
 }

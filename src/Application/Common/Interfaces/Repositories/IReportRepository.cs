@@ -11,5 +11,6 @@ namespace Application.Common.Interfaces.Repositories
         Task<IEnumerable<TasksByPriorityReportDto>> GetProjectTasksReportByPriorityAsync(long projectId);
         Task<MemberPerformance> GetMemberPerformanceInWorkSpaceAsync(long workspaceId, string memberId);
         Task<MemberPerformance> GetMemberPerformanceInProjectAsync(long projectId, string memberId);
+        Task<WorkSpaceReportDto> GetWorkSpaceReportAsync(long workspaceId);
     }
 }
