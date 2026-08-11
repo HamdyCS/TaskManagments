@@ -6,7 +6,8 @@ namespace Api.Common.Origins
     {
         private static string[] _origins = new string[]
         {
-            "http://localhost:4200"
+            "http://localhost:4200",
+            "http://localhost:5173"
         };
 
         public static string[] GetOrigins()

@@ -1,3 +1,4 @@
+using Api.Common.Origins;
 using Api.Common.Servcies;
 using Api.ExceptionHandler;
 using Api.Hubs.Notification;
@@ -64,12 +65,25 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 
-
+//cors
+builder.Services.AddCors(opt=>
+{
+    opt.AddPolicy("AllowOrigins", builder =>
+    {
+        builder.WithOrigins(AllowOrigin.GetOrigins())
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials();
+    });
+   
+});
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+
+app.UseCors("AllowOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();
