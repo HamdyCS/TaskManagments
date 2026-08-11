@@ -29,7 +29,8 @@ namespace Application.Features.Auth.Commands.SendOtp
                 && lastOtp.OtpPurposeId == (byte)request.OtpPurpose)
             {
                 logger.LogWarning("Already sent otp");
-                return OtpErrors.OtpAlreadySent(request.SendOtpDto.Email);
+                //return OtpErrors.OtpAlreadySent(request.SendOtpDto.Email);
+                return true;
             }
 
             //create otp

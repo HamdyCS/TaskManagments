@@ -17,9 +17,6 @@ namespace Application.Features.Auth.Commands.ResendOtp
         {
             logger.LogInformation("Starting resend otp to user with email {Email}", request.ResendOtpDto.Email);
 
-            var otp = otpService.GenerateOtp();
-            var hashedOtp = otpService.HashOtp(otp);
-
             logger.LogInformation("Getting last otp has same purpose of user with email {Email}", request.ResendOtpDto.Email);
 
             var lastOtp = await cacheService.GetAsync<OtpDto>($"otp:{request.OtpPurpose}:{request.ResendOtpDto.Email}");
