@@ -53,7 +53,7 @@ namespace Application.Features.Users.Commands.RegisterNewUser
 
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(result.token));
 
-            var path = configuration["settings:frontendUrl"] + "?email=" + result.email + "&token=" + encodedToken;
+            var path = configuration["settings:frontendUrl"] + "/confirm-email?email=" + result.email + "&token=" + encodedToken;
             logger.LogInformation("User registered successfully email {email}", result.email);
 
             //add email to queue
