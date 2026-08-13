@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Application.Common.Dtos
 {
-    public class MemberPerformance
+    public class MemberPerformanceDto
     {
         public string Id { get; set; }
         public string Name { get; set; }

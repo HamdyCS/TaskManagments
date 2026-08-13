@@ -10,9 +10,9 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
     public class GetMemberPerformanceInWorkSpaceQueryHandler(
         IUnitOfWork unitOfWork,
         ICacheService cacheService,
-        ILogger<GetMemberPerformanceInWorkSpaceQueryHandler> logger) : IRequestHandler<GetMemberPerformanceInWorkSpaceQuery, ErrorOr<MemberPerformance>>
+        ILogger<GetMemberPerformanceInWorkSpaceQueryHandler> logger) : IRequestHandler<GetMemberPerformanceInWorkSpaceQuery, ErrorOr<MemberPerformanceDto>>
     {
-        public async Task<ErrorOr<MemberPerformance>> Handle(GetMemberPerformanceInWorkSpaceQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<MemberPerformanceDto>> Handle(GetMemberPerformanceInWorkSpaceQuery request, CancellationToken cancellationToken)
         {
             logger.LogInformation("Starting GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId} and memberId {MemberId}", request.WorkspaceId, request.MemberId);
 
@@ -22,7 +22,7 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
 
             var cacheKey = $"report:member-perf-ws:{request.WorkspaceId}:{request.MemberId}";
 
-            var cachedResult = await cacheService.GetAsync<MemberPerformance>(cacheKey);
+            var cachedResult = await cacheService.GetAsync<MemberPerformanceDto>(cacheKey);
             if (cachedResult is not null)
             {
                 logger.LogInformation("GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId} and memberId {MemberId} returned from cache", request.WorkspaceId, request.MemberId);

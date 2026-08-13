@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.Common.Interfaces.Channels;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
@@ -190,6 +191,7 @@ namespace Infrastructure
             services.AddScoped<ITaskAttachmentRepository, TaskAttachmentRepository>();
             services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IWorkSpaceDashboardRepository,WorkSpaceDashboardRepository>();
 
             return services;
         }

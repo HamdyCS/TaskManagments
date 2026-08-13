@@ -10,9 +10,9 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInProject
     public class GetMemberPerformanceInProjectQueryHandler(
         IUnitOfWork unitOfWork,
         ICacheService cacheService,
-        ILogger<GetMemberPerformanceInProjectQueryHandler> logger) : IRequestHandler<GetMemberPerformanceInProjectQuery, ErrorOr<MemberPerformance>>
+        ILogger<GetMemberPerformanceInProjectQueryHandler> logger) : IRequestHandler<GetMemberPerformanceInProjectQuery, ErrorOr<MemberPerformanceDto>>
     {
-        public async Task<ErrorOr<MemberPerformance>> Handle(GetMemberPerformanceInProjectQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<MemberPerformanceDto>> Handle(GetMemberPerformanceInProjectQuery request, CancellationToken cancellationToken)
         {
             logger.LogInformation("Starting GetMemberPerformanceInProject with projectId {ProjectId} and memberId {MemberId}", request.ProjectId, request.MemberId);
 
@@ -22,7 +22,7 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInProject
 
             var cacheKey = $"report:member-perf-proj:{request.ProjectId}:{request.MemberId}";
 
-            var cachedResult = await cacheService.GetAsync<MemberPerformance>(cacheKey);
+            var cachedResult = await cacheService.GetAsync<MemberPerformanceDto>(cacheKey);
             if (cachedResult is not null)
             {
                 logger.LogInformation("GetMemberPerformanceInProject with projectId {ProjectId} and memberId {MemberId} returned from cache", request.ProjectId, request.MemberId);

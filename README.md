@@ -270,6 +270,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | 8 | `TaskAttachmentsController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments` | `POST ""` · `GET ""` · `GET {attachmentId}` · `GET by-name/{name}` · `DELETE {attachmentId}` |
 | 9 | `ReportsController` | `/api/workspaces/{workSpaceId}/reports` | `GET projects/{projectId}/tasks-by-priority` · `GET projects/{projectId}/tasks-by-status` · `GET members/{memberId}/performance` · `GET projects/{projectId}/members/{memberId}/performance` · `GET ""` · `GET pdf` |
 | 10 | `NotificationsController` | `/api/notifications` | `GET {id}` · `GET all` · `GET all/unread` · `PUT {id}/read` |
+| 11 | `WorkSpaceUserDashboardController` | `/api/workspaces/{workspaceId}/dashboard` | `GET ""` |
 
 ---
 
@@ -398,6 +399,12 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | GET | `/api/notifications/all` | List my notifications |
 | GET | `/api/notifications/all/unread` | List my unread notifications |
 | PUT | `/api/notifications/{id}/read` | Mark a notification as read |
+
+#### WorkSpaceUserDashboardController — `/api/workspaces/{workspaceId}/dashboard`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/workspaces/{workspaceId}/dashboard` | Workspace dashboard (Admin/Owner/ProjectManager: full workspace; other members: user-specific) |
 
 ---
 
@@ -1059,6 +1066,47 @@ Mark a notification as read.
 
 ---
 
+### 11. Workspace User Dashboard — `/api/workspaces/{workspaceId}/dashboard`
+
+#### 11.1 GET `` 🔒
+Get a combined dashboard for the workspace:
+- **Admin, Owner, or ProjectManager:** returns the **full workspace** dashboard (stats, status/priority breakdowns, active tasks across the workspace).
+- **Other members:** returns a **user-specific** dashboard filtered to the current user's data.
+
+The dashboard is cached in Redis for **5 minutes** (key `WorkSpaceDashboard:{workspaceId}:{userId}`).
+
+**Response:** `200 OK` with a `WorkSpaceDashboardDto`:
+```json
+{
+  "workspace": { "id": 2, "name": "Acme Corp" },
+  "stats": {
+    "totalProjects": 4,
+    "totalTasks": 25,
+    "inProgressTasks": 4,
+    "completedTasks": 8,
+    "completionRate": 32.0
+  },
+  "tasksByStatusReportDtos": [ { "taskStatus": "Backlog", "count": 5 }, { "taskStatus": "Done", "count": 8 } ],
+  "tasksByPriorityReportDtos": [ { "taskPriority": "High", "count": 3 }, { "taskPriority": "Low", "count": 1 } ],
+  "activeTasks": [
+    {
+      "id": 100,
+      "name": "Design landing page",
+      "projectName": "Website Redesign",
+      "priority": "High",
+      "status": "InProgress",
+      "createdAt": "2026-01-15T08:00:00Z",
+      "deadLine": "2026-03-01T18:00:00Z"
+    }
+  ],
+  "unReadNotifications": [ /* NotificationDto items (max 10) */ ]
+}
+```
+
+For dashboard KPI/breakdown details, see also [9. Reports](#9-reports--apiworkspacesworkspaceidreports).
+
+---
+
 ## Pagination
 
 Any list endpoint accepts `PaginationRequestDto` via query string:
@@ -1127,7 +1175,7 @@ The server sends notifications either to a specific user (`Clients.User(userId)`
 TaskManagments/
 ├── src/
 │   ├── Api/                      # Presentation layer
-│   │   ├── Controllers/          # 10 API controllers
+│   │   ├── Controllers/          # 11 API controllers
 │   │   ├── Hubs/Notification/    # SignalR hub + client interface + service
 │   │   ├── Polices/WorkSpace/    # Authorization requirement handlers
 │   │   ├── Common/               # Extensions, origins, file URL service
@@ -1137,7 +1185,7 @@ TaskManagments/
 │   │   └── Features/             # Auth, Users, WorkSpaces, WorkSpaceUsers,
 │   │                             # WorkSpaceInvites, Projects, Tasks,
 │   │                             # TaskComments, TaskAttachments, Reports,
-│   │                             # Notifications
+│   │                             # Notifications, WorkSpaceUserDashboard
 │   ├── Domain/                   # Pure domain
 │   │   ├── Common/               # Enums, interfaces
 │   │   └── Entities/             # 11 entities

@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
 {
-    public sealed record GetMemberPerformanceInWorkSpaceQuery(long WorkspaceId, string MemberId) : IRequest<ErrorOr<MemberPerformance>>;
+    public sealed record GetMemberPerformanceInWorkSpaceQuery(long WorkspaceId, string MemberId) : IRequest<ErrorOr<MemberPerformanceDto>>;
 }

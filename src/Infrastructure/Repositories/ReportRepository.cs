@@ -38,14 +38,14 @@ namespace Infrastructure.Repositories
         }
 
 
-        public async Task<MemberPerformance> GetMemberPerformanceInWorkSpaceAsync(long workspaceId, string memberId)
+        public async Task<MemberPerformanceDto> GetMemberPerformanceInWorkSpaceAsync(long workspaceId, string memberId)
         {
 
             var memberPerformance = await appDbContext.TaskAssignments
               .Where(ta => ta.AssignedToId == memberId
               && ta.Task.Project.WorkSpaceId == workspaceId && ta.IsActive)
               .GroupBy(_ => 1)
-              .Select(g => new MemberPerformance
+              .Select(g => new MemberPerformanceDto
               {
                   Id = memberId,
                   Name = g.First().AssignedTo.FirstName + " " + g.First().AssignedTo.LastName,
@@ -54,15 +54,15 @@ namespace Infrastructure.Repositories
                   DoneCount = g.Count(ta => ta.Task.TaskStatus == ProjectTaskStatus.Done)
               }).FirstOrDefaultAsync();
 
-            return memberPerformance ?? new MemberPerformance { AssignedCount = 0, InProgressCount = 0, DoneCount = 0 };
+            return memberPerformance ?? new MemberPerformanceDto { AssignedCount = 0, InProgressCount = 0, DoneCount = 0 };
         }
 
-        public async Task<IEnumerable<MemberPerformance>> GetAllMemberPerformanceInWorkSpaceAsync(long workspaceId)
+        public async Task<IEnumerable<MemberPerformanceDto>> GetAllMemberPerformanceInWorkSpaceAsync(long workspaceId)
         {
 
             var memberPerformances = await appDbContext.WorkSpaceUsers
               .Where(wu => wu.WorkSpaceId == workspaceId)
-              .Select(wu => new MemberPerformance
+              .Select(wu => new MemberPerformanceDto
               {
                   Id = wu.UserId,
                   Name = wu.User.FirstName + " " + wu.User.LastName,
@@ -82,14 +82,14 @@ namespace Infrastructure.Repositories
             return memberPerformances;
         }
 
-        public async Task<MemberPerformance> GetMemberPerformanceInProjectAsync(long projectId, string memberId)
+        public async Task<MemberPerformanceDto> GetMemberPerformanceInProjectAsync(long projectId, string memberId)
         {
 
             var memberPerformance = await appDbContext.TaskAssignments
               .Where(ta => ta.AssignedToId == memberId
               && ta.Task.ProjectId == projectId && ta.IsActive)
               .GroupBy(_ => 1)
-              .Select(g => new MemberPerformance
+              .Select(g => new MemberPerformanceDto
               {
                   Id = g.First().AssignedToId,
                   Name = g.First().AssignedTo.FirstName + " " + g.First().AssignedTo.LastName,
@@ -98,7 +98,7 @@ namespace Infrastructure.Repositories
                   DoneCount = g.Count(ta => ta.Task.TaskStatus == ProjectTaskStatus.Done)
               }).FirstOrDefaultAsync();
 
-            return memberPerformance ?? new MemberPerformance { AssignedCount = 0, InProgressCount = 0, DoneCount = 0 };
+            return memberPerformance ?? new MemberPerformanceDto { AssignedCount = 0, InProgressCount = 0, DoneCount = 0 };
         }
 
         public async Task<WorkSpaceReportDto> GetWorkSpaceReportAsync(long workspaceId)
@@ -136,7 +136,7 @@ namespace Infrastructure.Repositories
                     TotalInProgressTasks = 0,
                     TotalReviewTasks = 0,
                     TotalDoneTasks = 0,
-                    MemberPerformances = new List<MemberPerformance>()
+                    MemberPerformances = new List<MemberPerformanceDto>()
                 };
             }
 
