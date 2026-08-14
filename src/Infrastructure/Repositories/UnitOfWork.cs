@@ -1,5 +1,4 @@
 using Application.Common.Exceptions;
-using Application.Common.Interfaces;
 using Application.Common.Interfaces.Repositories;
 using Infrastructure.common.Extensions;
 using Infrastructure.Persistence;
@@ -20,7 +19,7 @@ namespace Infrastructure.Repositories
             , IProjectRepository projectRepository, ITaskRepository taskRepository
             , ITaskAssignmentRepository taskAssignmentRepository, ITaskAttachmentRepository taskAttachmentRepository
             , ITaskCommentRepository taskCommentRepository, IReportRepository reportRepository, 
-            IWorkSpaceDashboardRepository workSpaceDashboardRepository)
+            IDashboardRepository dashboardRepository)
         {
             this.context = context;
             this.UserRepository = userRepository;
@@ -35,7 +34,7 @@ namespace Infrastructure.Repositories
             this.TaskAttachmentRepository = taskAttachmentRepository;
             this.TaskCommentRepository = taskCommentRepository;
             this.ReportRepository = reportRepository;
-            this.WorkSpaceDashboardRepository = workSpaceDashboardRepository;
+            this.DashboardRepository = dashboardRepository;
         }
 
         public IUserRepository UserRepository { get; private set; }
@@ -61,7 +60,7 @@ namespace Infrastructure.Repositories
         public ITaskCommentRepository TaskCommentRepository { get; private set; }
 
         public IReportRepository ReportRepository { get; private set; }
-        public IWorkSpaceDashboardRepository WorkSpaceDashboardRepository { get; private set; }
+        public IDashboardRepository DashboardRepository { get; private set; }
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {

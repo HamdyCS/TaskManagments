@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Common.Dtos.WorkSpaceUserDashboard
+namespace Application.Common.Dtos.Dashboard
 {
-    public class WorkSpaceDashboardStatsDto
+    public class DashboardStatsDto
     {
         public int TotalProjects { get; set; }
 

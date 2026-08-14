@@ -1,4 +1,4 @@
-using Application.Common.Dtos.WorkSpaceUserDashboard;
+using Application.Common.Dtos.Dashboard;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Features.Notifications.Command.GetAllUnReadUserNotifications;
@@ -7,18 +7,18 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Features.WorkSpaceUserDashboard.Queries.GetWorkSpaceUserDashboard
+namespace Application.Features.Dashboard.Queries.GetDashboard
 {
-    public class GetWorkSpaceUserDashboardQueryHandler(IUnitOfWork unitOfWork,
+    public class GetDashboardQueryHandler(IUnitOfWork unitOfWork,
         IMediator mediator,ICacheService cacheService,
-        ILogger<GetWorkSpaceUserDashboardQueryHandler> logger) : IRequestHandler<GetWorkSpaceUserDashboardQuery, ErrorOr<WorkSpaceDashboardDto>>
+        ILogger<GetDashboardQueryHandler> logger) : IRequestHandler<GetDashboardQuery, ErrorOr<DashboardDto>>
     {
-        public async Task<ErrorOr<WorkSpaceDashboardDto>> Handle(GetWorkSpaceUserDashboardQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<DashboardDto>> Handle(GetDashboardQuery request, CancellationToken cancellationToken)
         {
             var userId = request.UserId;
             var workspaceId = request.WorkSpaceId;
             var specificallyForThisUser = request.SpecificallyForThisUser;
-            WorkSpaceDashboardDto workSpaceDashboardDto;
+            DashboardDto dashboardDto;
 
             logger.LogInformation("Starting get workspace user dashboard for user with id {UserId} in workspace with id {WorkSpaceId}", userId, workspaceId);
 
@@ -26,20 +26,20 @@ namespace Application.Features.WorkSpaceUserDashboard.Queries.GetWorkSpaceUserDa
 
             //check if workspace dashboard is cached for user
             var cacheKey = $"WorkSpaceDashboard:{workspaceId}:{userId}";
-            var workSpaceDashboardCached = await cacheService.GetAsync<WorkSpaceDashboardDto>(cacheKey);
+            var workSpaceDashboardCached = await cacheService.GetAsync<DashboardDto>(cacheKey);
             if (workSpaceDashboardCached != null)
             {
-                workSpaceDashboardDto = workSpaceDashboardCached;
+                dashboardDto = workSpaceDashboardCached;
             }
             else
             {
                 //get workspace dashboard for user
-                workSpaceDashboardDto =
+                dashboardDto =
                     specificallyForThisUser ?
-                    await unitOfWork.WorkSpaceDashboardRepository.GetWorkSpaceDashboardByUserIdAsync(workspaceId, userId) :
-                    await unitOfWork.WorkSpaceDashboardRepository.GetWorkSpaceDashboardAsync(workspaceId);
+                    await unitOfWork.DashboardRepository.GetWorkSpaceDashboardByUserIdAsync(workspaceId, userId) :
+                    await unitOfWork.DashboardRepository.GetWorkSpaceDashboardAsync(workspaceId);
                 //cache workspace dashboard for user
-                await cacheService.SetAsync(cacheKey, workSpaceDashboardDto, TimeSpan.FromMinutes(5));
+                await cacheService.SetAsync(cacheKey, dashboardDto, TimeSpan.FromMinutes(5));
             }
 
             
@@ -48,12 +48,12 @@ namespace Application.Features.WorkSpaceUserDashboard.Queries.GetWorkSpaceUserDa
                 new Common.Dtos.PaginationRequestDto { PageNumber = 1, PageSize = 10 }));
 
 
-            workSpaceDashboardDto.UnReadNotifications = unReadNotificationResult.Value.Data;
+            dashboardDto.UnReadNotifications = unReadNotificationResult.Value.Data;
 
 
             logger.LogInformation("Get workspace user dashboard for user with id {UserId} in workspace with id {WorkSpaceId} successfully", userId, workspaceId);
 
-            return workSpaceDashboardDto;
+            return dashboardDto;
 
         }
     }

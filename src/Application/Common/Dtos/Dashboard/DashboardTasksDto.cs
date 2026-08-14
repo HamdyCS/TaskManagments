@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Common.Dtos.WorkSpaceDashboard
+namespace Application.Common.Dtos.Dashboard
 {
-    public class WorkSpaceTaskDashboardDto
+    public class DashboardTasksDto
     {
         public long Id { get; set; }
 

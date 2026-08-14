@@ -1,4 +1,4 @@
-﻿using Application.Features.WorkSpaceUserDashboard.Queries.GetWorkSpaceUserDashboard;
+﻿using Application.Features.Dashboard.Queries.GetDashboard;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +6,7 @@ namespace Api.Controllers
 {
     [Route("api/workspaces/{workspaceId}/dashboard")]
     [ApiController]
-    public class WorkSpaceUserDashboardController(IAuthorizationService authorizationService
+    public class DashboardController(IAuthorizationService authorizationService
         , IMediator mediator) : ControllerBase
     {
         public async Task<bool> IsOwnerOrProjectManagerAsync(long workspaceId)
@@ -58,7 +58,7 @@ namespace Api.Controllers
             }
 
             var result = await mediator.
-                Send(new GetWorkSpaceUserDashboardQuery(userId, workspaceId, 
+                Send(new GetDashboardQuery(userId, workspaceId, 
                 !isOwnerOrProjectManager));
           
             return result.Match(

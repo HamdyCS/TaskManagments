@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Common.Dtos.WorkSpaceUserDashboard
+namespace Application.Common.Dtos.Dashboard
 {
-    public class WorkSpaceDashboardSummaryDto
+    public class DashboardSummaryDto
     {
         public long Id { get; set; }
 

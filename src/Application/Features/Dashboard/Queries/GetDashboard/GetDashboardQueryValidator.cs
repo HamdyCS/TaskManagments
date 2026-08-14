@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.Features.WorkSpaceUserDashboard.Queries.GetWorkSpaceUserDashboard
+namespace Application.Features.Dashboard.Queries.GetDashboard
 {
-    public class GetWorkSpaceUserDashboardQueryValidator : AbstractValidator<GetWorkSpaceUserDashboardQuery>
+    public class GetDashboardQueryValidator : AbstractValidator<GetDashboardQuery>
     {
-        public GetWorkSpaceUserDashboardQueryValidator()
+        public GetDashboardQueryValidator()
         {
             RuleFor(p => p.UserId)
                 .NotEmpty().WithMessage("UserId is required.");

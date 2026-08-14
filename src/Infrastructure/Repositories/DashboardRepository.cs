@@ -1,7 +1,6 @@
 ﻿using Application.Common.Dtos;
-using Application.Common.Dtos.WorkSpaceDashboard;
-using Application.Common.Dtos.WorkSpaceUserDashboard;
-using Application.Common.Interfaces;
+using Application.Common.Dtos.Dashboard;
+using Application.Common.Interfaces.Repositories;
 using Domain.Common.Enums;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -11,21 +10,21 @@ using System.Text;
 
 namespace Infrastructure.Repositories
 {
-    public class WorkSpaceDashboardRepository(AppDbContext appDbContext) : IWorkSpaceDashboardRepository
+    public class DashboardRepository(AppDbContext appDbContext) : IDashboardRepository
     {
-        public async Task<WorkSpaceDashboardDto> GetWorkSpaceDashboardAsync(long workspaceId)
+        public async Task<DashboardDto> GetWorkSpaceDashboardAsync(long workspaceId)
         {
             var workspaceDashboardDto = await appDbContext.WorkSpaces
                 .Where(w => w.Id == workspaceId)
-                .Select(w => new WorkSpaceDashboardDto
+                .Select(w => new DashboardDto
                 {
-                    Workspace = new WorkSpaceDashboardSummaryDto
+                    Workspace = new DashboardSummaryDto
                     {
                         Id = w.Id,
                         Name = w.Name,
                     },
 
-                    Stats = new WorkSpaceDashboardStatsDto
+                    Stats = new DashboardStatsDto
                     {
                         TotalTasks = w.Projects
                             .SelectMany(p => p.Tasks)
@@ -76,7 +75,7 @@ namespace Infrastructure.Repositories
                     ActiveTasks = w.Projects
                         .SelectMany(p => p.Tasks)
                         .Where(t => t.TaskStatus != ProjectTaskStatus.Done)
-                        .Select(t => new WorkSpaceTaskDashboardDto
+                        .Select(t => new DashboardTasksDto
                         {
                             Id = t.Id,
                             Name = t.Name,
@@ -92,14 +91,14 @@ namespace Infrastructure.Repositories
 
             if (workspaceDashboardDto is null)
             {
-                return new WorkSpaceDashboardDto
+                return new DashboardDto
                 {
-                    Workspace = new WorkSpaceDashboardSummaryDto
+                    Workspace = new DashboardSummaryDto
                     {
                         Id = workspaceId,
                         Name = string.Empty
                     },
-                    Stats = new WorkSpaceDashboardStatsDto
+                    Stats = new DashboardStatsDto
                     {
                         TotalTasks = 0,
                         CompletedTasks = 0,
@@ -109,25 +108,25 @@ namespace Infrastructure.Repositories
                     },
                     TasksByStatusReportDtos = new List<TasksByStatusReportDto>(),
                     TasksByPriorityReportDtos = new List<TasksByPriorityReportDto>(),
-                    ActiveTasks = new List<WorkSpaceTaskDashboardDto>()
+                    ActiveTasks = new List<DashboardTasksDto>()
                 };
             }
             return workspaceDashboardDto;
         }
-        public async Task<WorkSpaceDashboardDto> GetWorkSpaceDashboardByUserIdAsync(long workspaceId, string userId)
+        public async Task<DashboardDto> GetWorkSpaceDashboardByUserIdAsync(long workspaceId, string userId)
         {
             var workspaceDashboardDto = await appDbContext.WorkSpaces
         .AsNoTracking()
         .Where(w => w.Id == workspaceId)
-        .Select(w => new WorkSpaceDashboardDto
+        .Select(w => new DashboardDto
         {
-            Workspace = new WorkSpaceDashboardSummaryDto
+            Workspace = new DashboardSummaryDto
             {
                 Id = w.Id,
                 Name = w.Name,
             },
 
-            Stats = new WorkSpaceDashboardStatsDto
+            Stats = new DashboardStatsDto
             {
                 TotalTasks = w.Projects
                     .SelectMany(p => p.Tasks).Where(t => t.TaskAssignments.Any(ta => ta.AssignedToId == userId &&
@@ -191,7 +190,7 @@ namespace Infrastructure.Repositories
                 .Where(t => t.TaskAssignments.Any(ta => 
                 ta.AssignedToId == userId && ta.IsActive) &&
                  t.TaskStatus != ProjectTaskStatus.Done)
-                .Select(t => new WorkSpaceTaskDashboardDto
+                .Select(t => new DashboardTasksDto
                 {
                     Id = t.Id,
                     Name = t.Name,
@@ -207,14 +206,14 @@ namespace Infrastructure.Repositories
 
             if (workspaceDashboardDto is null)
             {
-                return new WorkSpaceDashboardDto
+                return new DashboardDto
                 {
-                    Workspace = new WorkSpaceDashboardSummaryDto
+                    Workspace = new DashboardSummaryDto
                     {
                         Id = workspaceId,
                         Name = string.Empty
                     },
-                    Stats = new WorkSpaceDashboardStatsDto
+                    Stats = new DashboardStatsDto
                     {
                         TotalTasks = 0,
                         CompletedTasks = 0,
@@ -224,7 +223,7 @@ namespace Infrastructure.Repositories
                     },
                     TasksByStatusReportDtos = new List<TasksByStatusReportDto>(),
                     TasksByPriorityReportDtos = new List<TasksByPriorityReportDto>(),
-                    ActiveTasks = new List<WorkSpaceTaskDashboardDto>()
+                    ActiveTasks = new List<DashboardTasksDto>()
                 };
             }
             return workspaceDashboardDto;

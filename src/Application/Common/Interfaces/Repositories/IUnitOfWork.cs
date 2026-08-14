@@ -19,7 +19,7 @@ namespace Application.Common.Interfaces.Repositories
         ITaskCommentRepository TaskCommentRepository { get; }
         IReportRepository ReportRepository { get; }
 
-        IWorkSpaceDashboardRepository WorkSpaceDashboardRepository { get; }
+        IDashboardRepository DashboardRepository { get; }
 
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
