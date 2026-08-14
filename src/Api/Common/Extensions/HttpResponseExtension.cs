@@ -16,9 +16,11 @@ namespace Api.Common.Extensions
 
         public static HttpResponse RemoveAuthInfoFromCookie(this HttpResponse httpResponse)
         {
+            var cookieOptions = CreateCookieOptions();
 
-            httpResponse.Cookies.Delete("access_token");
-            httpResponse.Cookies.Delete("refresh_token");
+
+            httpResponse.Cookies.Delete("access_token",cookieOptions);
+            httpResponse.Cookies.Delete("refresh_token",cookieOptions);
 
             return httpResponse;
         }
