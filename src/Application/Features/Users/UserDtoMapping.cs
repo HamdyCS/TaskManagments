@@ -1,3 +1,4 @@
+using Domain.Common.Enums;
 using Domain.Entities;
 using Mapster;
 using System;
@@ -11,7 +12,8 @@ namespace Application.Features.Users
         public void Register(TypeAdapterConfig config)
         {
             //user to userDto
-            config.NewConfig<User, UserDto>();
+            config.NewConfig<User, UserDto>()
+                .Map(src => src.Role, dest => (Role)dest.RoleId);
 
             //userDto to user
             config.NewConfig<UserDto, User>()
