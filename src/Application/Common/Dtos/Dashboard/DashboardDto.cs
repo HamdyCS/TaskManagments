@@ -20,7 +20,7 @@ namespace Application.Common.Dtos.Dashboard
         public IEnumerable<TasksByPriorityReportDto> TasksByPriorityReportDtos { get; set; }
 
         // Current user's tasks
-        public IEnumerable<DashboardTasksDto> ActiveTasks { get; set; }
+        public IEnumerable<DashboardTasksDto> LatestActiveTasks { get; set; }
 
         // Un read notifications
         public IEnumerable<NotificationDto> UnReadNotifications { get; set; }

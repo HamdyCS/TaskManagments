@@ -72,9 +72,10 @@ namespace Infrastructure.Repositories
                         })
                         .ToList(),
 
-                    ActiveTasks = w.Projects
+                    LatestActiveTasks = w.Projects
                         .SelectMany(p => p.Tasks)
-                        .Where(t => t.TaskStatus != ProjectTaskStatus.Done)
+                        .Where(t => t.TaskStatus != ProjectTaskStatus.Done).OrderByDescending(t => t.CreatedAt)
+                        .Take(10)
                         .Select(t => new DashboardTasksDto
                         {
                             Id = t.Id,
@@ -108,7 +109,7 @@ namespace Infrastructure.Repositories
                     },
                     TasksByStatusReportDtos = new List<TasksByStatusReportDto>(),
                     TasksByPriorityReportDtos = new List<TasksByPriorityReportDto>(),
-                    ActiveTasks = new List<DashboardTasksDto>()
+                    LatestActiveTasks = new List<DashboardTasksDto>()
                 };
             }
             return workspaceDashboardDto;
@@ -185,11 +186,11 @@ namespace Infrastructure.Repositories
                 })
                 .ToList(),
 
-            ActiveTasks = w.Projects
+            LatestActiveTasks = w.Projects
                 .SelectMany(p => p.Tasks)
                 .Where(t => t.TaskAssignments.Any(ta => 
                 ta.AssignedToId == userId && ta.IsActive) &&
-                 t.TaskStatus != ProjectTaskStatus.Done)
+                 t.TaskStatus != ProjectTaskStatus.Done).OrderByDescending(t => t.CreatedAt).Take(10)
                 .Select(t => new DashboardTasksDto
                 {
                     Id = t.Id,
@@ -199,8 +200,7 @@ namespace Infrastructure.Repositories
                     Priority = t.TaskPriority,
                     CreatedAt = t.CreatedAt,
                     DeadLine = t.Deadline
-                })
-                .ToList()
+                }).ToList()
         })
         .FirstOrDefaultAsync();
 
@@ -223,7 +223,7 @@ namespace Infrastructure.Repositories
                     },
                     TasksByStatusReportDtos = new List<TasksByStatusReportDto>(),
                     TasksByPriorityReportDtos = new List<TasksByPriorityReportDto>(),
-                    ActiveTasks = new List<DashboardTasksDto>()
+                    LatestActiveTasks = new List<DashboardTasksDto>()
                 };
             }
             return workspaceDashboardDto;
