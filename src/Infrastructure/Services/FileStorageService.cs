@@ -36,5 +36,15 @@ namespace Infrastructure.Services
             }
 
         }
+
+        public async Task<Stream> GetFileAsync (string relativePath, CancellationToken ct = default)
+        {
+            var filePath = Path.Combine(_uploadsFolder, Path.GetFileName(relativePath));
+
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException("File not found");
+
+            return new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, true);
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace Application.Common.Extensions
            var dto = new TaskAttachmentDto(
                 taskAttachment.Id,
                 taskAttachment.Name,
-                fileUrlService.GetUrl(taskAttachment.Path),
+                fileUrlService.GetUrl(taskAttachment.StorageKey),
                 taskAttachment.CreatedAt
             );
             return dto;

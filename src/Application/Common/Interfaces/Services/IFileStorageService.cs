@@ -4,5 +4,6 @@ namespace Application.Common.Interfaces.Services
     {
         Task<string> SaveFileAsync(Stream stream, string extension, CancellationToken ct = default);
         Task DeleteFileAsync(string relativeUrl, CancellationToken ct = default);
+        Task<Stream> GetFileAsync(string relativePath, CancellationToken ct = default);
     }
 }

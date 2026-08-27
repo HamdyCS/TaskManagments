@@ -9,7 +9,7 @@ namespace Application.Features.TaskAttachments
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<TaskAttachment, TaskAttachmentDto>()
-                .Map(dest => dest.Url, src => src.Path);
+                .Map(dest => dest.Url, src => src.StorageKey);
         }
     }
 }

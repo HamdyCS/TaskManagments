@@ -1,6 +1,7 @@
 using Application.Features.TaskAttachments;
 using Application.Features.TaskAttachments.Commands.DeleteAttachment;
 using Application.Features.TaskAttachments.Commands.UploadAttachment;
+using Application.Features.TaskAttachments.Queries.DownloadAttachmentById;
 using Application.Features.TaskAttachments.Queries.GetAttachmentById;
 using Application.Features.TaskAttachments.Queries.GetAttachmentByName;
 using Application.Features.TaskAttachments.Queries.GetAttachmentsByTaskId;
@@ -88,6 +89,7 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
+
         [HttpGet("by-name/{name}", Name = "GetAttachmentByName")]
         public async Task<IActionResult> GetAttachmentByName(
             [FromRoute] long workspaceId,
@@ -102,6 +104,23 @@ namespace Api.Controllers
 
             return result.Match<IActionResult>(
                 value => Ok(value),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpGet("{attachmentId}/download", Name = "DownloadAttachmentById")]
+        public async Task<IActionResult> DownloadAttachmentById(
+           [FromRoute] long workspaceId,
+           [FromRoute] long projectId,
+           [FromRoute] long taskId,
+           [FromRoute] long attachmentId)
+        {
+            var isWorkSpaceUser = await _IsWorkSpaceUserAsync(workspaceId);
+            if (!isWorkSpaceUser) return Forbid();
+
+            var result = await mediator.Send(new DownloadAttachmentByIdQuery(workspaceId, projectId, taskId, attachmentId));
+
+            return result.Match<IActionResult>(
+                value => File(value.FileStream, value.ContentType, value.FileName),
                 errors => errors.ToProblemDetailsObjectResult());
         }
 

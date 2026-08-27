@@ -9,7 +9,9 @@ namespace Domain.Entities
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public string Path { get; set; }
+        public string StorageKey { get; set; }
+        public decimal Size { get; set; }
+        public string ContentType { get; set; }
         public long TaskId { get; set; }
         public string CreatedById { get; set; }
         public DateTime CreatedAt { get; set; }

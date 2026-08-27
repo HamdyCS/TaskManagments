@@ -14,7 +14,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(ta => ta.Id).ValueGeneratedOnAdd();
 
             builder.Property(ta => ta.Name).IsRequired().HasMaxLength(255);
-            builder.Property(ta => ta.Path).IsRequired().HasMaxLength(2083); // الطول القياسي للـ URLs
+            builder.Property(ta => ta.StorageKey).IsRequired().HasMaxLength(2083); // الطول القياسي للـ URLs
             builder.Property(ta => ta.CreatedAt).HasDefaultValueSql("GETDATE()");
 
             builder.HasOne(ta => ta.CreatedBy)

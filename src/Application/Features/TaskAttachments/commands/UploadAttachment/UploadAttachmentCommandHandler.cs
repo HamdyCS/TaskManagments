@@ -44,10 +44,10 @@ namespace Application.Features.TaskAttachments.Commands.UploadAttachment
                 return TaskAttachmentErrors.TaskNotFound(request.TaskId);
 
             // Save file to disk
-            string relativeUrl;
+            string storageKey;
             try
             {
-                relativeUrl = await fileStorageService.SaveFileAsync(stream, extension, cancellationToken);
+                storageKey = await fileStorageService.SaveFileAsync(stream, extension, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -59,10 +59,12 @@ namespace Application.Features.TaskAttachments.Commands.UploadAttachment
             var attachment = new TaskAttachment
             {
                 Name = Path.GetFileNameWithoutExtension(file.FileName),
-                Path = relativeUrl,
+                StorageKey = storageKey,
                 TaskId = request.TaskId,
                 CreatedById = request.UserId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Size = stream.Length,
+                ContentType = file.ContentType,
             };
 
             unitOfWork.TaskAttachmentRepository.Add(attachment);
@@ -74,11 +76,11 @@ namespace Application.Features.TaskAttachments.Commands.UploadAttachment
                 // Best-effort cleanup: delete the orphaned file
                 try
                 {
-                    await fileStorageService.DeleteFileAsync(relativeUrl, cancellationToken);
+                    await fileStorageService.DeleteFileAsync(storageKey, cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Failed to cleanup orphaned file {Url} after database save failure", relativeUrl);
+                    logger.LogWarning(ex, "Failed to cleanup orphaned file {Url} after database save failure", storageKey);
                 }
 
                 logger.LogWarning("Failed to save attachment metadata for task {TaskId} by user with id {UserId}", request.TaskId, request.UserId);

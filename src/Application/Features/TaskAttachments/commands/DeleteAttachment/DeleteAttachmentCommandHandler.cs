@@ -26,11 +26,11 @@ namespace Application.Features.TaskAttachments.Commands.DeleteAttachment
             // Delete physical file first
             try
             {
-                await fileStorageService.DeleteFileAsync(attachment.Path, cancellationToken);
+                await fileStorageService.DeleteFileAsync(attachment.StorageKey, cancellationToken);
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to delete file {Url} for attachment {AttachmentId}", attachment.Path, request.AttachmentId);
+                logger.LogWarning(ex, "Failed to delete file {Url} for attachment {AttachmentId}", attachment.StorageKey, request.AttachmentId);
                 return TaskAttachmentErrors.FileDeleteFailed();
             }
 
