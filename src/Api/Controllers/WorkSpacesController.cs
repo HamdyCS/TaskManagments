@@ -6,8 +6,10 @@ using Application.Features.WorkSpaces.commands.GetAllUserWorkSpaces;
 using Application.Features.WorkSpaces.commands.GetAllWorkSpaces;
 using Application.Features.WorkSpaces.commands.GetWorkSpaceById;
 using Application.Features.WorkSpaces.commands.UpdateWorkSpace;
+using Application.Features.WorkSpaces.Queries.GetUserWorkSpaceRole;
 using Application.Features.WorkSpaceUsers;
 using Application.Features.WorkSpaceUsers.queries.GetAllWorkSpaceUsers;
+using Domain.Common.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -69,21 +71,41 @@ namespace Api.Controllers
 
 
         [HttpGet("{id}/all-users", Name = "GetAllWorkSpaceUsers")]
-        public async Task<ActionResult<PaginationResultDto<WorkSpaceUserDto>>> GetAllWorkSpaceUsers([FromRoute] long id,[FromQuery] PaginationRequestDto paginationRequestDto)
+        public async Task<ActionResult<PaginationResultDto<WorkSpaceUserDto>>> GetAllWorkSpaceUsers([FromRoute] long id, [FromQuery] PaginationRequestDto paginationRequestDto)
         {
             //check if user is admin
             var isAdmin = User.IsInRole(nameof(Role.Admin));
             if (!isAdmin)
             {
                 //check if user is in workSpace
-               var isInWorkSpaceUsers = await authorizationService.AuthorizeAsync(User, id, "WorkSpaceUser");
+                var isInWorkSpaceUsers = await authorizationService.AuthorizeAsync(User, id, "WorkSpaceUser");
                 if (!isInWorkSpaceUsers.Succeeded)
                     return Forbid();
             }
 
-           var result = await mediator.Send(new GetAllWorkSpaceUsersQuery(id, paginationRequestDto));
+            var result = await mediator.Send(new GetAllWorkSpaceUsersQuery(id, paginationRequestDto));
 
             return result.Match(value => Ok(value),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+
+        [HttpGet("{id}/my-role", Name = "GetUserWorkSpaceRole")]
+        public async Task<IActionResult> GetUserWorkSpaceRole([FromRoute] long id)
+        {
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+
+            var authorizationResult = await authorizationService.AuthorizeAsync(User, id, "WorkSpaceUser");
+            if (!authorizationResult.Succeeded)
+                return Forbid();
+
+
+            var result = await mediator.Send(new GetUserWorkSpaceRoleQuery(id, userId));
+
+            return result.Match<IActionResult>(value => Ok(value),
                 errors => errors.ToProblemDetailsObjectResult());
         }
 

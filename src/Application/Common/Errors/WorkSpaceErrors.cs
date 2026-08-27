@@ -27,5 +27,8 @@ namespace Application.Common.Errors
 
         public static Error UserAlreadyInWorkspaceByEmail(string email, long workSpaceId)
            => Error.Conflict("WorkSpace_UserAlreadyInWorkspace", $"User with email {email} already in WorkSpace with id {workSpaceId}");
+
+        public static Error UserNotInWorkspace(string userId, long workSpaceId)
+            => Error.NotFound("WorkSpace_UserNotInWorkspace", $"User with id {userId} is not a member of WorkSpace with id {workSpaceId}");
     }
 }

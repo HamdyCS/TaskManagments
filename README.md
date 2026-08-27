@@ -262,7 +262,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 |---|------------|------------|------|
 | 1 | `AuthController` | `/api/auth` | `POST register-user` · `POST register-admin` · `POST confirm-email` · `POST login` · `POST refresh-token` · `POST logout` · `GET ""` · `PUT ""` · `POST forget-password/send-otp` · `POST forget-password/resend-otp` · `POST forget-password` · `POST reset-password/send-email` · `POST reset-password` · `POST change-email/send-email` · `POST change-email` · `POST delete-account/send-otp` · `POST delete-account/resend-otp` · `DELETE delete-account` · `GET login-user-with-google` · `GET login-user-by-provider-callback` |
 | 2 | `UsersController` | `/api/users` | `GET {id}` · `GET all` · `DELETE {id}` |
-| 3 | `WorkSpacesController` | `/api/workspaces` | `GET {id}` · `GET all` · `GET {id}/all-users` · `POST ""` · `PUT {id}` · `DELETE {id}` |
+| 3 | `WorkSpacesController` | `/api/workspaces` | `GET {id}` · `GET all` · `GET {id}/all-users` · `GET {id}/my-role` · `POST ""` · `PUT {id}` · `DELETE {id}` |
 | 4 | `WorkSpaceInvitesController` | `/api/workspace-invites` | `GET {id}` · `GET all-my-invites` · `GET all-my-send-invites` · `POST ""` · `DELETE {id}` · `PATCH {id}/accept` · `PATCH {id}/reject` |
 | 5 | `ProjectsController` | `/api/workspaces/{workspaceId}/projects` | `POST ""` · `GET {projectId}` · `GET ""` · `PUT {projectId}` · `PATCH {projectId}/status` · `DELETE {projectId}` |
 | 6 | `ProjectsTasksController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks` | `POST ""` · `GET {taskId}` · `GET {taskId}/me` · `GET ""` · `GET users/{userId}` · `GET me` · `PUT {taskId}` · `DELETE {taskId}` · `POST {taskId}/assignments` · `DELETE {taskId}/assignments/{assignedUserId}` · `PATCH {taskId}/status` · `PATCH {taskId}/me/status` |
@@ -316,6 +316,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | GET | `/api/workspaces/{id}` | Get a workspace by ID |
 | GET | `/api/workspaces/all` | List workspaces (Admin: all; user: mine) |
 | GET | `/api/workspaces/{id}/all-users` | List workspace members |
+| GET | `/api/workspaces/{id}/my-role` | Get my role in the workspace |
 | POST | `/api/workspaces` | Create a workspace |
 | PUT | `/api/workspaces/{id}` | Update a workspace (**Admin/Owner**) |
 | DELETE | `/api/workspaces/{id}` | Delete a workspace (**Admin/Owner**) |
@@ -607,7 +608,15 @@ List the members of a workspace. Accessible by **Admin** or any workspace member
 }
 ```
 
-#### 3.4 POST `/api/workspaces` 🔒
+#### 3.4 GET `/api/workspaces/{id}/my-role` 🔒
+Get the current user's role in a workspace. Accessible by **Admin** or any workspace member.
+
+**Response:** `200 OK` with a `WorkSpaceRole` string:
+```
+"Owner"
+```
+
+#### 3.5 POST `/api/workspaces` 🔒
 Create a workspace. The creator becomes its **Owner**.
 
 **Body:**
@@ -616,13 +625,13 @@ Create a workspace. The creator becomes its **Owner**.
 ```
 **Response:** `201 Created` with the `WorkSpaceDto` and a `Location` header to `GET /api/workspaces/{id}`.
 
-#### 3.5 PUT `/api/workspaces/{id}` 🔒 **Admin or Owner**
+#### 3.6 PUT `/api/workspaces/{id}` 🔒 **Admin or Owner**
 Update a workspace.
 
 **Body:** `{ "name": "Acme Corp 2", "description": "Updated" }`
 **Response:** `204 No Content`.
 
-#### 3.6 DELETE `/api/workspaces/{id}` 🔒 **Admin or Owner**
+#### 3.7 DELETE `/api/workspaces/{id}` 🔒 **Admin or Owner**
 Delete (soft-delete) a workspace.
 
 **Response:** `204 No Content`.
