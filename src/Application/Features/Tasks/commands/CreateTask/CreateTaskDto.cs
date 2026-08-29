@@ -7,5 +7,5 @@ namespace Application.Features.Tasks.Commands.CreateTask
         string? Description,
         DateTime? Deadline,
         TaskPriority Priority,
-        string AssignedUserId);
+        string? AssignedUserId);
 }
