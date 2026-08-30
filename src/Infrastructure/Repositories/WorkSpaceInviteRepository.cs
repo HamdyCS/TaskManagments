@@ -15,10 +15,11 @@ namespace Infrastructure.Repositories
     {
         public Task<PaginationResult<WorkSpaceInvite>> GetAllWorkSpaceInvitesByInviteToIdAsync(string inviteToId, int pageNumber, int pageSize)
             => GetAllByFilterAsync(wi => wi.InvitedToId == inviteToId
-            , pageNumber, pageSize, wi => wi.CreatedAt);
+            , pageNumber, pageSize, wi => wi.CreatedAt,false);
 
         public Task<PaginationResult<WorkSpaceInvite>> GetAllWorkSpaceInvitesByInviteByIdAsync(string inviteById, int pageNumber, int pageSize)
-           => GetAllByFilterAsync(wi => wi.InvitedById == inviteById, pageNumber, pageSize, wi => wi.CreatedAt);
+           => GetAllByFilterAsync(wi => wi.InvitedById == inviteById, pageNumber, pageSize, wi => 
+           wi.CreatedAt,false);
 
         public async Task<WorkSpaceInvite?> GetWorkSpaceInviteByIdAndInviteByIdAsync(long workSpaceInviteId, string inviteById)
             => await context.WorkSpaceInvites.FirstOrDefaultAsync(wi => wi.Id == workSpaceInviteId

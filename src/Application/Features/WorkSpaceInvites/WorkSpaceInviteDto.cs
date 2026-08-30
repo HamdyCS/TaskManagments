@@ -13,6 +13,8 @@ namespace Application.Features.WorkSpaceInvites
 
         public string InvitedToId { get; set; }
 
+        public string InvitedToEmail { get; set; }
+
         public string InvitedById { get; set; }
 
         public DateTime CreatedAt { get; set; }

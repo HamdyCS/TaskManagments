@@ -18,6 +18,7 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.WorkSpaceId).IsRequired(true);
             builder.Property(x => x.InvitedToId).IsRequired(true);
+            builder.Property(x => x.InvitedToEmail).IsRequired(true);
             builder.Property(x => x.InvitedById).IsRequired(true);
             builder.Property(x => x.CreatedAt).IsRequired(true);
             builder.Property(x => x.ExpiresAt).IsRequired(true);

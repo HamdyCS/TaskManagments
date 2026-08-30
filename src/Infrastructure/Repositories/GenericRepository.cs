@@ -86,14 +86,16 @@ namespace Infrastructure.Repositories
         }
 
         protected virtual async Task<PaginationResult<T>> GetAllByFilterAsync<TKey>(Expression<Func<T, bool>> predicate, int pageNumber = 1, int pageSize = 1,
-            Expression<Func<T, TKey>>? orderBy = null)
+            Expression<Func<T, TKey>>? orderBy = null,bool ascending = true)
         {
 
             //query
             var query = context.Set<T>().Where(predicate);
 
             //ordered query
-            var orderedQuery = orderBy == null ? query.OrderBy(x => x.Id) : query.OrderBy(orderBy);
+            var orderedQuery = orderBy == null ?
+                ascending ? query.OrderBy(x => x.Id) : query.OrderByDescending(x => x.Id) 
+                : ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
 
             var totalCount = await query.CountAsync();
             var data = await orderedQuery.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
