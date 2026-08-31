@@ -23,7 +23,9 @@ namespace Infrastructure.Repositories
 
         public async Task<PaginationResult<WorkSpaceUser>> GetWorkSpaceUsersAsync(long workSpaceId, int pageNumber, int pageSize)
         {
-            var query = context.WorkSpaceUsers.Include(wu => wu.User)
+            var query = context.WorkSpaceUsers
+                .Include(wu => wu.User).Include(wu => wu.WorkSpace).
+                ThenInclude(ws => ws.CreatedBy)
                 .Where(wu => wu.WorkSpaceId == workSpaceId).OrderBy(wu => wu.CreatedAt);
 
             var totalCount = await query.CountAsync();
