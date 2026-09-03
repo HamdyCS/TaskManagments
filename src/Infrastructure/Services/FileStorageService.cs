@@ -14,7 +14,7 @@ namespace Infrastructure.Services
                 Directory.CreateDirectory(_uploadsFolder);
         }
 
-        public async Task<string> SaveFileAsync(Stream stream, string extension, CancellationToken ct = default)
+        public async Task<string> SaveTaskAttachmentFileAsync(Stream stream, string extension, CancellationToken ct = default)
         {
             var storedFileName = $"{Guid.NewGuid()}{extension}";
             var filePath = Path.Combine(_uploadsFolder, storedFileName);
@@ -26,7 +26,7 @@ namespace Infrastructure.Services
             return $"uploads/task-attachments/{storedFileName}";
         }
 
-        public async Task DeleteFileAsync(string relativePath, CancellationToken ct = default)
+        public async Task DeleteTaskAttachmentFileAsync(string relativePath, CancellationToken ct = default)
         {
             var filePath = Path.Combine(_uploadsFolder, Path.GetFileName(relativePath));
 
@@ -37,7 +37,7 @@ namespace Infrastructure.Services
 
         }
 
-        public async Task<Stream> GetFileAsync (string relativePath, CancellationToken ct = default)
+        public async Task<Stream> GetTaskAttachmentFileAsync (string relativePath, CancellationToken ct = default)
         {
             var filePath = Path.Combine(_uploadsFolder, Path.GetFileName(relativePath));
 

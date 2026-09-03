@@ -26,7 +26,7 @@ namespace Application.Features.TaskAttachments.Commands.DeleteAttachment
             // Delete physical file first
             try
             {
-                await fileStorageService.DeleteFileAsync(attachment.StorageKey, cancellationToken);
+                await fileStorageService.DeleteTaskAttachmentFileAsync(attachment.StorageKey, cancellationToken);
             }
             catch (Exception ex)
             {

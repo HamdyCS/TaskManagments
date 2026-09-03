@@ -2,8 +2,8 @@ namespace Application.Common.Interfaces.Services
 {
     public interface IFileStorageService
     {
-        Task<string> SaveFileAsync(Stream stream, string extension, CancellationToken ct = default);
-        Task DeleteFileAsync(string relativeUrl, CancellationToken ct = default);
-        Task<Stream> GetFileAsync(string relativePath, CancellationToken ct = default);
+        Task<string> SaveTaskAttachmentFileAsync(Stream stream, string extension, CancellationToken ct = default);
+        Task DeleteTaskAttachmentFileAsync(string relativeUrl, CancellationToken ct = default);
+        Task<Stream> GetTaskAttachmentFileAsync(string relativePath, CancellationToken ct = default);
     }
 }

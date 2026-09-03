@@ -33,7 +33,7 @@ namespace Application.Features.TaskAttachments.Queries.DownloadAttachmentById
             var fileExtension = Path.GetExtension(attachment.StorageKey);
             var nameWithExtension = $"{attachment.Name}{fileExtension}";
 
-            var stream = await fileStorageService.GetFileAsync(attachment.StorageKey, cancellationToken);
+            var stream = await fileStorageService.GetTaskAttachmentFileAsync(attachment.StorageKey, cancellationToken);
             logger.LogInformation("Download attachment with id {AttachmentId} for task {TaskId} successfully", request.AttachmentId, request.TaskId);
             return new DownloadAttachmentResultDto(stream, nameWithExtension, attachment.ContentType);
         }

@@ -47,7 +47,7 @@ namespace Application.Features.TaskAttachments.Commands.UploadAttachment
             string storageKey;
             try
             {
-                storageKey = await fileStorageService.SaveFileAsync(stream, extension, cancellationToken);
+                storageKey = await fileStorageService.SaveTaskAttachmentFileAsync(stream, extension, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -76,7 +76,7 @@ namespace Application.Features.TaskAttachments.Commands.UploadAttachment
                 // Best-effort cleanup: delete the orphaned file
                 try
                 {
-                    await fileStorageService.DeleteFileAsync(storageKey, cancellationToken);
+                    await fileStorageService.DeleteTaskAttachmentFileAsync(storageKey, cancellationToken);
                 }
                 catch (Exception ex)
                 {
