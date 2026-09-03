@@ -267,10 +267,10 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | 5 | `ProjectsController` | `/api/workspaces/{workspaceId}/projects` | `POST ""` · `GET {projectId}` · `GET ""` · `PUT {projectId}` · `PATCH {projectId}/status` · `DELETE {projectId}` |
 | 6 | `ProjectsTasksController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks` | `POST ""` · `GET {taskId}` · `GET {taskId}/me` · `GET ""` · `GET users/{userId}` · `GET me` · `PUT {taskId}` · `DELETE {taskId}` · `POST {taskId}/assignments` · `DELETE {taskId}/assignments/{assignedUserId}` · `PATCH {taskId}/status` · `PATCH {taskId}/me/status` |
 | 7 | `TaskCommentsController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments` | `POST ""` · `GET ""` · `GET {commentId}` · `PUT {commentId}` · `DELETE {commentId}` |
-| 8 | `TaskAttachmentsController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments` | `POST ""` · `GET ""` · `GET {attachmentId}` · `GET by-name/{name}` · `DELETE {attachmentId}` |
-| 9 | `ReportsController` | `/api/workspaces/{workSpaceId}/reports` | `GET projects/{projectId}/tasks-by-priority` · `GET projects/{projectId}/tasks-by-status` · `GET members/{memberId}/performance` · `GET projects/{projectId}/members/{memberId}/performance` · `GET ""` · `GET pdf` |
+| 8 | `TaskAttachmentsController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments` | `POST ""` · `GET ""` · `GET {attachmentId}` · `GET by-name/{name}` · `GET {attachmentId}/download` · `DELETE {attachmentId}` |
+| 9 | `ReportsController` | `/api/workspaces/{workSpaceId}/reports` | `GET projects/{projectId}/tasks-by-priority` · `GET projects/{projectId}/tasks-by-status` · `GET members/{memberId}/performance` · `GET projects/{projectId}/members/{memberId}/performance` · `GET ""` · `GET pdf/download` |
 | 10 | `NotificationsController` | `/api/notifications` | `GET {id}` · `GET all` · `GET all/unread` · `PUT {id}/read` |
-| 11 | `WorkSpaceUserDashboardController` | `/api/workspaces/{workspaceId}/dashboard` | `GET ""` |
+| 11 | `DashboardController` | `/api/workspaces/{workspaceId}/dashboard` | `GET ""` |
 
 ---
 
@@ -379,6 +379,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments` | List task attachments |
 | GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/{attachmentId}` | Get attachment by ID |
 | GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/by-name/{name}` | Get attachment by file name |
+| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/{attachmentId}/download` | Download an attachment |
 | DELETE | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/{attachmentId}` | Delete an attachment (**Admin/Owner/ProjectManager**) |
 
 #### ReportsController — `/api/workspaces/{workSpaceId}/reports`
@@ -390,7 +391,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | GET | `/api/workspaces/{workSpaceId}/reports/members/{memberId}/performance` | Member performance in workspace (**Admin/Owner/ProjectManager**) |
 | GET | `/api/workspaces/{workSpaceId}/reports/projects/{projectId}/members/{memberId}/performance` | Member performance in project |
 | GET | `/api/workspaces/{workSpaceId}/reports` | Workspace overview report (**Admin/Owner/ProjectManager**) |
-| GET | `/api/workspaces/{workSpaceId}/reports/pdf` | Download workspace report PDF (**Admin/Owner/ProjectManager**) |
+| GET | `/api/workspaces/{workSpaceId}/reports/pdf/download` | Download workspace report PDF (**Admin/Owner/ProjectManager**) |
 
 #### NotificationsController — `/api/notifications`
 
@@ -958,7 +959,12 @@ Get an attachment by file name.
 
 **Response:** `200 OK` with a `TaskAttachmentDto`.
 
-#### 8.5 DELETE `/{attachmentId}` 🔒 *Admin/Owner/ProjectManager*
+#### 8.5 GET `/{attachmentId}/download` 🔒
+Download an attachment file.
+
+**Response:** `200 OK` — file stream with the appropriate content type.
+
+#### 8.6 DELETE `/{attachmentId}` 🔒 *Admin/Owner/ProjectManager*
 Delete an attachment.
 
 **Response:** `204 No Content`.
@@ -1028,7 +1034,7 @@ Full workspace overview report.
 }
 ```
 
-#### 9.6 GET `/pdf` 🔒 *Manage*
+#### 9.6 GET `/pdf/download` 🔒 *Manage*
 Download the workspace report as a PDF.
 
 **Response:** `200 OK` — `application/pdf` file named `workspace-report.pdf`.
