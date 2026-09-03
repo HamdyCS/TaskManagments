@@ -21,6 +21,7 @@ namespace Application.Common.Dtos
         public int TotalReviewTasks { get; set; }
         public int TotalDoneTasks { get; set; }
 
+        public double CompletionPercentage {  get; set; }
         public IEnumerable<MemberPerformanceDto> MemberPerformances { get; set; }
 
     }

@@ -11,9 +11,9 @@ namespace Application.Features.Reports.Queries.GetWorkSpaceReportPdf
         IPdfGeneratorService pdfGeneratorService,
         IUnitOfWork unitOfWork,
         ICacheService cacheService,
-        ILogger<GetWorkSpaceReportPdfQueryHandler> logger) : IRequestHandler<GetWorkSpaceReportPdfQuery, ErrorOr<Byte[]>>
+        ILogger<GetWorkSpaceReportPdfQueryHandler> logger) : IRequestHandler<GetWorkSpaceReportPdfQuery, ErrorOr<WorkSpaceReportPdfDto>>
     {
-        public async Task<ErrorOr<Byte[]>> Handle(GetWorkSpaceReportPdfQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<WorkSpaceReportPdfDto>> Handle(GetWorkSpaceReportPdfQuery request, CancellationToken cancellationToken)
         {
             logger.LogInformation("Starting GetWorkSpaceReportPdf with workspaceId {WorkspaceId}", request.WorkspaceId);
 
@@ -27,7 +27,8 @@ namespace Application.Features.Reports.Queries.GetWorkSpaceReportPdf
             if (cachedResult is not null)
             {
                 logger.LogInformation("GetWorkSpaceReport with workspaceId {WorkspaceId} returned from cache", request.WorkspaceId);
-                return pdfGeneratorService.GenerateWorkSpaceReportPdf(cachedResult);
+                var pdfBytesByCache = pdfGeneratorService.GenerateWorkSpaceReportPdf(cachedResult);
+                return new WorkSpaceReportPdfDto { PdfBytes = pdfBytesByCache, FileName = $"{workspace.Name}-report.pdf" };
             }
 
             var report = await unitOfWork.ReportRepository.GetWorkSpaceReportAsync(request.WorkspaceId);
@@ -37,7 +38,7 @@ namespace Application.Features.Reports.Queries.GetWorkSpaceReportPdf
 
             logger.LogInformation("GetWorkSpaceReportPdf with workspaceId {WorkspaceId} successfully", request.WorkspaceId);
 
-            return pdfBytes;
+            return new WorkSpaceReportPdfDto { PdfBytes = pdfBytes, FileName = $"{workspace.Name}-report.pdf" };
         }
     }
 }

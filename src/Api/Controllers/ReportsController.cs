@@ -120,8 +120,8 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
-        [HttpGet("pdf", Name = "GetWorkSpaceReportPdf")]
-        public async Task<IActionResult> GetWorkSpaceReportPdf([FromRoute] long workspaceId)
+        [HttpGet("pdf/download", Name = "DownloadWorkSpaceReportPdf")]
+        public async Task<IActionResult> DownloadWorkSpaceReportPdf([FromRoute] long workspaceId)
         {
             var hasPermission = await _IsAdminOrOwnerOrProductManagerAsync(workspaceId);
             if (!hasPermission)
@@ -129,7 +129,8 @@ namespace Api.Controllers
 
             var result = await mediator.Send(new GetWorkSpaceReportPdfQuery(workspaceId));
 
-            return result.Match<IActionResult>(value => File(value, "application/pdf", "workspace-report.pdf"),
+            return result.Match<IActionResult>(value => File(value.PdfBytes
+                , "application/pdf", value.FileName),
                 errors => errors.ToProblemDetailsObjectResult());
         }
     }

@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Application.Features.Reports.Queries.GetWorkSpaceReportPdf
 {
-    public sealed record GetWorkSpaceReportPdfQuery(long WorkspaceId) : IRequest<ErrorOr<Byte[]>>;
+    public sealed record GetWorkSpaceReportPdfQuery(long WorkspaceId) : IRequest<ErrorOr<WorkSpaceReportPdfDto>>;
 }

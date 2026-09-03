@@ -11,5 +11,7 @@ namespace Application.Common.Dtos
         public int AssignedCount { get; set; }
         public int InProgressCount { get; set; }
         public int DoneCount { get; set; }
+        public double CompletionPercentage { get; set; }
+
     }
 }
