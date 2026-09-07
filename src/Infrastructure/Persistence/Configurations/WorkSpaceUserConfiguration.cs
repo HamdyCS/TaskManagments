@@ -28,6 +28,7 @@ namespace Infrastructure.Persistence.Configurations
 
             //quey filter
             builder.HasQueryFilter(wu => !wu.WorkSpace.IsDeleted);
+            builder.HasQueryFilter(wu => !wu.User.IsDeleted);
         }
     }
 }

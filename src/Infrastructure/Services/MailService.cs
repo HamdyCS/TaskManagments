@@ -20,8 +20,6 @@ namespace Infrastructure.Services
             {
                 case OtpPurpose.ForgetPassword:
                     return "Forget Password";
-                case OtpPurpose.DeleteAccount:
-                    return "Delete Account";
                 default:
                     return "Unknown";
             }
@@ -156,6 +154,46 @@ namespace Infrastructure.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error on Send email {Email}, Error {error}", changeEmailContent.To, ex.Message);
+            }
+        }
+
+        public async Task SendDeleteAccountEmailAsync(DeleteAccountEmailContent deleteAccountEmailContent)
+        {
+            try
+            {
+                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Common/Templates", "DeleteAccountEmail.html");
+                string htmlTemplate = await System.IO.File.ReadAllTextAsync(filePath);
+
+                htmlTemplate = htmlTemplate.Replace("{UserName}", deleteAccountEmailContent.FullName);
+                htmlTemplate = htmlTemplate.Replace("{DeleteAccountLink}", deleteAccountEmailContent.Url);
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Task Managements", mailOptions.Email));
+                message.To.Add(new MailboxAddress("", deleteAccountEmailContent.To));
+                message.Subject = "Confirm Your Account Deletion";
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = htmlTemplate,
+                    TextBody = "Your Delete Account link is: " + deleteAccountEmailContent.Url,
+                };
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(mailOptions.Host, mailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
+
+                    await client.AuthenticateAsync(mailOptions.Email, mailOptions.AppPassword);
+
+                    await client.SendAsync(message);
+
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error on Send email {Email}, Error {error}", deleteAccountEmailContent.To, ex.Message);
             }
         }
 

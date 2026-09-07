@@ -161,6 +161,7 @@ namespace Infrastructure
             services.AddSingleton<IOtpEmailQueue, OtpEmailQueue>();
             services.AddSingleton<IResetPasswordEmailQueue, ResetPasswordEmailQueue>();
             services.AddSingleton<IChangeEmailQueue, ChangeEmailQueue>();
+            services.AddSingleton<IDeleteAccountEmailQueue, DeleteAccountEmailQueue>();
 
             return services;
         }
@@ -172,6 +173,7 @@ namespace Infrastructure
             services.AddHostedService<OtpEmailBgService>();
             services.AddHostedService<ResetPasswordEmailBgService>();
             services.AddHostedService<ChangeEmailBgService>();
+            services.AddHostedService<DeleteAccountEmailBgService>();
 
             return services;
         }

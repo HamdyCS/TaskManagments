@@ -41,6 +41,8 @@ namespace Application.Common.Interfaces.Repositories
         Task<string> GenerateChangeEmailTokenAsync(User user,string newEmail);
 
         Task<bool> ChangeEmailAsync(User user, string token, string newEmail);
+        Task<string> GenerateDeleteAccountTokenAsync(User user);
+        Task<bool> VerifyDeleteAccountTokenAsync(User user, string token);
         Task<bool> DeleteAsync(User user);
         Task<PaginationResult<User>> GetAllUsers(int pageNumber, int pageSize);
         Task<User?> GetOrCreateExternalUserAsync(Role roleOnCreate);

@@ -37,7 +37,7 @@ TaskManagments is a **RESTful, backend-only API** for organizing work into works
 - Real-time push notifications through a SignalR hub.
 - Workspace invitations with role assignment and expiry.
 - Analytical reports (tasks by status/priority, member performance) and **PDF** export.
-- Full authentication lifecycle: registration, email confirmation, login (JWT via cookies), Google OAuth, OTP verification, password reset, email change, and account deletion.
+- Full authentication lifecycle: registration, email confirmation, login (JWT via cookies), Google OAuth, OTP verification, password reset, email change, and account deletion with email token confirmation.
 
 > [!NOTE]
 > This project is an API only. A frontend client (e.g. Angular) is expected to consume it. The default base URL is `http://localhost:5102`.
@@ -49,7 +49,7 @@ TaskManagments is a **RESTful, backend-only API** for organizing work into works
 - **Workspaces & Projects** — Organize work into workspaces that contain multiple projects.
 - **Task Management** — Create, assign, track, and comment on tasks with priorities, statuses, and deadlines.
 - **Role-Based Access** — Workspace `Owner`, `ProjectManager`, and `Member` roles with granular, per-request authorization.
-- **Authentication** — JWT stored in HttpOnly cookies, Google OAuth, OTP for sensitive operations, email confirmation, password reset, and email change flows.
+- **Authentication** — JWT stored in HttpOnly cookies, Google OAuth, OTP for forget-password, email confirmation, password reset, email change, and account deletion with email token confirmation.
 - **Real-Time Notifications** — SignalR hub for live workspace notifications (task assigned, status changed, comments, invites).
 - **File Attachments** — Upload/download task attachments (`.pdf`, `.jpg`, `.jpeg`, `.png`, up to **50 MB**).
 - **Reporting** — Workspace overview report, tasks by status/priority, member performance, and a PDF report download.
@@ -134,7 +134,7 @@ All enums are serialized as **strings** in JSON (`JsonStringEnumConverter`).
 | `TaskPriority` | `Low`, `Medium`, `High`, `Critical` |
 | `WorkSpaceInviteStatus` | `Pending`, `Accepted`, `Rejected` |
 | `NotificationType` | `TaskAssigned`, `TaskUnassigned`, `TaskStatusUpdated`, `TaskUpdated`, `CommentAdded`, `DueDateReminder`, `TaskDeleted`, `WorkSpaceInvite` |
-| `OtpPurpose` | `ForgetPassword`, `DeleteAccount` |
+| `OtpPurpose` | `ForgetPassword` |
 | `Provider` | `Google` |
 
 > [!TIP]
@@ -260,7 +260,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 
 | # | Controller | Base route | APIs |
 |---|------------|------------|------|
-| 1 | `AuthController` | `/api/auth` | `POST register-user` · `POST register-admin` · `POST confirm-email` · `POST login` · `POST refresh-token` · `POST logout` · `GET ""` · `PUT ""` · `POST forget-password/send-otp` · `POST forget-password/resend-otp` · `POST forget-password` · `POST reset-password/send-email` · `POST reset-password` · `POST change-email/send-email` · `POST change-email` · `POST delete-account/send-otp` · `POST delete-account/resend-otp` · `DELETE delete-account` · `GET login-user-with-google` · `GET login-user-by-provider-callback` |
+| 1 | `AuthController` | `/api/auth` | `POST register-user` · `POST register-admin` · `POST confirm-email` · `POST login` · `POST refresh-token` · `POST logout` · `GET ""` · `PUT ""` · `POST forget-password/send-otp` · `POST forget-password/resend-otp` · `POST forget-password` · `POST reset-password/send-email` · `POST reset-password` · `POST change-email/send-email` · `POST change-email` · `POST delete-account/send-email` · `DELETE delete-account` · `GET login-user-with-google` · `GET login-user-by-provider-callback` |
 | 2 | `UsersController` | `/api/users` | `GET {id}` · `GET all` · `DELETE {id}` |
 | 3 | `WorkSpacesController` | `/api/workspaces` | `GET {id}` · `GET all` · `GET {id}/all-users` · `GET {id}/my-role` · `POST ""` · `PUT {id}` · `DELETE {id}` |
 | 4 | `WorkSpaceInvitesController` | `/api/workspace-invites` | `GET {id}` · `GET all-my-invites` · `GET all-my-send-invites` · `POST ""` · `DELETE {id}` · `PATCH {id}/accept` · `PATCH {id}/reject` |
@@ -295,9 +295,8 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | POST | `/api/auth/reset-password` | Reset password via emailed token |
 | POST | `/api/auth/change-email/send-email` | Send change-email confirmation |
 | POST | `/api/auth/change-email` | Confirm email change via token |
-| POST | `/api/auth/delete-account/send-otp` | Send delete-account OTP |
-| POST | `/api/auth/delete-account/resend-otp` | Resend delete-account OTP |
-| DELETE | `/api/auth/delete-account` | Permanently delete the account |
+| POST | `/api/auth/delete-account/send-email` | Send delete-account confirmation email |
+| DELETE | `/api/auth/delete-account` | Permanently delete the account via emailed token |
 | GET | `/api/auth/login-user-with-google` | Start Google OAuth login |
 | GET | `/api/auth/login-user-by-provider-callback` | OAuth callback, completes login |
 
@@ -522,30 +521,23 @@ Confirm the email change with the emailed token. **🔒**
 **Body:** `{ "token": "<changeToken>", "newEmail": "new@example.com" }`
 **Response:** `204 No Content`.
 
-#### 1.16 POST `/api/auth/delete-account/send-otp`
-Send an OTP for account deletion. **🔒**
+#### 1.16 POST `/api/auth/delete-account/send-email`
+Send a delete-account confirmation email with a token link. **🔒**
 
-**Body:** `{ "email": "john@example.com" }`
 **Response:** `204 No Content`.
 
-#### 1.17 POST `/api/auth/delete-account/resend-otp`
-Resend the delete-account OTP. **🔒**
+#### 1.17 DELETE `/api/auth/delete-account`
+Permanently delete the current user's account using the emailed token. **🔒**
 
-**Body:** `{ "email": "john@example.com" }`
-**Response:** `204 No Content`.
-
-#### 1.18 DELETE `/api/auth/delete-account`
-Permanently delete the current user's account using the OTP. **Anonymous (requires auth cookie).**
-
-**Body:** `{ "email": "john@example.com", "otp": "123456" }`
+**Body:** `{ "token": "<deleteToken>" }`
 **Response:** `204 No Content` — clears auth cookies.
 
-#### 1.19 GET `/api/auth/login-user-with-google?returnUrl=`
+#### 1.18 GET `/api/auth/login-user-with-google?returnUrl=`
 Start Google OAuth login. **Anonymous.** `returnUrl` must be an allowed origin.
 
 **Response:** `401 Challenge` redirecting to Google's consent screen.
 
-#### 1.20 GET `/api/auth/login-user-by-provider-callback?returnUrl=&remoteError=`
+#### 1.19 GET `/api/auth/login-user-by-provider-callback?returnUrl=&remoteError=`
 OAuth callback endpoint. **Anonymous.**
 
 **Response:** `302 Redirect` to `returnUrl` with auth cookies set. Returns `400` for invalid `returnUrl` or remote errors.

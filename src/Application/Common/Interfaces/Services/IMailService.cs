@@ -12,5 +12,6 @@ namespace Application.Common.Interfaces.Services
 
         Task SendOtpEmailAsync(OtpEmailContent otpEmailContent);
         Task SendResetPasswordEmailAsync(ResetPasswordEmailContent resetPasswordEmailContent);
+        Task SendDeleteAccountEmailAsync(DeleteAccountEmailContent deleteAccountEmailContent);
     }
 }

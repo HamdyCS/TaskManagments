@@ -149,6 +149,18 @@ namespace Infrastructure.Repositories
             return changeEmailResult.Succeeded;
         }
 
+        public async Task<string> GenerateDeleteAccountTokenAsync(User user)
+        {
+            var token = await userManager.GenerateUserTokenAsync(user,TokenOptions.DefaultProvider, "DeleteAccount");
+            return token;
+        }
+
+        public async Task<bool> VerifyDeleteAccountTokenAsync(User user, string token)
+        {
+            var result = await userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "DeleteAccount", token);
+            return result;
+        }
+
         public async Task<bool> DeleteAsync(User user)
         {
             //update user

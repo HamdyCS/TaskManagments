@@ -10,6 +10,7 @@ using Application.Features.Auth.Commands.LoginByProvider;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.ResendOtp;
 using Application.Features.Auth.Commands.ResetPassword;
+using Application.Features.Auth.Commands.SendDeleteAccountEmail;
 using Application.Features.Auth.Commands.SendEmailChangeEmail;
 using Application.Features.Auth.Commands.SendOtp;
 using Application.Features.Auth.Commands.SendPasswordResetEmail;
@@ -260,29 +261,22 @@ namespace Api.Controllers
 
         //Delete account
 
-        [HttpPost("delete-account/send-otp", Name = "SendOtpForDeleteAccount")]
-        public async Task<IActionResult> SendOtpForDeleteAccount([FromBody] SendOtpDto sendOtpDto)
+        [HttpPost("delete-account/send-email", Name = "SendDeleteAccountEmail")]
+        public async Task<IActionResult> SendDeleteAccountEmail()
         {
-            var result = await mediator.Send(new SendOtpCommand(sendOtpDto, OtpPurpose.DeleteAccount));
+            var userId = User.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
-            return result.Match<IActionResult>(value => NoContent(),
-                errors => errors.ToProblemDetailsObjectResult());
-        }
-
-        [HttpPost("delete-account/resend-otp", Name = "ResendOtpForDeleteAccount")]
-        public async Task<IActionResult> ResendOtpForDeleteAccount([FromBody] ResendOtpDto resendOtpDto)
-        {
-            var result = await mediator.Send(new ResendOtpCommand(resendOtpDto, OtpPurpose.DeleteAccount));
+            var result = await mediator.Send(new SendDeleteAccountEmailCommand(userId));
 
             return result.Match<IActionResult>(value => NoContent(),
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
         [HttpDelete("delete-account", Name = "DeleteAccount")]
-        [AllowAnonymous]
         public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountDto deleteAccountDto)
         {
-            //get user Id
             var userId = User.GetUserId();
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
@@ -291,12 +285,11 @@ namespace Api.Controllers
 
             if (!result.IsError)
             {
-                //Remove auth info from cookies
                 Response.RemoveAuthInfoFromCookie();
+                return NoContent();
             }
 
-            return result.Match<IActionResult>(value => NoContent(),
-                errors => errors.ToProblemDetailsObjectResult());
+            return result.Errors.ToProblemDetailsObjectResult();
         }
 
         [HttpGet("login-user-with-google", Name = "LoginUserWithGoogle")]
