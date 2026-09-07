@@ -50,8 +50,7 @@ namespace Application.Features.Auth.Commands.SendEmailChangeEmail
             }
 
             var encodedToken = WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(token));
-            var path = configuration["settings:frontendUrl"] + "/change-email?token=" + encodedToken;
-
+            var path = configuration["settings:frontendUrl"] + "/dashboard/account/verify-new-email?email=" + request.NewEmail + "&token=" + encodedToken;
             //send email
             logger.LogInformation("Adding change email to queue for user with id {UserId}", request.UserId);
             await changeEmailQueue.EnqueueAsync(new ChangeEmailContent

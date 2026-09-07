@@ -40,7 +40,7 @@ namespace Application.Features.Auth.Commands.SendPasswordResetEmail
             }
 
             var encodedToken = WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(token));
-            var path = configuration["settings:frontendUrl"] + "/reset-password?token=" + encodedToken;
+            var path = configuration["settings:frontendUrl"] + "/dashboard/account/update-password?token=" + encodedToken;
 
             //send email
             logger.LogInformation("Adding password reset email to queue for user with id {UserId}", request.UserId);
