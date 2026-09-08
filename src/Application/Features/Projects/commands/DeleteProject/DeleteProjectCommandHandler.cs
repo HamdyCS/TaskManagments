@@ -1,6 +1,7 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
+using Domain.Common.Enums;
 using ErrorOr;
 using MediatR;
 
@@ -24,8 +25,20 @@ namespace Application.Features.Projects.Commands.DeleteProject
                 return ProjectErrors.ProjectNotFoundById(request.ProjectId);
             }
 
-            // FR-014: Soft-delete via GenericRepository.Delete
+            // Soft-delete via GenericRepository.Delete
             unitOfWork.ProjectRepository.Delete(project);
+
+
+            //add recent activity
+            var fullName = await unitOfWork.UserRepository.GetUserFullNameAsync(request.UserId, cancellationToken);
+            var workSpaceName = await unitOfWork.WorkSpaceRepository.GetWorkSpaceNameAsync(request.WorkSpaceId);
+            var recentActivity = new RecentActivity
+            {
+                Text = $"{fullName} deleted project {project.Name} from workspace {workSpaceName}",
+                ActivityType = RecentActivityType.ProjectDeleted,
+                CreatedAt = DateTime.UtcNow
+            };
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("DeleteProject with id {ProjectId} in workSpace {WorkSpaceId} successfully by user {UserId}", request.ProjectId, request.WorkSpaceId, request.UserId);

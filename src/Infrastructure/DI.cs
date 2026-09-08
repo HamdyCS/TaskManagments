@@ -193,6 +193,7 @@ namespace Infrastructure
             services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IDashboardRepository, DashboardRepository>();
+            services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
 
             return services;
         }
@@ -207,6 +208,7 @@ namespace Infrastructure
             services.AddScoped<IWorkSpaceService, WorkSpaceService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
+            services.AddScoped<IRecentActivityService, RecentActivityService>();
 
             return services;
         }

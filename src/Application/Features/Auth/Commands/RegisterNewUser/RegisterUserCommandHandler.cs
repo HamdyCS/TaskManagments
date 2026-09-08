@@ -2,6 +2,8 @@ using Application.Common.Emails;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Channels;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
+using Domain.Common.Enums;
 using Domain.Entities;
 using ErrorOr;
 using Mapster;
@@ -16,6 +18,7 @@ using System.Text;
 namespace Application.Features.Users.Commands.RegisterNewUser
 {
     public class RegisterUserCommandHandler(IUnitOfWork unitOfWork, IConfiguration configuration,
+        IRecentActivityService recentActivityService,
         ILogger<ConfirmationEmailCommandHandler> logger, IConfirmationEmailQueue confirmationEmailQueue) : IRequestHandler<RegisterUserCommand, ErrorOr<RegisterUserResultDto>>
     {
         public async Task<ErrorOr<RegisterUserResultDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -63,6 +66,19 @@ namespace Application.Features.Users.Commands.RegisterNewUser
                 Url = path,
                 FullName = user.FullName
             });
+
+            //add recent activity
+            if(role == Role.User)
+            {
+                var recentActivity = new RecentActivity
+                {
+                    Text = $"New user registered: {user.FullName}",
+                    ActivityType = RecentActivityType.UserRegistered,
+                    CreatedAt = DateTime.UtcNow
+                };
+                
+                await recentActivityService.AddAsync(recentActivity);
+            }
 
             //return RegisterUserResultDto
             return new RegisterUserResultDto { Id = user.Id };

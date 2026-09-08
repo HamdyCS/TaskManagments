@@ -21,6 +21,8 @@ namespace Infrastructure.Persistence
         public virtual DbSet<WorkSpaceUser> WorkSpaceUsers{ get; set; }
         public virtual DbSet<WorkSpaceInvite> WorkSpaceInvites { get; set; }
 
+        public virtual DbSet<RecentActivity> RecentActivities { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
             //get all as no tracking

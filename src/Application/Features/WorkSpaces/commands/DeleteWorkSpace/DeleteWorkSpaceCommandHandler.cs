@@ -1,10 +1,13 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
+using Domain.Common.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.WorkSpaces.commands.DeleteWorkSpace
 {
-    public class DeleteWorkSpaceCommandHandler(IUnitOfWork unitOfWork, ILogger<DeleteWorkSpaceCommandHandler> logger
+    public class DeleteWorkSpaceCommandHandler(IUnitOfWork unitOfWork, ILogger<DeleteWorkSpaceCommandHandler> logger,
+        IRecentActivityService recentActivityService
         ) : IRequestHandler<DeleteWorkSpaceCommand, ErrorOr<bool>>
 
     {
@@ -34,6 +37,15 @@ namespace Application.Features.WorkSpaces.commands.DeleteWorkSpace
                 logger.LogWarning("Failed to delete workspace with id {WorkSpaceId} by user with id {UserId}", workSpaceId, deleteBy);
                 return WorkSpaceErrors.DeleteWorkSpaceFailed(workSpaceId, deleteBy);
             }
+
+            //add recent activity
+            var fullName = await unitOfWork.UserRepository.GetUserFullNameAsync(deleteBy, cancellationToken);
+            var recentActivity = new RecentActivity
+            {
+                Text = $"{fullName} deleted workspace {workSpace.Name}",
+                ActivityType = RecentActivityType.WorkSpaceDeleted,
+                CreatedAt = DateTime.UtcNow
+            };
 
 
             logger.LogInformation("Deleted workspace with id {WorkSpaceId} by user with id {UserId} ", workSpaceId, deleteBy);

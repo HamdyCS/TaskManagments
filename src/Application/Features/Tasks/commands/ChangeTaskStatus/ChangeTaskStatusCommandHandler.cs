@@ -1,6 +1,7 @@
 using Application.Common.Errors;
 using Application.Common.Extensions;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Application.Features.Notifications.Command.CreateNotification;
 using Domain.Common.Enums;
 using ErrorOr;
@@ -12,6 +13,7 @@ namespace Application.Features.Tasks.Commands.ChangeTaskStatus
     public class ChangeTaskStatusCommandHandler(
         IUnitOfWork unitOfWork,
         IMediator mediator,
+        IRecentActivityService recentActivityService,
         ILogger<ChangeTaskStatusCommandHandler> logger) : IRequestHandler<ChangeTaskStatusCommand, ErrorOr<TaskDto>>
     {
      
@@ -58,6 +60,16 @@ namespace Application.Features.Tasks.Commands.ChangeTaskStatus
                     $"Task '{task.Name}' status changed to {request.ChangeTaskStatusDto.Status}",
                     NotificationType.TaskStatusUpdated)), cancellationToken);
             }
+
+            //add recent activity
+            var fullName = await unitOfWork.UserRepository.GetUserFullNameAsync(assignment.AssignedToId, cancellationToken);
+
+            var recentActivity = new RecentActivity
+            {
+                Text = $"{fullName} completed task {task.Name} in project {project.Name}",
+                ActivityType = RecentActivityType.ProjectCreated,
+                CreatedAt = DateTime.UtcNow
+            };
 
             logger.LogInformation("ChangeTaskStatus for task {TaskId} in project {ProjectId} by user with id {UserId} successfully", request.TaskId, request.ProjectId, request.UserId);
 

@@ -12,17 +12,19 @@ namespace Application.Features.Projects.Commands.CreateProject
     public class CreateProjectCommandHandler(
         IUnitOfWork unitOfWork,
         IWorkSpaceService workSpaceService,
+        IRecentActivityService recentActivityService,
         ILogger<CreateProjectCommandHandler> logger) : IRequestHandler<CreateProjectCommand, ErrorOr<ProjectDto>>
     {
         public async Task<ErrorOr<ProjectDto>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
         {
             logger.LogInformation("Starting CreateProject with name {Name} in workSpace {WorkSpaceId}", request.CreateProjectDto.Name, request.WorkSpaceId);
 
-            // FR-011: Validate workspace exists
-            if (!await workSpaceService.IsWorkSpaceExistAsync(request.WorkSpaceId))
+            //  Validate workspace exists
+            var workSpace = await unitOfWork.WorkSpaceRepository.GetByIdAsync(request.WorkSpaceId);
+            if (workSpace is null)
                 return ProjectErrors.WorkSpaceNotFound;
 
-            // FR-010: Check name uniqueness (also validated in validator, but double-check for race conditions)
+            // Check name uniqueness (also validated in validator, but double-check for race conditions)
             if (!await unitOfWork.ProjectRepository.IsProjectNameUniqueInWorkspaceAsync(request.WorkSpaceId, request.CreateProjectDto.Name))
                 return ProjectErrors.ProjectNameAlreadyExists(request.WorkSpaceId, request.CreateProjectDto.Name);
 
@@ -38,6 +40,16 @@ namespace Application.Features.Projects.Commands.CreateProject
             };
 
             unitOfWork.ProjectRepository.Add(project);
+
+            //add recent activity
+            var fullName = await unitOfWork.UserRepository.GetUserFullNameAsync(request.UserId, cancellationToken);
+            var recentActivity = new RecentActivity
+            {
+                Text = $"{fullName} created a new project {project.Name} to workspace {workSpace.Name}",
+                ActivityType = RecentActivityType.ProjectCreated,
+                CreatedAt = DateTime.UtcNow
+            };
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("CreateProject with name {Name} in workSpace {WorkSpaceId} successfully by user {UserId}", request.CreateProjectDto.Name, request.WorkSpaceId, request.UserId);

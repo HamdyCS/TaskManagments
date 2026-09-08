@@ -1,5 +1,6 @@
 using Application.Common.Errors;
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Domain.Common.Enums;
 using Mapster;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,8 @@ using System.Text;
 
 namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
 {
-    public class CreateWorkSpaceCommandHandler(IUnitOfWork unitOfWork, ILogger<CreateWorkSpaceCommandHandler> logger
+    public class CreateWorkSpaceCommandHandler(IUnitOfWork unitOfWork, ILogger<CreateWorkSpaceCommandHandler> logger,
+        IRecentActivityService recentActivityService
         ) : IRequestHandler<CreateWorkSpaceCommand, ErrorOr<WorkSpaceDto>>
 
     {
@@ -55,6 +57,19 @@ namespace Application.Features.WorkSpaces.commands.CreateWorkSpace
                 logger.LogWarning("Failed to add user to workspace for user with id {UserId}", createBy);
                 return WorkSpaceErrors.CreateWorkSpaceFailed(createBy);
             }
+
+
+            //add recent activity
+            var fullName = await unitOfWork.UserRepository.GetUserFullNameAsync(createBy, cancellationToken);
+            var recentActivity = new RecentActivity
+            {
+                Text = $"{fullName} created a new workspace {workSpace.Name}",
+                ActivityType = RecentActivityType.WorkspaceCreated,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await recentActivityService.AddAsync(recentActivity);
+
 
             await unitOfWork.CommitTransactionAsync(cancellationToken);
 

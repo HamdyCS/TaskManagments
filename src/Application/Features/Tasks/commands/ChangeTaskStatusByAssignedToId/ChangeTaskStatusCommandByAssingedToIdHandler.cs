@@ -60,6 +60,16 @@ namespace Application.Features.Tasks.Commands.ChangeTaskStatusByAssignedToId
                     NotificationType.TaskStatusUpdated)), cancellationToken);
             }
 
+            //add recent activity
+            var fullName = await unitOfWork.UserRepository.GetUserFullNameAsync(assignment.AssignedToId, cancellationToken);
+
+            var recentActivity = new RecentActivity
+            {
+                Text = $"{fullName} completed task {task.Name} in project {project.Name}",
+                ActivityType = RecentActivityType.ProjectCreated,
+                CreatedAt = DateTime.UtcNow
+            };
+
             logger.LogInformation("ChangeTaskStatus for task {TaskId} in project {ProjectId} by user with id {UserId} successfully", request.TaskId, request.ProjectId, request.AssignedToId);
 
             return task.Adapt<TaskDto>();

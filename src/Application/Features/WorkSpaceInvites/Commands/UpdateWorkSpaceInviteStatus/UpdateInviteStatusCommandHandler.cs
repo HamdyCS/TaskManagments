@@ -14,7 +14,7 @@ namespace Application.Features.WorkSpaceInvites.Commands.UpdateWorkSpaceInviteSt
 {
     public class UpdateInviteStatusCommandHandler(IUnitOfWork unitOfWork, IMediator mediator,
         IWorkSpaceUserService workSpaceUserService,
-        ILogger<UpdateInviteStatusCommandHandler> logger) :
+        ILogger<UpdateInviteStatusCommandHandler> logger,IRecentActivityService recentActivityService) :
         IRequestHandler<UpdateInviteStatusCommand, ErrorOr<bool>>
     {
         public async Task<ErrorOr<bool>> Handle(UpdateInviteStatusCommand request, CancellationToken cancellationToken)
@@ -78,7 +78,17 @@ namespace Application.Features.WorkSpaceInvites.Commands.UpdateWorkSpaceInviteSt
                 var notification = new CreateNotificationDto(inviteToId,null,workSpaceInviteId,
                     $"You have been added to workspace {workSpaceName}" ,"WorkSpace Invite", NotificationType.WorkSpaceInvite);
 
-                await mediator.Send(new CreateNotificationCommand(notification), cancellationToken);   
+                await mediator.Send(new CreateNotificationCommand(notification), cancellationToken);
+
+                //add recent activity
+                var fullName = await unitOfWork.UserRepository.GetUserFullNameAsync(inviteToId, cancellationToken);
+                var recentActivity = new RecentActivity
+                {
+                    Text = $"{fullName} joined workspace {workSpaceName}",
+                    ActivityType = RecentActivityType.JoinedWorkspace,
+                    CreatedAt = DateTime.UtcNow
+                };
+
             }
 
             //commit transaction

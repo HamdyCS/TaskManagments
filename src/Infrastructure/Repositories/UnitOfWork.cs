@@ -19,7 +19,7 @@ namespace Infrastructure.Repositories
             , IProjectRepository projectRepository, ITaskRepository taskRepository
             , ITaskAssignmentRepository taskAssignmentRepository, ITaskAttachmentRepository taskAttachmentRepository
             , ITaskCommentRepository taskCommentRepository, IReportRepository reportRepository, 
-            IDashboardRepository dashboardRepository)
+            IDashboardRepository dashboardRepository, IRecentActivityRepository recentActivityRepository)
         {
             this.context = context;
             this.UserRepository = userRepository;
@@ -35,6 +35,7 @@ namespace Infrastructure.Repositories
             this.TaskCommentRepository = taskCommentRepository;
             this.ReportRepository = reportRepository;
             this.DashboardRepository = dashboardRepository;
+            this.RecentActivityRepository = recentActivityRepository;
         }
 
         public IUserRepository UserRepository { get; private set; }
@@ -60,7 +61,10 @@ namespace Infrastructure.Repositories
         public ITaskCommentRepository TaskCommentRepository { get; private set; }
 
         public IReportRepository ReportRepository { get; private set; }
+
         public IDashboardRepository DashboardRepository { get; private set; }
+
+        public IRecentActivityRepository RecentActivityRepository { get; private set; }
 
         public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
