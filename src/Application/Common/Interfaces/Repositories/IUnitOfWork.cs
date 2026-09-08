@@ -20,6 +20,7 @@ namespace Application.Common.Interfaces.Repositories
         IReportRepository ReportRepository { get; }
         IDashboardRepository DashboardRepository { get; }
         IRecentActivityRepository RecentActivityRepository { get; }
+        IAdminDashboardRepository AdminDashboardRepository { get; }
 
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

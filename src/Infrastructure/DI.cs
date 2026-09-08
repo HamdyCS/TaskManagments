@@ -194,6 +194,7 @@ namespace Infrastructure
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IDashboardRepository, DashboardRepository>();
             services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
+            services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
 
             return services;
         }

@@ -271,6 +271,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | 9 | `ReportsController` | `/api/workspaces/{workSpaceId}/reports` | `GET projects/{projectId}/tasks-by-priority` · `GET projects/{projectId}/tasks-by-status` · `GET members/{memberId}/performance` · `GET projects/{projectId}/members/{memberId}/performance` · `GET ""` · `GET pdf/download` |
 | 10 | `NotificationsController` | `/api/notifications` | `GET {id}` · `GET all` · `GET all/unread` · `PUT {id}/read` |
 | 11 | `DashboardController` | `/api/workspaces/{workspaceId}/dashboard` | `GET ""` |
+| 12 | `AdminDashboardController` | `/api/admin/dashboard` | `GET ""` · `GET recent-activities` |
 
 ---
 
@@ -406,6 +407,13 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/workspaces/{workspaceId}/dashboard` | Workspace dashboard (Admin/Owner/ProjectManager: full workspace; other members: user-specific) |
+
+#### AdminDashboardController — `/api/admin/dashboard`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/admin/dashboard` | Admin dashboard with global stats (users, workspaces, projects, tasks) |
+| GET | `/api/admin/dashboard/recent-activities` | Paginated list of recent activities across the system |
 
 ---
 
@@ -1114,6 +1122,70 @@ For dashboard KPI/breakdown details, see also [9. Reports](#9-reports--apiworksp
 
 ---
 
+### 12. Admin Dashboard — `/api/admin/dashboard`
+
+All endpoints require the **Admin** role.
+
+#### 12.1 GET `` 🔒 **Admin**
+Get the admin dashboard with global statistics across all workspaces.
+
+The dashboard is cached in Redis for **5 minutes** (key `AdminDashboard:{userId}`).
+
+**Response:** `200 OK` with an `AdminDashboardDto`:
+```json
+{
+  "totalUsersCount": 150,
+  "totalAdminsCount": 3,
+  "totalUsersInLast30DaysCount": 25,
+  "totalWorkspacesCount": 12,
+  "totalWorkspacesInLast30DaysCount": 4,
+  "totalProjectsCount": 48,
+  "totalProjectsInLast30DaysCount": 8,
+  "totalTasksCount": 320,
+  "totalTasksInLast30DaysCount": 45,
+  "tasksOverviewDto": {
+    "backlogCount": 50,
+    "todoCount": 65,
+    "inProgressCount": 80,
+    "reviewCount": 45,
+    "doneCount": 80
+  }
+}
+```
+
+#### 12.2 GET `/recent-activities?pageNumber=&pageSize=` 🔒 **Admin**
+List recent activities across the system (paginated).
+
+**Query params:**
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `pageNumber` | int | `1` | Page number |
+| `pageSize` | int | `10` | Page size (max 100) |
+
+**Response:** `200 OK` with `PaginationResultDto<RecentActivityDto>`:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "text": "User John Doe created workspace Acme Corp",
+      "activityType": "WorkSpaceCreated",
+      "createdAt": "2026-01-15T08:00:00Z"
+    }
+  ],
+  "totalCount": 250,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "nextPage": 2,
+  "previousPage": null,
+  "totalPages": 25,
+  "hasNextPage": true,
+  "hasPreviousPage": false
+}
+```
+
+---
+
 ## Pagination
 
 Any list endpoint accepts `PaginationRequestDto` via query string:
@@ -1139,7 +1211,7 @@ All paginated responses use the standard envelope `PaginationResultDto<T>`:
 }
 ```
 
-Affected endpoints: workspace lists (3.2, 3.3), invites (4.2, 4.3), users (2.2), projects (5.3), tasks (6.4, 6.5, 6.6), comments (7.2), notifications (10.2, 10.3).
+Affected endpoints: workspace lists (3.2, 3.3), invites (4.2, 4.3), users (2.2), projects (5.3), tasks (6.4, 6.5, 6.6), comments (7.2), notifications (10.2, 10.3), admin dashboard (12.2).
 
 ---
 
@@ -1182,7 +1254,7 @@ The server sends notifications either to a specific user (`Clients.User(userId)`
 TaskManagments/
 ├── src/
 │   ├── Api/                      # Presentation layer
-│   │   ├── Controllers/          # 11 API controllers
+│   │   ├── Controllers/          # 12 API controllers
 │   │   ├── Hubs/Notification/    # SignalR hub + client interface + service
 │   │   ├── Polices/WorkSpace/    # Authorization requirement handlers
 │   │   ├── Common/               # Extensions, origins, file URL service
@@ -1192,7 +1264,8 @@ TaskManagments/
 │   │   └── Features/             # Auth, Users, WorkSpaces, WorkSpaceUsers,
 │   │                             # WorkSpaceInvites, Projects, Tasks,
 │   │                             # TaskComments, TaskAttachments, Reports,
-│   │                             # Notifications, WorkSpaceUserDashboard
+│   │                             # Notifications, WorkSpaceUserDashboard,
+│   │                             # AdminDashboard
 │   ├── Domain/                   # Pure domain
 │   │   ├── Common/               # Enums, interfaces
 │   │   └── Entities/             # 11 entities
