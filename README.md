@@ -261,7 +261,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | # | Controller | Base route | APIs |
 |---|------------|------------|------|
 | 1 | `AuthController` | `/api/auth` | `POST register-user` · `POST register-admin` · `POST confirm-email` · `POST login` · `POST refresh-token` · `POST logout` · `GET ""` · `PUT ""` · `POST forget-password/send-otp` · `POST forget-password/resend-otp` · `POST forget-password` · `POST reset-password/send-email` · `POST reset-password` · `POST change-email/send-email` · `POST change-email` · `POST delete-account/send-email` · `DELETE delete-account` · `GET login-user-with-google` · `GET login-user-by-provider-callback` |
-| 2 | `UsersController` | `/api/users` | `GET {id}` · `GET all` · `DELETE {id}` |
+| 2 | `UsersController` | `/api/users` | `GET {id}` · `GET all` · `GET admin-users` · `GET regular-users` · `DELETE {id}` |
 | 3 | `WorkSpacesController` | `/api/workspaces` | `GET {id}` · `GET all` · `GET {id}/all-users` · `GET {id}/my-role` · `POST ""` · `PUT {id}` · `DELETE {id}` |
 | 4 | `WorkSpaceInvitesController` | `/api/workspace-invites` | `GET {id}` · `GET all-my-invites` · `GET all-my-send-invites` · `POST ""` · `DELETE {id}` · `PATCH {id}/accept` · `PATCH {id}/reject` |
 | 5 | `ProjectsController` | `/api/workspaces/{workspaceId}/projects` | `POST ""` · `GET {projectId}` · `GET ""` · `PUT {projectId}` · `PATCH {projectId}/status` · `DELETE {projectId}` |
@@ -307,6 +307,8 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 |--------|----------|-------------|
 | GET | `/api/users/{id}` | Get a user by ID |
 | GET | `/api/users/all` | List all users (**Admin**) |
+| GET | `/api/users/admin-users` | List all admin users (**Admin**) |
+| GET | `/api/users/regular-users` | List all regular users (**Admin**) |
 | DELETE | `/api/users/{id}` | Delete a user (**Admin**) |
 
 #### WorkSpacesController — `/api/workspaces`
@@ -564,7 +566,17 @@ List all users (paginated).
 
 **Response:** `200 OK` with a `PaginationResultDto<UserDto>`.
 
-#### 2.3 DELETE `/api/users/{id}` 🔒 **Admin**
+#### 2.3 GET `/api/users/admin-users?pageNumber=&pageSize=` 🔒 **Admin**
+List all admin users only (paginated).
+
+**Response:** `200 OK` with a `PaginationResultDto<UserDto>`.
+
+#### 2.4 GET `/api/users/regular-users?pageNumber=&pageSize=` 🔒 **Admin**
+List all regular users (non-admin) only (paginated).
+
+**Response:** `200 OK` with a `PaginationResultDto<UserDto>`.
+
+#### 2.5 DELETE `/api/users/{id}` 🔒 **Admin**
 Delete a user account.
 
 **Response:** `204 No Content`.
@@ -1211,7 +1223,7 @@ All paginated responses use the standard envelope `PaginationResultDto<T>`:
 }
 ```
 
-Affected endpoints: workspace lists (3.2, 3.3), invites (4.2, 4.3), users (2.2), projects (5.3), tasks (6.4, 6.5, 6.6), comments (7.2), notifications (10.2, 10.3), admin dashboard (12.2).
+Affected endpoints: workspace lists (3.2, 3.3), invites (4.2, 4.3), users (2.2, 2.3, 2.4), projects (5.3), tasks (6.4, 6.5, 6.6), comments (7.2), notifications (10.2, 10.3), admin dashboard (12.2).
 
 ---
 
