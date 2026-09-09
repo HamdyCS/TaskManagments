@@ -4,6 +4,7 @@ using Application.Common.Dtos;
 using Application.Features.Auth.Commands.DeleteAccount;
 using Application.Features.Auth.Commands.DeleteUser;
 using Application.Features.Users;
+using Application.Features.Users.Queries.GetAllAdminUsers;
 using Application.Features.Users.Queries.GetAllUsers;
 using Application.Features.Users.Queries.GetUserById;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,18 @@ namespace Api.Controllers
             return result.Match(value => Ok(value),
                 errors => errors.ToProblemDetailsObjectResult());
         }
+
+        [HttpGet("admin-users", Name = "GetAllAdminUsers")]
+        [Authorize(Roles = nameof(Role.Admin))]
+        public async Task<ActionResult<PaginationResultDto<UserDto>>> GetAllAdminUsers([FromQuery] int pageNumber, [FromQuery] int pageSize)
+        {
+            var result = await mediator.Send(new GetAllAdminUsersQuery(
+                new PaginationRequestDto { PageNumber = pageNumber, PageSize = pageSize }));
+
+            return result.Match(value => Ok(value),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
 
         [HttpDelete("{id}", Name = "DeleteUserById")]
         [Authorize(Roles = nameof(Role.Admin))]

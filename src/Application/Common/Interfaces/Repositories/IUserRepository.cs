@@ -44,7 +44,8 @@ namespace Application.Common.Interfaces.Repositories
         Task<string> GenerateDeleteAccountTokenAsync(User user);
         Task<bool> VerifyDeleteAccountTokenAsync(User user, string token);
         Task<bool> DeleteAsync(User user);
-        Task<PaginationResult<User>> GetAllUsers(int pageNumber, int pageSize);
+        Task<PaginationResult<User>> GetAllUsersAsync(int pageNumber, int pageSize);
+        Task<PaginationResult<User>> GetAllAdminUsersAsync(int pageNumber, int pageSize);
         Task<User?> GetOrCreateExternalUserAsync(Role roleOnCreate);
         AuthenticationProperties GenerateExternalAuthProperty(Provider provider, string redirectUrl);
         Task<string?> GetUserFullNameAsync(string userId, CancellationToken cancellationToken);

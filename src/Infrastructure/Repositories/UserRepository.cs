@@ -172,9 +172,19 @@ namespace Infrastructure.Repositories
             return result.Succeeded;
         }
 
-        public async Task<PaginationResult<User>> GetAllUsers(int pageNumber, int pageSize)
+        public async Task<PaginationResult<User>> GetAllUsersAsync(int pageNumber, int pageSize)
         {
             var query = context.Users.Where(u => !u.IsDeleted);
+
+            var totalCount = await query.CountAsync();
+            var users = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PaginationResult<User>(users, totalCount, pageNumber, pageSize);
+        }
+
+        public async Task<PaginationResult<User>> GetAllAdminUsersAsync(int pageNumber, int pageSize)
+        {
+            var query = context.Users.Where(u => !u.IsDeleted && u.RoleId == (short)Role.Admin);
 
             var totalCount = await query.CountAsync();
             var users = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
