@@ -6,11 +6,14 @@ using Application.Features.WorkSpaces.commands.GetAllUserWorkSpaces;
 using Application.Features.WorkSpaces.commands.GetAllWorkSpaces;
 using Application.Features.WorkSpaces.commands.GetWorkSpaceById;
 using Application.Features.WorkSpaces.commands.UpdateWorkSpace;
+using Application.Features.WorkSpaces.Queries.GetWorkSpaceDetails;
+using Application.Features.WorkSpaces.Queries.GetWorkSpaceOverviews;
 using Application.Features.WorkSpaces.Queries.GetUserWorkSpaceRole;
 using Application.Features.WorkSpaceUsers;
 using Application.Features.WorkSpaceUsers.queries.GetAllWorkSpaceUsers;
 using Domain.Common.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Application.Common.Dtos.WorkSpace;
 
 namespace Api.Controllers
 {
@@ -167,6 +170,39 @@ namespace Api.Controllers
             var result = await mediator.Send(new DeleteWorkSpaceCommand(id, userId));
 
             return result.Match<IActionResult>(value => NoContent(),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+
+        [HttpGet("overviews", Name = "GetWorkSpaceOverviews")]
+        public async Task<ActionResult<PaginationResultDto<WorkSpaceOverviewDto>>> GetWorkSpaceOverview(
+            [FromRoute] long id,
+            [FromQuery] PaginationRequestDto paginationRequestDto,
+            [FromQuery] string? ownerName,
+            [FromQuery] string? workSpaceName)
+        {
+            var isAdmin = User.IsInRole(nameof(Role.Admin));
+            if (!isAdmin)
+                return Forbid();
+
+            var result = await mediator.Send(
+                new GetAllWorkSpaceOverviewsQuery(paginationRequestDto, ownerName, workSpaceName));
+
+            return result.Match(value => Ok(value),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+
+        [HttpGet("{id}/details", Name = "GetWorkSpaceDetails")]
+        public async Task<ActionResult<WorkSpaceDetailsDto>> GetWorkSpaceDetails([FromRoute] long id)
+        {
+            var isAdmin = User.IsInRole(nameof(Role.Admin));
+            if (!isAdmin)
+                return Forbid();
+
+            var result = await mediator.Send(new GetWorkSpaceDetailsQuery(id));
+
+            return result.Match(value => Ok(value),
                 errors => errors.ToProblemDetailsObjectResult());
         }
 
