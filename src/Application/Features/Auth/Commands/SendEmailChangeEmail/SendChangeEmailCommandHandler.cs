@@ -2,6 +2,7 @@ using Application.Common.Emails;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Channels;
 using Application.Common.Interfaces.Repositories;
+using Domain.Common.Enums;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -50,7 +51,8 @@ namespace Application.Features.Auth.Commands.SendEmailChangeEmail
             }
 
             var encodedToken = WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(token));
-            var path = configuration["settings:frontendUrl"] + "/dashboard/account/verify-new-email?email=" + request.NewEmail + "&token=" + encodedToken;
+            var dashboardPath = user.RoleId == (int)Role.Admin ? "admin/dashboard" : "dashboard";
+            var path = configuration["settings:frontendUrl"] + '/' + dashboardPath + "/account/verify-new-email?email=" + request.NewEmail + "&token=" + encodedToken;
             //send email
             logger.LogInformation("Adding change email to queue for user with id {UserId}", request.UserId);
             await changeEmailQueue.EnqueueAsync(new ChangeEmailContent

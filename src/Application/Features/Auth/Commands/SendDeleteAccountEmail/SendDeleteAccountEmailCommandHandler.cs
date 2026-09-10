@@ -2,6 +2,7 @@ using Application.Common.Emails;
 using Application.Common.Errors;
 using Application.Common.Interfaces.Channels;
 using Application.Common.Interfaces.Repositories;
+using Domain.Common.Enums;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -36,7 +37,8 @@ namespace Application.Features.Auth.Commands.SendDeleteAccountEmail
             }
 
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var path = configuration["settings:frontendUrl"] + "/dashboard/account/confirm-delete?token=" + encodedToken;
+            var dashboardPath = user.RoleId == (int)Role.Admin ? "admin/dashboard" : "dashboard";
+            var path = configuration["settings:frontendUrl"] + '/' + dashboardPath + "/account/confirm-delete?token=" + encodedToken;
 
             logger.LogInformation("Adding delete account email to queue for user with id {UserId}", request.UserId);
             await deleteAccountEmailQueue.EnqueueAsync(new DeleteAccountEmailContent
