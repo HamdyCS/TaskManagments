@@ -81,7 +81,8 @@ namespace Infrastructure.Repositories
                     MembersCount = ws.WorkSpaceUsers.Count(),
                     ProjectsCount = ws.Projects.Count(),
                     TasksCount = ws.Projects.SelectMany(p => p.Tasks).Count(),
-                    CreatedAt = ws.CreatedAt
+                    CreatedAt = ws.CreatedAt,
+                    Name = ws.Name,
                 },
                 CompletionPercentage = ws.Projects.SelectMany(p => p.Tasks).Count() == 0 ? 0 : 
                 (double)ws.Projects.SelectMany(p => p.Tasks).
