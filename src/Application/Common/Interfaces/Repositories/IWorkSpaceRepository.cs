@@ -1,4 +1,6 @@
 ﻿using Application.Common.Dtos.WorkSpace;
+using Application.Common.Dtos.WorkSpaceOverview;
+using Application.Common.Dtos.WorkSpacesOverview;
 using Domain.Common.Pagination;
 using System;
 using System.Collections.Generic;

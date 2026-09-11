@@ -8,9 +8,6 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
         {
             RuleFor(x => x.WorkspaceId)
                 .GreaterThan(0).WithMessage("Workspace ID must be greater than 0");
-
-            RuleFor(x => x.MemberId)
-                .NotEmpty().WithMessage("Member ID is required");
         }
     }
 }

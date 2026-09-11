@@ -77,17 +77,16 @@ namespace Api.Controllers
 
             return result.Match<IActionResult>(value => Ok(value),
                 errors => errors.ToProblemDetailsObjectResult());
-        }
-        
+        }     
 
-        [HttpGet("members/{memberId}/performance", Name = "GetMemberPerformanceInWorkSpace")]
-        public async Task<IActionResult> GetMemberPerformanceInWorkSpace([FromRoute] long workspaceId, [FromRoute] string memberId)
+        [HttpGet("members/performance", Name = "GetMemberPerformanceInWorkSpace")]
+        public async Task<IActionResult> GetMemberPerformanceInWorkSpace([FromRoute] long workspaceId)
         {
             var hasPermission = await _IsAdminOrOwnerOrProductManagerAsync(workspaceId);
             if (!hasPermission)
                 return Forbid();
 
-            var result = await mediator.Send(new GetMemberPerformanceInWorkSpaceQuery(workspaceId, memberId));
+            var result = await mediator.Send(new GetMemberPerformanceInWorkSpaceQuery(workspaceId));
 
             return result.Match<IActionResult>(value => Ok(value),
                 errors => errors.ToProblemDetailsObjectResult());

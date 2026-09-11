@@ -272,6 +272,7 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 | 10 | `NotificationsController` | `/api/notifications` | `GET {id}` · `GET all` · `GET all/unread` · `PUT {id}/read` |
 | 11 | `DashboardController` | `/api/workspaces/{workspaceId}/dashboard` | `GET ""` |
 | 12 | `AdminDashboardController` | `/api/admin/dashboard` | `GET ""` · `GET recent-activities` |
+| 13 | `AdminReportsController` | `/api/admin/reports` | `GET member-performances` · `GET overview` · `GET overview/pdf/download` |
 
 ---
 
@@ -418,6 +419,14 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 |--------|----------|-------------|
 | GET | `/api/admin/dashboard` | Admin dashboard with global stats (users, workspaces, projects, tasks) |
 | GET | `/api/admin/dashboard/recent-activities` | Paginated list of recent activities across the system |
+
+#### AdminReportsController — `/api/admin/reports`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/admin/reports/member-performances` | List all member performances across workspaces (**Admin**, paginated, filterable) |
+| GET | `/api/admin/reports/overview` | Workspaces overview report with date filtering (**Admin**) |
+| GET | `/api/admin/reports/overview/pdf/download` | Download workspaces overview report as PDF (**Admin**) |
 
 ---
 
@@ -1260,6 +1269,83 @@ List recent activities across the system (paginated).
 
 ---
 
+### 13. Admin Reports — `/api/admin/reports`
+
+All endpoints require the **Admin** role.
+
+#### 13.1 GET `/api/admin/reports/member-performances?pageNumber=&pageSize=&memberName=` 🔒 **Admin**
+List all member performances across all workspaces (paginated).
+
+**Query params:**
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `pageNumber` | int | `1` | Page number |
+| `pageSize` | int | `10` | Page size |
+| `memberName` | string | — | Optional filter by member name |
+
+**Response:** `200 OK` with `PaginationResult<MemberPerformanceDto>`:
+```json
+{
+  "data": [
+    {
+      "id": "a1b2c3...",
+      "name": "John Doe",
+      "assignedCount": 24,
+      "inProgressCount": 5,
+      "doneCount": 14
+    }
+  ],
+  "totalCount": 50,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "nextPage": 2,
+  "previousPage": null,
+  "totalPages": 5,
+  "hasNextPage": true,
+  "hasPreviousPage": false
+}
+```
+
+#### 13.2 GET `/api/admin/reports/overview?from=&to=` 🔒 **Admin**
+Get a workspaces overview report filtered by date range.
+
+**Query params:**
+| Param | Type | Description |
+|-------|------|-------------|
+| `from` | DateTime | Start date (optional) |
+| `to` | DateTime | End date (optional) |
+
+**Response:** `200 OK` with `WorkSpacesOverviewReportDto`:
+```json
+{
+  "totalWorkspaces": 12,
+  "totalProjects": 48,
+  "totalTasks": 320,
+  "totalMembers": 150,
+  "workspaces": [
+    {
+      "id": 1,
+      "name": "Acme Corp",
+      "ownerNames": ["John Doe"],
+      "membersCount": 8,
+      "projectsCount": 4,
+      "tasksCount": 25,
+      "completionPercentage": 32.0,
+      "createdAt": "2026-01-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### 13.3 GET `/api/admin/reports/overview/pdf/download?from=&to=` 🔒 **Admin**
+Download the workspaces overview report as a PDF.
+
+**Query params:** Same as [13.2](#132-get-apireportsoverviewfromto--admin).
+
+**Response:** `200 OK` — `application/pdf` file named `workspaces-overview-report.pdf`.
+
+---
+
 ## Pagination
 
 Any list endpoint accepts `PaginationRequestDto` via query string:
@@ -1285,7 +1371,7 @@ All paginated responses use the standard envelope `PaginationResultDto<T>`:
 }
 ```
 
-Affected endpoints: workspace lists (3.2, 3.3, 3.8), invites (4.2, 4.3), users (2.2, 2.3, 2.4), projects (5.3), tasks (6.4, 6.5, 6.6), comments (7.2), notifications (10.2, 10.3), admin dashboard (12.2).
+Affected endpoints: workspace lists (3.2, 3.3, 3.8), invites (4.2, 4.3), users (2.2, 2.3, 2.4), projects (5.3), tasks (6.4, 6.5, 6.6), comments (7.2), notifications (10.2, 10.3), admin dashboard (12.2), admin reports (13.1).
 
 ---
 

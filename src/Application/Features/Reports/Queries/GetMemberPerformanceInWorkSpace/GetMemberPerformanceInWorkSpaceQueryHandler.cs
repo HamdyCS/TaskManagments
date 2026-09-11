@@ -14,26 +14,26 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
     {
         public async Task<ErrorOr<MemberPerformanceDto>> Handle(GetMemberPerformanceInWorkSpaceQuery request, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Starting GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId} and memberId {MemberId}", request.WorkspaceId, request.MemberId);
+            logger.LogInformation("Starting GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId}", request.WorkspaceId);
 
             var workspace = await unitOfWork.WorkSpaceRepository.GetByIdAsync(request.WorkspaceId);
             if (workspace is null)
                 return WorkSpaceErrors.WorkSpaceNotFoundById(request.WorkspaceId);
 
-            var cacheKey = $"report:member-perf-ws:{request.WorkspaceId}:{request.MemberId}";
+            var cacheKey = $"report:member-perf-ws:{request.WorkspaceId}";
 
             var cachedResult = await cacheService.GetAsync<MemberPerformanceDto>(cacheKey);
             if (cachedResult is not null)
             {
-                logger.LogInformation("GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId} and memberId {MemberId} returned from cache", request.WorkspaceId, request.MemberId);
+                logger.LogInformation("GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId} returned from cache", request.WorkspaceId);
                 return cachedResult;
             }
 
-            var report = await unitOfWork.ReportRepository.GetMemberPerformanceInWorkSpaceAsync(request.WorkspaceId, request.MemberId);
+            var report = await unitOfWork.ReportRepository.GetMemberPerformanceInWorkSpaceAsync(request.WorkspaceId);
 
             await cacheService.SetAsync(cacheKey, report, TimeSpan.FromMinutes(10));
 
-            logger.LogInformation("GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId} and memberId {MemberId} successfully", request.WorkspaceId, request.MemberId);
+            logger.LogInformation("GetMemberPerformanceInWorkSpace with workspaceId {WorkspaceId} successfully", request.WorkspaceId);
 
             return report;
         }
