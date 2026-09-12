@@ -42,9 +42,11 @@ namespace Infrastructure.Repositories
         public async Task<PaginationResult<MemberPerformanceDto>> GetAllMemberPerformancesAsync(int pageNumber, int pageSize, string? memberNameQuery)
         {
             var query = context.Users.AsQueryable();
+            var trimedQuery = memberNameQuery?.Trim();
             if (!string.IsNullOrEmpty(memberNameQuery))
             {
-                query = query.Where(u => u.FirstName.Contains(memberNameQuery) || u.LastName.Contains(memberNameQuery));
+                query = query.Where(u => (u.FirstName + " " + u.LastName).Contains(trimedQuery)
+                          || (u.LastName + " " + u.FirstName).Contains(trimedQuery));
             }
             var totalCount = await query.CountAsync();
             var memberPerformances = await query
