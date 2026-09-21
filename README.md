@@ -1,59 +1,85 @@
+<div align="center">
 
 # TaskManagments
 
-A team-oriented **project and task management API** built with ASP.NET Core, following **Clean Architecture** and **CQRS** principles. Manage workspaces, projects, and tasks with fine-grained role-based permissions, real-time notifications via SignalR, OAuth authentication, and PDF reporting.
+**A production-oriented task management backend built with ASP.NET Core, Clean Architecture, CQRS, MediatR, SQL Server, Redis, SignalR, and JWT-based authentication.**
 
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
 [![C#](https://img.shields.io/badge/C%23-13-239120?style=flat-square&logo=csharp)](https://learn.microsoft.com/dotnet/csharp/)
 [![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-10-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
----
+[Overview](#overview) | [Features](#features) | [Architecture](#architecture) | [Getting Started](#getting-started) | [API Reference](#api-reference)
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Domain Model](#domain-model)
-- [Authentication & Authorization](#authentication--authorization)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [API Reference](#api-reference)
-- [Pagination](#pagination)
-- [Real-time Notifications (SignalR)](#real-time-notifications-signalr)
-- [Error Handling](#error-handling)
-- [Project Structure](#project-structure)
+</div>
 
 ---
 
 ## Overview
 
-TaskManagments is a **RESTful, backend-only API** for organizing work into workspaces that contain projects and tasks, with team collaboration features:
+TaskManagments is a **RESTful, backend-only API** for organizing work into workspaces that contain projects and tasks, with team collaboration features.
 
-- Role-based access control across workspace members (**Owner**, **Project Manager**, **Member**) plus a global **Admin** role.
-- Task assignment, commenting, and file attachments.
-- Real-time push notifications through a SignalR hub.
-- Workspace invitations with role assignment and expiry.
-- Analytical reports (tasks by status/priority, member performance) and **PDF** export.
-- Full authentication lifecycle: registration, email confirmation, login (JWT via cookies), Google OAuth, OTP verification, password reset, email change, and account deletion with email token confirmation.
+- **Workspaces** group users together with role-based access control (Owner, Project Manager, Member).
+- **Projects** live inside workspaces and hold the actual tasks.
+- **Tasks** have statuses, priorities, deadlines, assignments, comments, and file attachments.
+- **Notifications** are pushed in real-time via SignalR when task states change.
+- **Reports** provide workspace analytics with PDF export.
 
 > [!NOTE]
-> This project is an API only. A frontend client (e.g. Angular) is expected to consume it. The default base URL is `http://localhost:5102`.
+> This is an API-only project. A frontend client (e.g. Angular) is expected to consume it. The default base URL is `http://localhost:5102`.
+
+### Who uses it
+
+| Role | Capabilities |
+|------|-------------|
+| **Admin** | Manage all users, workspaces, view system-wide reports and dashboards |
+| **Workspace Owner** | Full control over a workspace: manage members, projects, tasks, and invites |
+| **Project Manager** | Create/update projects and tasks within a workspace |
+| **Member** | View tasks, comment on tasks, update status of assigned tasks |
 
 ---
 
 ## Features
 
-- **Workspaces & Projects** — Organize work into workspaces that contain multiple projects.
-- **Task Management** — Create, assign, track, and comment on tasks with priorities, statuses, and deadlines.
-- **Role-Based Access** — Workspace `Owner`, `ProjectManager`, and `Member` roles with granular, per-request authorization.
-- **Authentication** — JWT stored in HttpOnly cookies, Google OAuth, OTP for forget-password, email confirmation, password reset, email change, and account deletion with email token confirmation.
-- **Real-Time Notifications** — SignalR hub for live workspace notifications (task assigned, status changed, comments, invites).
-- **File Attachments** — Upload/download task attachments (`.pdf`, `.jpg`, `.jpeg`, `.png`, up to **50 MB**).
-- **Reporting** — Workspace overview report, tasks by status/priority, member performance, and a PDF report download.
-- **Workspace Invites** — Invite users to a workspace with a role and expiry, accept/reject from the invitee side.
+### Authentication & Identity
+- Registration with email confirmation
+- Login via JWT stored in HttpOnly cookies
+- Refresh token rotation
+- Google OAuth login
+- Password reset via OTP (email) or token link
+- Email change with confirmation
+- Account deletion with email confirmation
+
+### Workspace Management
+- Create, update, delete workspaces (soft-delete)
+- Invite users with role assignment and expiry
+- Accept/reject invitations
+- Workspace-scoped role authorization
+
+### Project & Task Management
+- Create, update, delete projects within workspaces
+- Project status tracking (Active, OnHold, Completed)
+- Task creation with assignment, priority, status, and deadlines
+- Task filtering by status, priority, search term, and sort order
+- Self-service status updates for assigned tasks
+- File attachments (PDF, JPG, PNG — up to 50 MB)
+
+### Real-Time Notifications
+- SignalR hub at `/notificationHub`
+- Push notifications for task assignments, status changes, comments, and invites
+- Persistent notification storage with read/unread state
+
+### Reporting & PDF Generation
+- Workspace overview reports (members, projects, task breakdown)
+- Tasks by status/priority aggregation
+- Member performance metrics
+- Admin-level system-wide reports
+- PDF export via QuestPDF
+
+### Administration
+- Global admin dashboard with user/workspace/project/task counts
+- Recent activity log
+- Member performance reports across all workspaces
 
 ---
 
@@ -65,61 +91,83 @@ Clean Architecture with strict dependency rules:
 Api (Presentation)  -->  Application  -->  Domain  <--  Infrastructure
 ```
 
+```mermaid
+graph TD
+    A[Api] -->|depends on| B[Application]
+    B -->|depends on| C[Domain]
+    D[Infrastructure] -->|implements| B
+    D -->|depends on| C
+
+    style A fill:#4A90D9,color:#fff
+    style B fill:#7B68EE,color:#fff
+    style C fill:#50C878,color:#fff
+    style D fill:#FF8C00,color:#fff
+```
+
 | Layer | Responsibility |
 |-------|---------------|
-| **Api** | Controllers, SignalR hubs, auth policies & handlers, exception handling, CORS/origin checks |
+| **Api** | Controllers, SignalR hub, auth policies & handlers, exception handling, CORS |
 | **Application** | CQRS features (commands/queries), FluentValidation validators, DTOs, mapping, service/repository interfaces, errors |
-| **Domain** | Entities, enums, pagination model, `ISoftDelete` / `IBaseEntity` interfaces (zero dependencies) |
+| **Domain** | Entities, enums, pagination model, `ISoftDelete` / `IBaseEntity` interfaces (zero external dependencies) |
 | **Infrastructure** | EF Core + SQL Server, Redis cache, ASP.NET Identity, MailKit email, background services, repositories |
 
-Key patterns:
+### Dependency direction
 
-- **CQRS** with MediatR — every feature is a command/query handled by a dedicated handler.
-- **Repository + Unit of Work** — all data access flows through `IUnitOfWork`; repositories are never injected into handlers directly.
-- **ErrorOr** result pattern — handlers return `ErrorOr<T>` for expected failures instead of throwing.
-- **FluentValidation** — request validation on every command/query.
-- **Mapster** — object mapping (via `.Adapt<T>()` and `IRegister` mapping classes).
-- **Soft Delete** — entities implementing `ISoftDelete` are soft-deleted by the generic repository.
+- **Api** depends on **Application** (to dispatch commands/queries)
+- **Application** depends on **Domain** (to use entities and interfaces)
+- **Infrastructure** depends on **Domain** (to implement interfaces) and references **Application** (for DTOs)
+- **Domain** has **zero** external dependencies — it is the innermost layer
 
 ---
 
-## Tech Stack
+## Design Patterns & Engineering Practices
 
-| Technology | Purpose |
-|------------|---------|
-| ASP.NET Core 10 | Web framework (controllers, minimal APIs, middleware) |
-| Entity Framework Core | ORM + migrations (SQL Server) |
-| SQL Server | Primary database |
-| Redis | Distributed caching (reports, etc.) |
-| ASP.NET Core Identity | User management (users extend `IdentityUser`) |
-| MediatR | CQRS command/query dispatcher |
-| FluentValidation | Request validation |
-| Mapster | Object mapping |
-| ErrorOr | Functional error handling |
-| SignalR | Real-time notifications (`/notificationHub`) |
-| MailKit | SMTP email (confirmation, OTP, reset, invites) |
-| QuestPDF | PDF report generation |
-| Serilog + Seq | Structured logging |
+| Pattern | Where | Purpose |
+|---------|-------|---------|
+| **Clean Architecture** | Entire solution | Enforces separation of concerns; business logic is independent of infrastructure |
+| **CQRS** | `Application/Features/` | Every feature is a command or query handled by a dedicated handler |
+| **Mediator** | MediatR | Decouples controllers from handlers; enables pipeline behaviors |
+| **Repository + Unit of Work** | `Infrastructure/Repositories/` | All data access flows through `IUnitOfWork`; repositories are never injected into handlers directly |
+| **ErrorOr** | Handlers return `ErrorOr<T>` | Expected failures are returned as values, not thrown as exceptions |
+| **FluentValidation** | `ValidationBehavior<T>` pipeline | Request validation runs before every handler; failures short-circuit the pipeline |
+| **Mapster** | DTO mapping | Object mapping via `.Adapt<T>()` and `IRegister` mapping classes |
+| **Soft Delete** | `ISoftDelete` entities | Entities are marked deleted rather than removed; global query filters exclude them |
+| **Options Pattern** | Configuration classes | Strongly-typed configuration for JWT, OTP, mail, Redis settings |
+| **Background Services** | Email queues, cleanup | Channel-based in-memory queues for async email processing; periodic removal of unconfirmed users |
+| **Global Exception Handling** | `GlobalExceptionHandler` | Maps infrastructure exceptions to RFC 7807 Problem Details responses |
 
 ---
 
 ## Domain Model
 
-All entities live in `src/Domain/Entities/`.
+```
+User (IdentityUser)
+ ├── WorkSpaceUser ──────── WorkSpace
+ │                              ├── Project ──────── ProjectTask
+ │                              │                      ├── TaskAssignment
+ │                              │                      ├── TaskComment
+ │                              │                      └── TaskAttachment
+ │                              └── WorkSpaceInvite
+ ├── Notification
+ └── RefreshToken
+```
 
-| Entity | Notes |
-|--------|-------|
-| `User` | Extends `IdentityUser`. **String** primary key. Has `FirstName`, `LastName`, `DateOfBirth`. |
-| `WorkSpace` | Top-level container (`long Id`), tracks `CreatedById`, `LastUpdatedById`. Soft-deletable. |
-| `WorkSpaceUser` | Many-to-many `User` ↔ `WorkSpace` join with a `WorkSpaceRole`. |
-| `Project` | Belongs to a `WorkSpace`, has a `ProjectStatus`. Soft-deletable. |
-| `ProjectTask` | Belongs to a `Project`, has `TaskStatus`, `TaskPriority`, `Deadline`. Soft-deletable. |
-| `TaskAssignment` | Assigns a user to a task (`AssignedToId`), tracks who assigned and when it was unassigned. |
-| `TaskComment` | Comments on a task by a user. |
-| `TaskAttachment` | File metadata on a task. |
-| `Notification` | Per-user notification (optionally linked to a task or workspace invite). |
-| `RefreshToken` | Refresh tokens for the JWT rotation flow. |
-| `WorkSpaceInvite` | Invitation to join a workspace with role and expiry. |
+### Key Entities
+
+| Entity | Key | Description |
+|--------|-----|-------------|
+| `User` | `string` | Extends `IdentityUser`. Has `FirstName`, `LastName`, `DateOfBirth`, custom `RoleId`. |
+| `WorkSpace` | `long` | Top-level container. Tracks `CreatedById`, `LastUpdatedById`. Soft-deletable. |
+| `WorkSpaceUser` | `long` | Many-to-many join with a `WorkSpaceRole`. |
+| `Project` | `long` | Belongs to a `WorkSpace`. Has `ProjectStatus`. Soft-deletable. |
+| `ProjectTask` | `long` | Belongs to a `Project`. Has `TaskStatus`, `TaskPriority`, `Deadline`. Soft-deletable. |
+| `TaskAssignment` | `long` | Assigns a user to a task. Tracks who assigned and when unassigned. |
+| `TaskComment` | `long` | Comments on a task by a user. |
+| `TaskAttachment` | `long` | File metadata on a task. |
+| `Notification` | `long` | Per-user notification, optionally linked to a task or workspace invite. |
+| `RefreshToken` | `long` | JWT refresh tokens with revocation support. |
+| `WorkSpaceInvite` | `long` | Invitation to join a workspace with role and expiry. |
+| `RecentActivity` | `long` | System-wide activity log for the admin dashboard. |
 
 ### Enums
 
@@ -134,47 +182,129 @@ All enums are serialized as **strings** in JSON (`JsonStringEnumConverter`).
 | `TaskPriority` | `Low`, `Medium`, `High`, `Critical` |
 | `WorkSpaceInviteStatus` | `Pending`, `Accepted`, `Rejected` |
 | `NotificationType` | `TaskAssigned`, `TaskUnassigned`, `TaskStatusUpdated`, `TaskUpdated`, `CommentAdded`, `DueDateReminder`, `TaskDeleted`, `WorkSpaceInvite` |
-| `OtpPurpose` | `ForgetPassword` |
-| `Provider` | `Google` |
+| `RecentActivityType` | `UserRegistered`, `WorkspaceCreated`, `WorkSpaceDeleted`, `JoinedWorkspace`, `ProjectCreated`, `ProjectDeleted`, `TaskCompleted` |
 
 > [!TIP]
-> Because IDs are passed as route params and enums as strings, JSON bodies use `"status": "InProgress"` rather than numbers.
+> Because IDs are passed as route params and enums as strings, JSON bodies use `"status": "InProgress"` rather than numeric values.
 
 ---
 
-## Authentication & Authorization
+## Authentication & Security
 
-### JWT via cookies
+### Authentication lifecycle
 
-- JWT access tokens are read from the **`access_token` HttpOnly cookie**, not the `Authorization` header.
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as API
+    participant I as Identity
+    participant M as MailService
+
+    C->>A: POST /api/auth/register-user
+    A->>I: Create user + email token
+    A->>M: Send confirmation email
+    A-->>C: 200 { id }
+
+    C->>A: POST /api/auth/confirm-email
+    A->>I: Confirm email
+    A-->>C: 204
+
+    C->>A: POST /api/auth/login
+    A->>I: Validate credentials
+    A->>A: Generate JWT + RefreshToken
+    A-->>C: 204 + Set-Cookie (access_token, refresh_token)
+
+    loop Every request
+        C->>A: API call with cookies
+        A->>A: Validate JWT from access_token cookie
+    end
+
+    C->>A: POST /api/auth/refresh-token
+    A->>I: Validate refresh token
+    A->>A: Issue new JWT
+    A-->>C: 204 + Set-Cookie (access_token)
+```
+
+### JWT configuration
+
+- Access tokens are read from the **`access_token` HttpOnly cookie**, not the `Authorization` header.
 - Refresh tokens are stored in the **`refresh_token`** cookie.
-- Login/refresh/logout endpoints set or clear these cookies automatically.
-- All protected endpoints expect the cookie to be sent by the browser (or an HTTP client configured to send cookies).
+- Signing: HMAC-SHA256 with a symmetric key.
+- Token lifetime: configurable (default 20 minutes).
+- Refresh token lifetime: configurable (default 30 days).
+- Clock skew: `TimeSpan.Zero`.
 
-### Roles & policies
+### Cookie security
 
-| Role / Policy | Meaning |
-|---------------|---------|
-| `Admin` (global role) | Bypasses workspace membership checks. Can manage users, list all workspaces, etc. |
-| `WorkSpaceOwner` | The user is the **Owner** of the workspace. |
-| `WorkSpaceUser` | The user is a member of the workspace (any role). |
-| `WorkSpaceProjectManager` | The user is a **ProjectManager** in the workspace. |
-
-Controllers perform inline authorization via `IAuthorizationService.AuthorizeAsync(User, resourceId, policyName)`. Handlers for these policies live in `src/Api/Polices/WorkSpace/`.
+| Property | Value |
+|----------|-------|
+| HttpOnly | `true` |
+| Secure | `true` |
+| SameSite | `None` |
+| Path | `/` |
+| Expires | 30 days |
 
 ### Google OAuth
 
 - `GET /api/auth/login-user-with-google?returnUrl=...` triggers the OAuth challenge.
-- The callback `GET /api/auth/login-user-by-provider-callback?returnUrl=...` completes login and redirects back.
-- `returnUrl` must be an allowed origin (see `Api/Common/Origins/AllowOrigin.cs`).
+- The callback `GET /api/auth/login-user-by-provider-callback?returnUrl=...` completes login and redirects.
+- `returnUrl` must be an allowed origin.
 
-### Registration rules
+### Password rules
 
-- First/last name: 2–50 characters.
-- Email: valid email address.
-- Password: 8–80 characters, must contain at least one lowercase, one uppercase, one digit, and one special character (`!@#$%^&*()_+=-`).
-- Date of birth: must be at least **18 years old**.
-- New accounts must **confirm their email** before logging in (`POST /api/auth/confirm-email`).
+- Minimum 8 characters, maximum 80.
+- Must contain at least one lowercase, one uppercase, one digit, and one special character (`!@#$%^&*()_+=-`).
+- Users must be at least 18 years old to register.
+
+---
+
+## Authorization Model
+
+### Global roles
+
+| Role | Meaning |
+|------|---------|
+| `Admin` | Bypasses workspace membership checks. Can manage users, list all workspaces, access admin dashboards. |
+| `User` | Standard user. Must be a workspace member to access workspace resources. |
+
+### Workspace roles
+
+| Role | Capabilities |
+|------|-------------|
+| `Owner` | Full control: update workspace, manage members, invite users, create/update/delete projects and tasks |
+| `ProjectManager` | Create/update/delete projects and tasks, assign users, change task status |
+| `Member` | View tasks, comment, update status of own assigned tasks |
+
+### Authorization policies
+
+| Policy | Handler | Check |
+|--------|---------|-------|
+| `WorkSpaceOwner` | `WorkSpaceOwnerRequirementHandler` | User has `WorkSpaceRole.Owner` in the workspace |
+| `WorkSpaceUser` | `WorkSpaceUserRequirementHandler` | User is a member of the workspace (any role) |
+| `WorkSpaceProjectManager` | `WorkSpaceProjectManagerRequirementHandler` | User has `WorkSpaceRole.ProjectManager` in the workspace |
+
+Controllers perform inline authorization via `IAuthorizationService.AuthorizeAsync(User, resourceId, policyName)`. Admin role checks bypass workspace-level authorization entirely.
+
+---
+
+## Tech Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| ASP.NET Core | 10 | Web framework |
+| Entity Framework Core | 10.0.9 | ORM + migrations |
+| SQL Server | — | Primary database |
+| Redis | — | Distributed caching |
+| ASP.NET Core Identity | 10.0.9 | User management |
+| MediatR | 14.1.0 | CQRS command/query dispatcher |
+| FluentValidation | 12.1.1 | Request validation |
+| Mapster | 10.0.10 | Object mapping |
+| ErrorOr | 2.1.1 | Functional error handling |
+| SignalR | 10.0.9 | Real-time notifications |
+| MailKit | 4.17.0 | SMTP email |
+| QuestPDF | 2026.7.2 | PDF report generation |
+| Serilog | 10.0.0 | Structured logging |
+| BCrypt.Net | 4.2.0 | Password hashing |
 
 ---
 
@@ -184,7 +314,7 @@ Controllers perform inline authorization via `IAuthorizationService.AuthorizeAsy
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server) (LocalDB or a full instance)
-- [Redis](https://redis.io/) (caching)
+- [Redis](https://redis.io/) (for caching)
 - Optional: [Seq](http://localhost:5341) for structured log ingestion
 
 ### Clone & run
@@ -216,7 +346,7 @@ dotnet ef migrations add <Name> \
 ```
 
 > [!TIP]
-> Connection strings live in `appsettings.Development.json` under the `SqlServer` key (not `DefaultConnection`). Redis is under the `Redis` key.
+> Connection strings live in `appsettings.Development.json` under the `ConnectionStrings:SqlServer` key. Redis is under `ConnectionStrings:Redis`.
 
 ---
 
@@ -228,1183 +358,24 @@ All configuration lives in `appsettings.json` / `appsettings.Development.json`.
 |---------|-------------|---------------|
 | `ConnectionStrings:SqlServer` | SQL Server connection string | `Server=.;Database=TaskManagementsDB;Integrated Security=True;...` |
 | `ConnectionStrings:Redis` | Redis connection string | `localhost:6379` |
-| `Jwt:SigningKey` | JWT signing key (from user-secrets / env in production) | — |
+| `Jwt:SigningKey` | JWT signing key | **Must be provided via user-secrets or env** |
 | `Jwt:Issuer` | Token issuer | `https://localhost:7018` |
 | `Jwt:Audience` | Token audience | `http://localhost:4200` |
 | `Jwt:LifeTimeMinutes` | Access-token lifetime | `20` |
 | `RefreshToken:LifeTimeDays` | Refresh-token lifetime | `30` |
 | `Otp:LifeTimeInMinutes` | OTP lifetime | `60` |
 | `WorkSpaceInvite:LifeTimeDays` | Invite expiry | `60` |
-| `Mail` | SMTP settings (Email, AppPassword, Host, Port) | Ethereal test inbox |
-| `settings:frontendUrl` | Frontend origin used in emails/redirects | `http://localhost:4200` |
-| `Serilog` | Serilog sinks (Console + Seq) and levels | Seq at `localhost:5341` |
-| `Authentication:Google` | Google OAuth ClientId / ClientSecret | — |
+| `Mail:Email` | SMTP username | Ethereal test inbox |
+| `Mail:AppPassword` | SMTP password | Ethereal test password |
+| `Mail:Host` | SMTP host | `smtp.ethereal.email` |
+| `Mail:Port` | SMTP port | `587` |
+| `settings:frontendUrl` | Frontend origin for email links | `http://localhost:5173` |
+| `Authentication:Google:ClientId` | Google OAuth client ID | **Must be provided** |
+| `Authentication:Google:ClientSecret` | Google OAuth client secret | **Must be provided** |
+| `Serilog:WriteTo:Seq:Args:serverUrl` | Seq server URL | `http://localhost:5341` |
 
 > [!IMPORTANT]
-> Secrets such as `Jwt:SigningKey` and `Authentication:Google` must **not** be committed. Provide them via environment variables or user-secrets in production.
-
----
-
-## API Reference
-
-> Conventions used below:
-> - Base URL: `http://localhost:5102`
-> - Authentication is via the `access_token` cookie (set by login). Endpoints marked **🔒** require an authenticated user.
-> - Route values: `{workspaceId}` / `{workSpaceId}` and `{projectId}` are `long`; `{userId}` / `{memberId}` are `string` (Identity IDs); `{taskId}`, `{commentId}`, `{attachmentId}`, `{id}` are `long`.
-> - Pagination endpoints accept `?pageNumber=1&pageSize=10` (see [Pagination](#pagination)).
-> - All errors are returned as **RFC 7807 Problem Details** (`errors.ToProblemDetailsObjectResult()`).
-
----
-
-### Endpoint index (grouped by controller)
-
-| # | Controller | Base route | APIs |
-|---|------------|------------|------|
-| 1 | `AuthController` | `/api/auth` | `POST register-user` · `POST register-admin` · `POST confirm-email` · `POST login` · `POST refresh-token` · `POST logout` · `GET ""` · `PUT ""` · `POST forget-password/send-otp` · `POST forget-password/resend-otp` · `POST forget-password` · `POST reset-password/send-email` · `POST reset-password` · `POST change-email/send-email` · `POST change-email` · `POST delete-account/send-email` · `DELETE delete-account` · `GET login-user-with-google` · `GET login-user-by-provider-callback` |
-| 2 | `UsersController` | `/api/users` | `GET {id}` · `GET all` · `GET admin-users` · `GET regular-users` · `DELETE {id}` |
-| 3 | `WorkSpacesController` | `/api/workspaces` | `GET {id}` · `GET all` · `GET {id}/all-users` · `GET {id}/my-role` · `POST ""` · `PUT {id}` · `DELETE {id}` · `GET overviews` · `GET {id}/details` |
-| 4 | `WorkSpaceInvitesController` | `/api/workspace-invites` | `GET {id}` · `GET all-my-invites` · `GET all-my-send-invites` · `POST ""` · `DELETE {id}` · `PATCH {id}/accept` · `PATCH {id}/reject` |
-| 5 | `ProjectsController` | `/api/workspaces/{workspaceId}/projects` | `POST ""` · `GET {projectId}` · `GET ""` · `PUT {projectId}` · `PATCH {projectId}/status` · `DELETE {projectId}` |
-| 6 | `ProjectsTasksController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks` | `POST ""` · `GET {taskId}` · `GET {taskId}/me` · `GET ""` · `GET users/{userId}` · `GET me` · `PUT {taskId}` · `DELETE {taskId}` · `POST {taskId}/assignments` · `DELETE {taskId}/assignments/{assignedUserId}` · `PATCH {taskId}/status` · `PATCH {taskId}/me/status` |
-| 7 | `TaskCommentsController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments` | `POST ""` · `GET ""` · `GET {commentId}` · `PUT {commentId}` · `DELETE {commentId}` |
-| 8 | `TaskAttachmentsController` | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments` | `POST ""` · `GET ""` · `GET {attachmentId}` · `GET by-name/{name}` · `GET {attachmentId}/download` · `DELETE {attachmentId}` |
-| 9 | `ReportsController` | `/api/workspaces/{workSpaceId}/reports` | `GET projects/{projectId}/tasks-by-priority` · `GET projects/{projectId}/tasks-by-status` · `GET members/{memberId}/performance` · `GET projects/{projectId}/members/{memberId}/performance` · `GET ""` · `GET pdf/download` |
-| 10 | `NotificationsController` | `/api/notifications` | `GET {id}` · `GET all` · `GET all/unread` · `PUT {id}/read` |
-| 11 | `DashboardController` | `/api/workspaces/{workspaceId}/dashboard` | `GET ""` |
-| 12 | `AdminDashboardController` | `/api/admin/dashboard` | `GET ""` · `GET recent-activities` |
-| 13 | `AdminReportsController` | `/api/admin/reports` | `GET member-performances` · `GET overview` · `GET overview/pdf/download` |
-
----
-
-### Controller API tables
-
-#### AuthController — `/api/auth`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register-user` | Register a new regular user |
-| POST | `/api/auth/register-admin` | Register a new Admin user (**Admin**) |
-| POST | `/api/auth/confirm-email` | Confirm the email address |
-| POST | `/api/auth/login` | Log in, sets auth cookies |
-| POST | `/api/auth/refresh-token` | Rotate the access token |
-| POST | `/api/auth/logout` | Log out, clears cookies |
-| GET | `/api/auth` | Get the current user |
-| PUT | `/api/auth` | Update the current user's profile |
-| POST | `/api/auth/forget-password/send-otp` | Send password-reset OTP |
-| POST | `/api/auth/forget-password/resend-otp` | Resend password-reset OTP |
-| POST | `/api/auth/forget-password` | Reset password via OTP |
-| POST | `/api/auth/reset-password/send-email` | Send password-reset email (token) |
-| POST | `/api/auth/reset-password` | Reset password via emailed token |
-| POST | `/api/auth/change-email/send-email` | Send change-email confirmation |
-| POST | `/api/auth/change-email` | Confirm email change via token |
-| POST | `/api/auth/delete-account/send-email` | Send delete-account confirmation email |
-| DELETE | `/api/auth/delete-account` | Permanently delete the account via emailed token |
-| GET | `/api/auth/login-user-with-google` | Start Google OAuth login |
-| GET | `/api/auth/login-user-by-provider-callback` | OAuth callback, completes login |
-
-#### UsersController — `/api/users`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/users/{id}` | Get a user by ID |
-| GET | `/api/users/all` | List all users (**Admin**) |
-| GET | `/api/users/admin-users` | List all admin users (**Admin**) |
-| GET | `/api/users/regular-users` | List all regular users (**Admin**) |
-| DELETE | `/api/users/{id}` | Delete a user (**Admin**) |
-
-#### WorkSpacesController — `/api/workspaces`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/workspaces/{id}` | Get a workspace by ID |
-| GET | `/api/workspaces/all` | List workspaces (Admin: all; user: mine) |
-| GET | `/api/workspaces/{id}/all-users` | List workspace members |
-| GET | `/api/workspaces/{id}/my-role` | Get my role in the workspace |
-| POST | `/api/workspaces` | Create a workspace |
-| PUT | `/api/workspaces/{id}` | Update a workspace (**Admin/Owner**) |
-| DELETE | `/api/workspaces/{id}` | Delete a workspace (**Admin/Owner**) |
-| GET | `/api/workspaces/overviews` | List workspace overviews with stats (**Admin**) |
-| GET | `/api/workspaces/{id}/details` | Get full workspace details (**Admin**) |
-
-#### WorkSpaceInvitesController — `/api/workspace-invites`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/workspace-invites/{id}` | Get an invite by ID |
-| GET | `/api/workspace-invites/all-my-invites` | List invites received by me |
-| GET | `/api/workspace-invites/all-my-send-invites` | List invites sent by me |
-| POST | `/api/workspace-invites` | Invite a user to a workspace (**Owner**) |
-| DELETE | `/api/workspace-invites/{id}` | Delete a pending invite |
-| PATCH | `/api/workspace-invites/{id}/accept` | Accept an invite |
-| PATCH | `/api/workspace-invites/{id}/reject` | Reject an invite |
-
-#### ProjectsController — `/api/workspaces/{workspaceId}/projects`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/workspaces/{workspaceId}/projects` | Create a project (**Admin/Owner/ProjectManager**) |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}` | Get a project by ID |
-| GET | `/api/workspaces/{workspaceId}/projects` | List projects in the workspace |
-| PUT | `/api/workspaces/{workspaceId}/projects/{projectId}` | Update a project (**Admin/Owner/ProjectManager**) |
-| PATCH | `/api/workspaces/{workspaceId}/projects/{projectId}/status` | Update project status (**Admin/Owner/ProjectManager**) |
-| DELETE | `/api/workspaces/{workspaceId}/projects/{projectId}` | Delete a project (**Admin/Owner/ProjectManager**) |
-
-#### ProjectsTasksController — `/api/workspaces/{workspaceId}/projects/{projectId}/tasks`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks` | Create a task (**Admin/Owner/ProjectManager**) |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}` | Get a task by ID |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/me` | Get a task assigned to me |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks` | List project tasks (filterable) |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/users/{userId}` | List a user's tasks |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/me` | List my tasks |
-| PUT | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}` | Update a task (**Admin/Owner/ProjectManager**) |
-| DELETE | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}` | Delete a task (**Admin/Owner/ProjectManager**) |
-| POST | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/assignments` | Assign a user to the task (**Admin/Owner/ProjectManager**) |
-| DELETE | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/assignments/{assignedUserId}` | Unassign a user (**Admin/Owner/ProjectManager**) |
-| PATCH | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/status` | Change task status (**Admin/Owner/ProjectManager**) |
-| PATCH | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/me/status` | Change my assigned task status |
-
-#### TaskCommentsController — `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments` | Add a comment |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments` | List task comments |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments/{commentId}` | Get a comment by ID |
-| PUT | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments/{commentId}` | Update a comment (author) |
-| DELETE | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments/{commentId}` | Delete a comment (Admin/Owner or author) |
-
-#### TaskAttachmentsController — `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments` | Upload an attachment (**Admin/Owner/ProjectManager**) |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments` | List task attachments |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/{attachmentId}` | Get attachment by ID |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/by-name/{name}` | Get attachment by file name |
-| GET | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/{attachmentId}/download` | Download an attachment |
-| DELETE | `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments/{attachmentId}` | Delete an attachment (**Admin/Owner/ProjectManager**) |
-
-#### ReportsController — `/api/workspaces/{workSpaceId}/reports`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/workspaces/{workSpaceId}/reports/projects/{projectId}/tasks-by-priority` | Tasks grouped by priority |
-| GET | `/api/workspaces/{workSpaceId}/reports/projects/{projectId}/tasks-by-status` | Tasks grouped by status |
-| GET | `/api/workspaces/{workSpaceId}/reports/members/{memberId}/performance` | Member performance in workspace (**Admin/Owner/ProjectManager**) |
-| GET | `/api/workspaces/{workSpaceId}/reports/projects/{projectId}/members/{memberId}/performance` | Member performance in project |
-| GET | `/api/workspaces/{workSpaceId}/reports` | Workspace overview report (**Admin/Owner/ProjectManager**) |
-| GET | `/api/workspaces/{workSpaceId}/reports/pdf/download` | Download workspace report PDF (**Admin/Owner/ProjectManager**) |
-
-#### NotificationsController — `/api/notifications`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/notifications/{id}` | Get a notification by ID |
-| GET | `/api/notifications/all` | List my notifications |
-| GET | `/api/notifications/all/unread` | List my unread notifications |
-| PUT | `/api/notifications/{id}/read` | Mark a notification as read |
-
-#### WorkSpaceUserDashboardController — `/api/workspaces/{workspaceId}/dashboard`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/workspaces/{workspaceId}/dashboard` | Workspace dashboard (Admin/Owner/ProjectManager: full workspace; other members: user-specific) |
-
-#### AdminDashboardController — `/api/admin/dashboard`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/admin/dashboard` | Admin dashboard with global stats (users, workspaces, projects, tasks) |
-| GET | `/api/admin/dashboard/recent-activities` | Paginated list of recent activities across the system |
-
-#### AdminReportsController — `/api/admin/reports`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/admin/reports/member-performances` | List all member performances across workspaces (**Admin**, paginated, filterable) |
-| GET | `/api/admin/reports/overview` | Workspaces overview report with date filtering (**Admin**) |
-| GET | `/api/admin/reports/overview/pdf/download` | Download workspaces overview report as PDF (**Admin**) |
-
----
-
-### 1. Auth — `/api/auth`
-
-#### 1.1 POST `/api/auth/register-user`
-Register a new regular user. **Anonymous.**
-
-**Body:**
-```json
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "password": "Password123!",
-  "dateOfBirth": "2000-01-01"
-}
-```
-**Response:** `200 OK` with `{ "id": "<userId>" }`. A confirmation email is sent.
-
-#### 1.2 POST `/api/auth/register-admin`
-Register a new **Admin** user. **Admin only.**
-
-Same body as registration. **Response:** `200 OK` with `{ "id": "<userId>" }`.
-
-#### 1.3 POST `/api/auth/confirm-email?email=&token=`
-Confirm the email address after registration. **Anonymous.**
-
-**Response:** `204 No Content`.
-
-#### 1.4 POST `/api/auth/login`
-Log in and set the auth cookies. **Anonymous.**
-
-**Body:**
-```json
-{ "email": "john@example.com", "password": "Password123!" }
-```
-**Response:** `204 No Content` — sets `access_token` and `refresh_token` HttpOnly cookies.
-
-#### 1.5 POST `/api/auth/refresh-token`
-Rotate the access token using the `refresh_token` cookie. **Anonymous.**
-
-**Response:** `204 No Content` — refreshes the `access_token` cookie. `401 Unauthorized` if no/invalid refresh token.
-
-#### 1.6 POST `/api/auth/logout`
-Log out and clear the auth cookies. **🔒**
-
-**Response:** `204 No Content`.
-
-#### 1.7 GET `/api/auth`
-Get the currently authenticated user. **🔒**
-
-**Response:** `200 OK` with a `UserDto`:
-```json
-{
-  "id": "a1b2c3...",
-  "email": "john@example.com",
-  "firstName": "John",
-  "lastName": "Doe",
-  "dateOfBirth": "2000-01-01"
-}
-```
-
-#### 1.8 PUT `/api/auth`
-Update the current user's profile. **🔒**
-
-**Body:**
-```json
-{ "firstName": "Johnny", "lastName": "Doe", "dateOfBirth": "2000-01-01" }
-```
-**Response:** `201 Created` with the updated `UserDto`.
-
-#### 1.9 POST `/api/auth/forget-password/send-otp`
-Send an OTP to the user's email for password reset. **Anonymous.**
-
-**Body:** `{ "email": "john@example.com" }`
-**Response:** `204 No Content`.
-
-#### 1.10 POST `/api/auth/forget-password/resend-otp`
-Resend the password-reset OTP. **Anonymous.**
-
-**Body:** `{ "email": "john@example.com" }`
-**Response:** `204 No Content`.
-
-#### 1.11 POST `/api/auth/forget-password`
-Reset the password using the OTP (for users who forgot it). **Anonymous.**
-
-**Body:**
-```json
-{ "email": "john@example.com", "newPassword": "NewPassword123!", "otp": "123456" }
-```
-**Response:** `204 No Content`.
-
-#### 1.12 POST `/api/auth/reset-password/send-email`
-Send a password-reset email (token link) to the authenticated user. **🔒**
-
-**Response:** `204 No Content`.
-
-#### 1.13 POST `/api/auth/reset-password`
-Reset the password with the emailed token. **🔒**
-
-**Body:** `{ "token": "<resetToken>", "newPassword": "NewPassword123!" }`
-**Response:** `204 No Content`.
-
-#### 1.14 POST `/api/auth/change-email/send-email?email=`
-Send a change-email confirmation to the new address. **🔒**
-
-**Response:** `204 No Content`.
-
-#### 1.15 POST `/api/auth/change-email`
-Confirm the email change with the emailed token. **🔒**
-
-**Body:** `{ "token": "<changeToken>", "newEmail": "new@example.com" }`
-**Response:** `204 No Content`.
-
-#### 1.16 POST `/api/auth/delete-account/send-email`
-Send a delete-account confirmation email with a token link. **🔒**
-
-**Response:** `204 No Content`.
-
-#### 1.17 DELETE `/api/auth/delete-account`
-Permanently delete the current user's account using the emailed token. **🔒**
-
-**Body:** `{ "token": "<deleteToken>" }`
-**Response:** `204 No Content` — clears auth cookies.
-
-#### 1.18 GET `/api/auth/login-user-with-google?returnUrl=`
-Start Google OAuth login. **Anonymous.** `returnUrl` must be an allowed origin.
-
-**Response:** `401 Challenge` redirecting to Google's consent screen.
-
-#### 1.19 GET `/api/auth/login-user-by-provider-callback?returnUrl=&remoteError=`
-OAuth callback endpoint. **Anonymous.**
-
-**Response:** `302 Redirect` to `returnUrl` with auth cookies set. Returns `400` for invalid `returnUrl` or remote errors.
-
----
-
-### 2. Users — `/api/users`
-
-#### 2.1 GET `/api/users/{id}` 🔒
-Get a user by ID.
-
-**Response:** `200 OK` with a `UserDto` (see [1.7](#17-get-apiauth)).
-
-#### 2.2 GET `/api/users/all?pageNumber=&pageSize=` 🔒 **Admin**
-List all users (paginated).
-
-**Response:** `200 OK` with a `PaginationResultDto<UserDto>`.
-
-#### 2.3 GET `/api/users/admin-users?pageNumber=&pageSize=` 🔒 **Admin**
-List all admin users only (paginated).
-
-**Response:** `200 OK` with a `PaginationResultDto<UserDto>`.
-
-#### 2.4 GET `/api/users/regular-users?pageNumber=&pageSize=` 🔒 **Admin**
-List all regular users (non-admin) only (paginated).
-
-**Response:** `200 OK` with a `PaginationResultDto<UserDto>`.
-
-#### 2.5 DELETE `/api/users/{id}` 🔒 **Admin**
-Delete a user account.
-
-**Response:** `204 No Content`.
-
----
-
-### 3. Workspaces — `/api/workspaces`
-
-#### 3.1 GET `/api/workspaces/{id}` 🔒
-Get a workspace by ID. Accessible by **Admin** or any workspace member.
-
-**Response:** `200 OK` with a `WorkSpaceDto`:
-```json
-{
-  "id": 1,
-  "name": "Acme Corp",
-  "description": "Product development",
-  "createdById": "a1b2c3...",
-  "createdAt": "2026-01-01T10:00:00Z",
-  "lastUpdatedById": null,
-  "lastUpdatedAt": null
-}
-```
-
-#### 3.2 GET `/api/workspaces/all?pageNumber=&pageSize=` 🔒
-List workspaces (paginated).
-- **Admin:** returns **all** workspaces (`GetAllWorkSpacesQuery`).
-- **Any user:** returns only the workspaces the user belongs to (`GetAllUserWorkSpacesQuery`).
-
-**Response:** `200 OK` with `PaginationResultDto<WorkSpaceDto>`.
-
-#### 3.3 GET `/api/workspaces/{id}/all-users?pageNumber=&pageSize=` 🔒
-List the members of a workspace. Accessible by **Admin** or any workspace member.
-
-**Response:** `200 OK` with `PaginationResultDto<WorkSpaceUserDto>`:
-```json
-{
-  "id": 1,
-  "fullName": "John Doe",
-  "email": "john@example.com",
-  "workSpaceRole": "Owner"
-}
-```
-
-#### 3.4 GET `/api/workspaces/{id}/my-role` 🔒
-Get the current user's role in a workspace. Accessible by **Admin** or any workspace member.
-
-**Response:** `200 OK` with a `WorkSpaceRole` string:
-```
-"Owner"
-```
-
-#### 3.5 POST `/api/workspaces` 🔒
-Create a workspace. The creator becomes its **Owner**.
-
-**Body:**
-```json
-{ "name": "Acme Corp", "description": "Product development" }
-```
-**Response:** `201 Created` with the `WorkSpaceDto` and a `Location` header to `GET /api/workspaces/{id}`.
-
-#### 3.6 PUT `/api/workspaces/{id}` 🔒 **Admin or Owner**
-Update a workspace.
-
-**Body:** `{ "name": "Acme Corp 2", "description": "Updated" }`
-**Response:** `204 No Content`.
-
-#### 3.7 DELETE `/api/workspaces/{id}` 🔒 **Admin or Owner**
-Delete (soft-delete) a workspace.
-
-**Response:** `204 No Content`.
-
-#### 3.8 GET `/api/workspaces/overviews?pageNumber=&pageSize=&ownerName=&workSpaceName=` 🔒 **Admin**
-List workspace overviews with aggregated stats (paginated, filterable).
-
-**Query params:**
-| Param | Type | Description |
-|-------|------|-------------|
-| `pageNumber` | int | Page number (default `1`) |
-| `pageSize` | int | Page size (default `10`) |
-| `ownerName` | string | Optional filter by owner name |
-| `workSpaceName` | string | Optional filter by workspace name |
-
-**Response:** `200 OK` with `PaginationResultDto<WorkSpaceOverviewDto>`:
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "name": "Acme Corp",
-      "ownersNames": ["John Doe"],
-      "membersCount": 8,
-      "projectsCount": 4,
-      "tasksCount": 25,
-      "createdAt": "2026-01-01T10:00:00Z"
-    }
-  ],
-  "totalCount": 12,
-  "pageNumber": 1,
-  "pageSize": 10,
-  "nextPage": 2,
-  "previousPage": null,
-  "totalPages": 2,
-  "hasNextPage": true,
-  "hasPreviousPage": false
-}
-```
-
-#### 3.9 GET `/api/workspaces/{id}/details` 🔒 **Admin**
-Get full workspace details including overview stats, completion percentage, members, and project names.
-
-**Response:** `200 OK` with a `WorkSpaceDetailsDto`:
-```json
-{
-  "workSpaceOverview": {
-    "id": 1,
-    "name": "Acme Corp",
-    "ownersNames": ["John Doe"],
-    "membersCount": 8,
-    "projectsCount": 4,
-    "tasksCount": 25,
-    "createdAt": "2026-01-01T10:00:00Z"
-  },
-  "completionPercentage": 32.0,
-  "members": [
-    { "id": 1, "fullName": "John Doe" },
-    { "id": 2, "fullName": "Jane Smith" }
-  ],
-  "projectNames": ["Website Redesign", "Mobile App"]
-}
-```
-
----
-
-### 4. Workspace Invites — `/api/workspace-invites`
-
-#### 4.1 GET `/api/workspace-invites/{id}` 🔒
-Get an invite by ID.
-- **Admin:** any invite.
-- **Other users:** only invites addressed to them.
-
-**Response:** `200 OK` with a `WorkSpaceInviteDto`:
-```json
-{
-  "id": 1,
-  "workSpaceId": 2,
-  "invitedToId": "a1b2c3...",
-  "invitedById": "d4e5f6...",
-  "createdAt": "2026-01-01T10:00:00Z",
-  "expiresAt": "2026-03-01T10:00:00Z",
-  "workSpaceInviteStatus": "Pending"
-}
-```
-
-#### 4.2 GET `/api/workspace-invites/all-my-invites?pageNumber=&pageSize=` 🔒
-List invites **received** by the current user (paginated).
-
-**Response:** `200 OK` with `PaginationResultDto<WorkSpaceInviteDto>`.
-
-#### 4.3 GET `/api/workspace-invites/all-my-send-invites?pageNumber=&pageSize=` 🔒
-List invites **sent** by the current user (paginated).
-
-**Response:** `200 OK` with `PaginationResultDto<WorkSpaceInviteDto>`.
-
-#### 4.4 POST `/api/workspace-invites` 🔒 **Workspace Owner**
-Invite a user to a workspace with a role.
-
-**Body:**
-```json
-{ "workSpaceId": 2, "inviteToEmail": "jane@example.com", "workSpaceRole": "ProjectManager" }
-```
-**Response:** `201 Created` with the `WorkSpaceInviteDto` and a `Location` header to `GET /api/workspace-invites/{id}`.
-
-#### 4.5 DELETE `/api/workspace-invites/{id}` 🔒
-Delete a pending invite (by the sender).
-
-**Response:** `204 No Content`.
-
-#### 4.6 PATCH `/api/workspace-invites/{id}/accept` 🔒
-Accept an invite (must be the invited user). Adds the user to the workspace with the invited role.
-
-**Response:** `204 No Content`.
-
-#### 4.7 PATCH `/api/workspace-invites/{id}/reject` 🔒
-Reject an invite (must be the invited user).
-
-**Response:** `204 No Content`.
-
----
-
-### 5. Projects — `/api/workspaces/{workspaceId}/projects`
-
-Authorization helper:
-- **Manage** (create/update/status/delete): **Admin**, **Owner**, or **ProjectManager**.
-- **Read** (get/list): **Admin** or any workspace member.
-
-#### 5.1 POST `` 🔒 *Manage*
-Create a project in the workspace.
-
-**Body:**
-```json
-{ "name": "Website Redesign", "description": "Q1 initiative" }
-```
-**Response:** `201 Created` with the `ProjectDto`:
-```json
-{
-  "id": 10,
-  "name": "Website Redesign",
-  "description": "Q1 initiative",
-  "status": "Active",
-  "workSpaceId": 2,
-  "createdById": "a1b2c3...",
-  "createdAt": "2026-01-10T09:00:00Z",
-  "lastUpdatedById": null,
-  "lastUpdatedAt": null
-}
-```
-
-#### 5.2 GET `/{projectId}` 🔒 *Read*
-Get a project by ID.
-
-**Response:** `200 OK` with a `ProjectDto`.
-
-#### 5.3 GET `` 🔒 *Read*
-List projects in a workspace (paginated).
-
-**Response:** `200 OK` with `PaginationResultDto<ProjectDto>`.
-
-#### 5.4 PUT `/{projectId}` 🔒 *Manage*
-Update a project.
-
-**Body:**
-```json
-{ "name": "Website Redesign v2", "description": "Updated", "status": "OnHold" }
-```
-**Response:** `204 No Content`.
-
-#### 5.5 PATCH `/{projectId}/status` 🔒 *Manage*
-Update only the project status.
-
-**Body:** `{ "status": "Completed" }`
-**Response:** `204 No Content`.
-
-#### 5.6 DELETE `/{projectId}` 🔒 *Manage*
-Delete (soft-delete) a project.
-
-**Response:** `204 No Content`.
-
----
-
-### 6. Tasks — `/api/workspaces/{workspaceId}/projects/{projectId}/tasks`
-
-Authorization helper:
-- **Manage** (create/update/delete/assign/status): **Admin**, **Owner**, or **ProjectManager**.
-- **Read / personal actions**: **Admin** or any workspace member.
-
-#### 6.1 POST `` 🔒 *Manage*
-Create a task. An assignment to `assignedUserId` is created immediately.
-
-**Body:**
-```json
-{
-  "name": "Design landing page",
-  "description": "High-fidelity mockups",
-  "deadline": "2026-03-01T18:00:00Z",
-  "priority": "High",
-  "assignedUserId": "a1b2c3..."
-}
-```
-**Response:** `201 Created` with the `TaskDto`:
-```json
-{
-  "id": 100,
-  "name": "Design landing page",
-  "description": "High-fidelity mockups",
-  "deadline": "2026-03-01T18:00:00Z",
-  "taskStatus": "Backlog",
-  "taskPriority": "High",
-  "createdAt": "2026-01-15T08:00:00Z",
-  "lastUpdatedAt": null,
-  "lastUpdatedById": null,
-  "projectId": 10,
-  "createdById": "a1b2c3...",
-  "assignments": [
-    {
-      "id": 500,
-      "assignedToId": "a1b2c3...",
-      "assignedById": "d4e5f6...",
-      "createdAt": "2026-01-15T08:00:00Z",
-      "unassignedAt": null,
-      "isActive": true
-    }
-  ],
-  "attachments": []
-}
-```
-
-#### 6.2 GET `/{taskId}` 🔒 *Read*
-Get a task by ID.
-
-**Response:** `200 OK` with a `TaskDto`.
-
-#### 6.3 GET `/{taskId}/me` 🔒 *Workspace member*
-Get a task **only if it is assigned to the current user** (or the user is admin).
-
-**Response:** `200 OK` with a `TaskDto`.
-
-#### 6.4 GET `` 🔒 *Read*
-List all tasks in a project with **pagination and filtering**.
-
-**Query params:**
-| Param | Type | Description |
-|-------|------|-------------|
-| `pageNumber` | int | Page number (default `1`) |
-| `pageSize` | int | Page size (default `10`) |
-| `status` | enum | Filter by `ProjectTaskStatus` |
-| `priority` | enum | Filter by `TaskPriority` |
-| `searchTerm` | string | Search by name/description |
-| `sortBy` | string | Sort field |
-| `sortOrder` | string | `asc` / `desc` |
-
-**Response:** `200 OK` with `PaginationResultDto<TaskDto>`.
-
-#### 6.5 GET `/users/{userId}` 🔒 *Read*
-List the tasks assigned to a specific user (same filter params as 6.4).
-
-**Response:** `200 OK` with `PaginationResultDto<TaskDto>`.
-
-#### 6.6 GET `/me` 🔒 *Workspace member*
-List the tasks assigned to the current user (same filter params as 6.4).
-
-**Response:** `200 OK` with `PaginationResultDto<TaskDto>`.
-
-#### 6.7 PUT `/{taskId}` 🔒 *Manage*
-Update a task.
-
-**Body:**
-```json
-{ "name": "Design landing page (v2)", "description": "Updated", "deadline": "2026-03-05T18:00:00Z", "priority": "Critical" }
-```
-**Response:** `200 OK` with the updated `TaskDto`.
-
-#### 6.8 DELETE `/{taskId}` 🔒 *Manage*
-Delete (soft-delete) a task.
-
-**Response:** `204 No Content`.
-
-#### 6.9 POST `/{taskId}/assignments` 🔒 *Manage*
-Assign a user to the task.
-
-**Body:** `{ "userId": "a1b2c3..." }`
-**Response:** `200 OK` with `{ "assignments": [ <TaskAssignmentDto> ] }`.
-
-#### 6.10 DELETE `/{taskId}/assignments/{assignedUserId}` 🔒 *Manage*
-Unassign a user from the task.
-
-**Response:** `204 No Content`.
-
-#### 6.11 PATCH `/{taskId}/status` 🔒 *Manage*
-Change the task status (performed by a manager).
-
-**Body:** `{ "status": "InProgress" }`
-**Response:** `200 OK` with the updated `TaskDto`.
-
-#### 6.12 PATCH `/{taskId}/me/status` 🔒 *Workspace member*
-Change the task status **when the task is assigned to the current user** (self-service).
-
-**Body:** `{ "status": "Done" }`
-**Response:** `200 OK` with the updated `TaskDto`.
-
----
-
-### 7. Comments — `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments`
-
-All comment actions require the user to be a workspace member.
-
-#### 7.1 POST `` 🔒
-Add a comment to the task.
-
-**Body:** `{ "comment": "Started working on this." }`
-**Response:** `201 Created` with the `TaskCommentDto`:
-```json
-{
-  "id": 900,
-  "comment": "Started working on this.",
-  "taskId": 100,
-  "commentById": "a1b2c3...",
-  "commentByName": "John Doe",
-  "createdAt": "2026-01-16T12:00:00Z",
-  "lastUpdatedAt": null
-}
-```
-
-#### 7.2 GET `` 🔒
-List comments for the task (paginated).
-
-**Response:** `200 OK` with `PaginationResultDto<TaskCommentDto>`.
-
-#### 7.3 GET `/{commentId}` 🔒
-Get a single comment.
-
-**Response:** `200 OK` with a `TaskCommentDto`.
-
-#### 7.4 PUT `/{commentId}` 🔒
-Update a comment (must be the comment author).
-
-**Body:** `{ "comment": "Updated text" }`
-**Response:** `200 OK` with the updated `TaskCommentDto`.
-
-#### 7.5 DELETE `/{commentId}` 🔒
-Delete a comment.
-- **Admin/Owner** may delete any comment.
-- Otherwise, the **comment author** may delete their own comment.
-
-**Response:** `204 No Content`.
-
----
-
-### 8. Attachments — `/api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments`
-
-#### 8.1 POST `` 🔒 *Admin/Owner/ProjectManager*
-Upload a file attachment (`multipart/form-data`).
-
-| Field | Value |
-|-------|-------|
-| `File` | The file to upload (form-data file field) |
-
-**Constraints:** `.pdf`, `.jpg`, `.jpeg`, `.png`; max **50 MB** (`RequestSizeLimit`/`RequestFormLimits` set to 52,428,800 bytes).
-
-**Response:** `201 Created` with the `TaskAttachmentDto`:
-```json
-{
-  "id": 700,
-  "name": "wireframe.pdf",
-  "url": "/uploads/workspaces/2/tasks/100/wireframe.pdf",
-  "createdAt": "2026-01-16T14:00:00Z"
-}
-```
-
-#### 8.2 GET `` 🔒
-List all attachments of the task.
-
-**Response:** `200 OK` with `List<TaskAttachmentDto>`.
-
-#### 8.3 GET `/{attachmentId}` 🔒
-Get attachment metadata by ID.
-
-**Response:** `200 OK` with a `TaskAttachmentDto`.
-
-#### 8.4 GET `/by-name/{name}` 🔒
-Get an attachment by file name.
-
-**Response:** `200 OK` with a `TaskAttachmentDto`.
-
-#### 8.5 GET `/{attachmentId}/download` 🔒
-Download an attachment file.
-
-**Response:** `200 OK` — file stream with the appropriate content type.
-
-#### 8.6 DELETE `/{attachmentId}` 🔒 *Admin/Owner/ProjectManager*
-Delete an attachment.
-
-**Response:** `204 No Content`.
-
----
-
-### 9. Reports — `/api/workspaces/{workSpaceId}/reports`
-
-Authorization helper:
-- **Manage reports** (workspace report, PDF, member performance in workspace): **Admin**, **Owner**, or **ProjectManager**.
-- **View reports** (project task breakdowns, member performance in project): **Admin** or any workspace member.
-
-Report queries are cached in Redis for 10 minutes.
-
-#### 9.1 GET `/projects/{projectId}/tasks-by-priority` 🔒 *View*
-Tasks grouped by priority.
-
-**Response:** `200 OK` with:
-```json
-[ { "taskPriority": "Low", "count": 3 }, { "taskPriority": "Critical", "count": 1 } ]
-```
-
-#### 9.2 GET `/projects/{projectId}/tasks-by-status` 🔒 *View*
-Tasks grouped by status.
-
-**Response:** `200 OK` with:
-```json
-[ { "taskStatus": "Backlog", "count": 4 }, { "taskStatus": "Done", "count": 2 } ]
-```
-
-#### 9.3 GET `/members/{memberId}/performance` 🔒 *Manage*
-Member performance across the whole workspace.
-
-**Response:** `200 OK` with a `MemberPerformance`:
-```json
-{
-  "id": "a1b2c3...",
-  "name": "John Doe",
-  "assignedCount": 12,
-  "inProgressCount": 3,
-  "doneCount": 7
-}
-```
-
-#### 9.4 GET `/projects/{projectId}/members/{memberId}/performance` 🔒 *View*
-Member performance within a single project.
-
-**Response:** `200 OK` with a `MemberPerformance`.
-
-#### 9.5 GET `` 🔒 *Manage*
-Full workspace overview report.
-
-**Response:** `200 OK` with a `WorkSpaceReportDto`:
-```json
-{
-  "workSpaceName": "Acme Corp",
-  "ownerNames": [ "John Doe" ],
-  "totalProjects": 4,
-  "totalMembers": 8,
-  "totalTasks": 25,
-  "totalBacklogTasks": 5,
-  "totalTodoTasks": 6,
-  "totalInProgressTasks": 4,
-  "totalReviewTasks": 2,
-  "totalDoneTasks": 8,
-  "memberPerformances": [ { "id": "...", "name": "John Doe", "assignedCount": 12, "inProgressCount": 3, "doneCount": 7 } ]
-}
-```
-
-#### 9.6 GET `/pdf/download` 🔒 *Manage*
-Download the workspace report as a PDF.
-
-**Response:** `200 OK` — `application/pdf` file named `workspace-report.pdf`.
-
----
-
-### 10. Notifications — `/api/notifications`
-
-All notification endpoints act on the **current user's** notifications (via the auth cookie).
-
-#### 10.1 GET `/{id}` 🔒
-Get a notification by ID (must belong to the current user).
-
-**Response:** `200 OK` with a `NotificationDto`:
-```json
-{
-  "id": 300,
-  "notifyToId": "a1b2c3...",
-  "taskId": 100,
-  "workSpaceInviteId": null,
-  "title": "New task assigned",
-  "message": "You were assigned to 'Design landing page'",
-  "createdAt": "2026-01-15T08:00:00Z",
-  "isRead": false,
-  "readAt": null,
-  "notificationType": "TaskAssigned"
-}
-```
-
-#### 10.2 GET `/all?pageNumber=&pageSize=` 🔒
-List all notifications for the current user (paginated).
-
-**Response:** `200 OK` with `PaginationResultDto<NotificationDto>`.
-
-#### 10.3 GET `/all/unread?pageNumber=&pageSize=` 🔒
-List only unread notifications (paginated).
-
-**Response:** `200 OK` with `PaginationResultDto<NotificationDto>`.
-
-#### 10.4 PUT `/{id}/read` 🔒
-Mark a notification as read.
-
-**Response:** `204 No Content`.
-
----
-
-### 11. Workspace User Dashboard — `/api/workspaces/{workspaceId}/dashboard`
-
-#### 11.1 GET `` 🔒
-Get a combined dashboard for the workspace:
-- **Admin, Owner, or ProjectManager:** returns the **full workspace** dashboard (stats, status/priority breakdowns, active tasks across the workspace).
-- **Other members:** returns a **user-specific** dashboard filtered to the current user's data.
-
-The dashboard is cached in Redis for **5 minutes** (key `WorkSpaceDashboard:{workspaceId}:{userId}`).
-
-**Response:** `200 OK` with a `WorkSpaceDashboardDto`:
-```json
-{
-  "workspace": { "id": 2, "name": "Acme Corp" },
-  "stats": {
-    "totalProjects": 4,
-    "totalTasks": 25,
-    "inProgressTasks": 4,
-    "completedTasks": 8,
-    "completionRate": 32.0
-  },
-  "tasksByStatusReportDtos": [ { "taskStatus": "Backlog", "count": 5 }, { "taskStatus": "Done", "count": 8 } ],
-  "tasksByPriorityReportDtos": [ { "taskPriority": "High", "count": 3 }, { "taskPriority": "Low", "count": 1 } ],
-  "activeTasks": [
-    {
-      "id": 100,
-      "name": "Design landing page",
-      "projectName": "Website Redesign",
-      "priority": "High",
-      "status": "InProgress",
-      "createdAt": "2026-01-15T08:00:00Z",
-      "deadLine": "2026-03-01T18:00:00Z"
-    }
-  ],
-  "unReadNotifications": [ /* NotificationDto items (max 10) */ ]
-}
-```
-
-For dashboard KPI/breakdown details, see also [9. Reports](#9-reports--apiworkspacesworkspaceidreports).
-
----
-
-### 12. Admin Dashboard — `/api/admin/dashboard`
-
-All endpoints require the **Admin** role.
-
-#### 12.1 GET `` 🔒 **Admin**
-Get the admin dashboard with global statistics across all workspaces.
-
-The dashboard is cached in Redis for **5 minutes** (key `AdminDashboard:{userId}`).
-
-**Response:** `200 OK` with an `AdminDashboardDto`:
-```json
-{
-  "totalUsersCount": 150,
-  "totalAdminsCount": 3,
-  "totalUsersInLast30DaysCount": 25,
-  "totalWorkspacesCount": 12,
-  "totalWorkspacesInLast30DaysCount": 4,
-  "totalProjectsCount": 48,
-  "totalProjectsInLast30DaysCount": 8,
-  "totalTasksCount": 320,
-  "totalTasksInLast30DaysCount": 45,
-  "tasksOverviewDto": {
-    "backlogCount": 50,
-    "todoCount": 65,
-    "inProgressCount": 80,
-    "reviewCount": 45,
-    "doneCount": 80
-  }
-}
-```
-
-#### 12.2 GET `/recent-activities?pageNumber=&pageSize=` 🔒 **Admin**
-List recent activities across the system (paginated).
-
-**Query params:**
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `pageNumber` | int | `1` | Page number |
-| `pageSize` | int | `10` | Page size (max 100) |
-
-**Response:** `200 OK` with `PaginationResultDto<RecentActivityDto>`:
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "text": "User John Doe created workspace Acme Corp",
-      "activityType": "WorkSpaceCreated",
-      "createdAt": "2026-01-15T08:00:00Z"
-    }
-  ],
-  "totalCount": 250,
-  "pageNumber": 1,
-  "pageSize": 10,
-  "nextPage": 2,
-  "previousPage": null,
-  "totalPages": 25,
-  "hasNextPage": true,
-  "hasPreviousPage": false
-}
-```
-
----
-
-### 13. Admin Reports — `/api/admin/reports`
-
-All endpoints require the **Admin** role.
-
-#### 13.1 GET `/api/admin/reports/member-performances?pageNumber=&pageSize=&memberName=` 🔒 **Admin**
-List all member performances across all workspaces (paginated).
-
-**Query params:**
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `pageNumber` | int | `1` | Page number |
-| `pageSize` | int | `10` | Page size |
-| `memberName` | string | — | Optional filter by member name |
-
-**Response:** `200 OK` with `PaginationResult<MemberPerformanceDto>`:
-```json
-{
-  "data": [
-    {
-      "id": "a1b2c3...",
-      "name": "John Doe",
-      "assignedCount": 24,
-      "inProgressCount": 5,
-      "doneCount": 14
-    }
-  ],
-  "totalCount": 50,
-  "pageNumber": 1,
-  "pageSize": 10,
-  "nextPage": 2,
-  "previousPage": null,
-  "totalPages": 5,
-  "hasNextPage": true,
-  "hasPreviousPage": false
-}
-```
-
-#### 13.2 GET `/api/admin/reports/overview?from=&to=` 🔒 **Admin**
-Get a workspaces overview report filtered by date range.
-
-**Query params:**
-| Param | Type | Description |
-|-------|------|-------------|
-| `from` | DateTime | Start date (optional) |
-| `to` | DateTime | End date (optional) |
-
-**Response:** `200 OK` with `WorkSpacesOverviewReportDto`:
-```json
-{
-  "totalWorkspaces": 12,
-  "totalProjects": 48,
-  "totalTasks": 320,
-  "totalMembers": 150,
-  "workspaces": [
-    {
-      "id": 1,
-      "name": "Acme Corp",
-      "ownerNames": ["John Doe"],
-      "membersCount": 8,
-      "projectsCount": 4,
-      "tasksCount": 25,
-      "completionPercentage": 32.0,
-      "createdAt": "2026-01-01T10:00:00Z"
-    }
-  ]
-}
-```
-
-#### 13.3 GET `/api/admin/reports/overview/pdf/download?from=&to=` 🔒 **Admin**
-Download the workspaces overview report as a PDF.
-
-**Query params:** Same as [13.2](#132-get-apireportsoverviewfromto--admin).
-
-**Response:** `200 OK` — `application/pdf` file named `workspaces-overview-report.pdf`.
-
----
-
-## Pagination
-
-Any list endpoint accepts `PaginationRequestDto` via query string:
-
-| Query param | Type | Default |
-|-------------|------|---------|
-| `pageNumber` | int | `1` |
-| `pageSize` | int | `10` |
-
-All paginated responses use the standard envelope `PaginationResultDto<T>`:
-
-```json
-{
-  "data": [ /* items of type T */ ],
-  "totalCount": 42,
-  "pageNumber": 1,
-  "pageSize": 10,
-  "nextPage": 2,
-  "previousPage": null,
-  "totalPages": 5,
-  "hasNextPage": true,
-  "hasPreviousPage": false
-}
-```
-
-Affected endpoints: workspace lists (3.2, 3.3, 3.8), invites (4.2, 4.3), users (2.2, 2.3, 2.4), projects (5.3), tasks (6.4, 6.5, 6.6), comments (7.2), notifications (10.2, 10.3), admin dashboard (12.2), admin reports (13.1).
-
----
-
-## Real-time Notifications (SignalR)
-
-Connect to the hub at **`/notificationHub`**.
-
-**Hub methods (client → server):**
-
-| Method | Params | Description |
-|--------|--------|-------------|
-| `JoinWorkSpace` | `workSpaceId` (long) | Join the group `workspace-{workSpaceId}` to receive its notifications |
-| `LeaveWorkSpace` | `workSpaceId` (long) | Leave the group |
-
-**Client method (server → client):**
-
-| Method | Payload | Description |
-|--------|---------|-------------|
-| `ReceiveNotification` | `NotificationDto` | A new notification for the user/workspace |
-
-The server sends notifications either to a specific user (`Clients.User(userId)`) or to a workspace group (`Clients.Group("workspace-{id}")`), e.g. when a task is assigned, its status changes, a comment is added, or an invite is created.
-
----
-
-## Error Handling
-
-- The **Application** layer returns `ErrorOr<T>`; controllers translate failures to **RFC 7807 Problem Details** via `errors.ToProblemDetailsObjectResult()`.
-- A global exception handler (`src/Api/ExceptionHandler/GlobalExceptionHandler.cs`) catches and maps infrastructure exceptions:
-  - `UniqueConstraintViolationException`
-  - `ForeignKeyConstraintViolationException`
-  - `DatabaseOperationException`
-  - `CacheOperationException`
-- Expected failures (e.g. "not found", "forbidden", "validation") never throw — they are returned as errors.
+> Secrets such as `Jwt:SigningKey` and `Authentication:Google` must **not** be committed. Provide them via environment variables or `dotnet user-secrets` in production.
 
 ---
 
@@ -1413,28 +384,44 @@ The server sends notifications either to a specific user (`Clients.User(userId)`
 ```
 TaskManagments/
 ├── src/
-│   ├── Api/                      # Presentation layer
-│   │   ├── Controllers/          # 12 API controllers
-│   │   ├── Hubs/Notification/    # SignalR hub + client interface + service
-│   │   ├── Polices/WorkSpace/    # Authorization requirement handlers
-│   │   ├── Common/               # Extensions, origins, file URL service
-│   │   └── ExceptionHandler/     # Global exception handler
-│   ├── Application/              # CQRS features
-│   │   ├── Common/               # DTOs, errors, exceptions, interfaces
-│   │   └── Features/             # Auth, Users, WorkSpaces, WorkSpaceUsers,
-│   │                             # WorkSpaceInvites, Projects, Tasks,
-│   │                             # TaskComments, TaskAttachments, Reports,
-│   │                             # Notifications, WorkSpaceUserDashboard,
-│   │                             # AdminDashboard
-│   ├── Domain/                   # Pure domain
-│   │   ├── Common/               # Enums, interfaces
-│   │   └── Entities/             # 11 entities
-│   └── Infrastructure/           # EF Core, Redis, Identity, Mail, services
-├── .opencode/                    # Repo conventions & dev rules
-└── TaskManagments.sln
+│   ├── Api/                          # Presentation layer
+│   │   ├── Controllers/              # 13 API controllers
+│   │   ├── Hubs/Notification/        # SignalR hub + client interface + service
+│   │   ├── Polices/WorkSpace/        # Authorization requirement handlers
+│   │   ├── Common/                   # Extensions, CORS origins, file URL service
+│   │   └── ExceptionHandler/         # Global exception handler (ProblemDetails)
+│   ├── Application/                  # Business logic layer
+│   │   ├── Common/                   # DTOs, errors, exceptions, interfaces
+│   │   └── Features/                 # CQRS features organized by domain
+│   │       ├── Auth/                 # Registration, login, OAuth, password reset, OTP
+│   │       ├── Users/                # User management
+│   │       ├── WorkSpaces/           # Workspace CRUD, overviews, details
+│   │       ├── WorkSpaceUsers/       # Membership checks
+│   │       ├── WorkSpaceInvites/     # Invitation management
+│   │       ├── Projects/             # Project CRUD
+│   │       ├── Tasks/                # Task CRUD, assignment, filtering
+│   │       ├── TaskComments/         # Comment CRUD
+│   │       ├── TaskAttachments/      # File attachment management
+│   │       ├── Reports/              # Report queries + PDF generation
+│   │       ├── Notifications/        # Notification CRUD + real-time push
+│   │       ├── WorkSpaceUserDashboard/ # Workspace dashboard
+│   │       └── AdminDashboard/       # Admin dashboard + reports
+│   ├── Domain/                       # Pure domain (zero dependencies)
+│   │   ├── Common/                   # Enums, interfaces (ISoftDelete, IBaseEntity)
+│   │   └── Entities/                 # 12 entities
+│   └── Infrastructure/               # Infrastructure implementations
+│       ├── Persistence/              # DbContext, entity configurations, migrations
+│       ├── Identity/                 # Identity configuration, role seeding
+│       ├── Repositories/             # 15 repositories + Unit of Work
+│       ├── Services/                 # Email, caching, file storage, PDF generation
+│       └── BackgroundServices/       # Email queue consumers, unconfirmed user cleanup
+├── .opencode/                        # Repo conventions & dev rules
+└── TaskManagments.slnx               # Solution file
 ```
 
-### Feature layout (CQRS example)
+### Feature layout (CQRS pattern)
+
+Each feature follows a consistent structure:
 
 ```
 Features/
@@ -1455,6 +442,710 @@ Features/
 
 ---
 
-## License
+## API Reference
 
-This project is licensed under the [MIT License](LICENSE).
+> **Conventions:**
+> - Base URL: `http://localhost:5102`
+> - Authentication is via the `access_token` cookie (set by login). Endpoints marked require an authenticated user.
+> - Route values: `{workspaceId}` / `{workSpaceId}` and `{projectId}` are `long`; `{userId}` / `{memberId}` are `string` (Identity IDs); `{taskId}`, `{commentId}`, `{attachmentId}`, `{id}` are `long`.
+> - Pagination endpoints accept `?pageNumber=1&pageSize=10` (see [Pagination](#pagination)).
+> - All errors are returned as **RFC 7807 Problem Details**.
+
+---
+
+### Endpoint inventory
+
+<details>
+<summary><strong>AuthController</strong> — <code>/api/auth</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/register-user` | Public | Register a new regular user |
+| POST | `/api/auth/register-admin` | Admin | Register a new Admin user |
+| POST | `/api/auth/confirm-email` | Public | Confirm email address |
+| POST | `/api/auth/login` | Public | Log in, sets auth cookies |
+| POST | `/api/auth/refresh-token` | Public | Rotate the access token |
+| POST | `/api/auth/logout` | Authenticated | Log out, clears cookies |
+| GET | `/api/auth` | Authenticated | Get current user |
+| PUT | `/api/auth` | Authenticated | Update current user's profile |
+| POST | `/api/auth/forget-password/send-otp` | Public | Send password-reset OTP |
+| POST | `/api/auth/forget-password/resend-otp` | Public | Resend password-reset OTP |
+| POST | `/api/auth/forget-password` | Public | Reset password via OTP |
+| POST | `/api/auth/reset-password/send-email` | Authenticated | Send password-reset email (token) |
+| POST | `/api/auth/reset-password` | Authenticated | Reset password via emailed token |
+| POST | `/api/auth/change-email/send-email` | Authenticated | Send change-email confirmation |
+| POST | `/api/auth/change-email` | Authenticated | Confirm email change via token |
+| POST | `/api/auth/delete-account/send-email` | Authenticated | Send delete-account confirmation email |
+| DELETE | `/api/auth/delete-account` | Authenticated | Permanently delete account via emailed token |
+| GET | `/api/auth/login-user-with-google` | Public | Start Google OAuth login |
+| GET | `/api/auth/login-user-by-provider-callback` | Public | OAuth callback, completes login |
+
+</details>
+
+<details>
+<summary><strong>UsersController</strong> — <code>/api/users</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/users/{id}` | Authenticated | Get a user by ID |
+| GET | `/api/users/all` | Admin | List all users (paginated) |
+| GET | `/api/users/admin-users` | Admin | List all admin users (paginated) |
+| GET | `/api/users/regular-users` | Admin | List all regular users (paginated) |
+| DELETE | `/api/users/{id}` | Admin | Delete a user |
+
+</details>
+
+<details>
+<summary><strong>WorkSpacesController</strong> — <code>/api/workspaces</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/workspaces/{id}` | Authenticated | Get a workspace by ID |
+| GET | `/api/workspaces/all` | Authenticated | List workspaces (Admin: all; user: mine) |
+| GET | `/api/workspaces/{id}/all-users` | Authenticated | List workspace members |
+| GET | `/api/workspaces/{id}/my-role` | Authenticated | Get my role in the workspace |
+| POST | `/api/workspaces` | Authenticated | Create a workspace (creator becomes Owner) |
+| PUT | `/api/workspaces/{id}` | Admin/Owner | Update a workspace |
+| DELETE | `/api/workspaces/{id}` | Admin/Owner | Delete a workspace (soft-delete) |
+| GET | `/api/workspaces/overviews` | Admin | List workspace overviews with stats |
+| GET | `/api/workspaces/{id}/details` | Admin | Get full workspace details |
+
+</details>
+
+<details>
+<summary><strong>WorkSpaceInvitesController</strong> — <code>/api/workspace-invites</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/workspace-invites/{id}` | Authenticated | Get an invite by ID |
+| GET | `/api/workspace-invites/all-my-invites` | Authenticated | List invites received by me |
+| GET | `/api/workspace-invites/all-my-send-invites` | Authenticated | List invites sent by me |
+| POST | `/api/workspace-invites` | Owner | Invite a user to a workspace |
+| DELETE | `/api/workspace-invites/{id}` | Authenticated | Delete a pending invite |
+| PATCH | `/api/workspace-invites/{id}/accept` | Authenticated | Accept an invite |
+| PATCH | `/api/workspace-invites/{id}/reject` | Authenticated | Reject an invite |
+
+</details>
+
+<details>
+<summary><strong>ProjectsController</strong> — <code>/api/workspaces/{workspaceId}/projects</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/workspaces/{workspaceId}/projects` | Admin/Owner/ProjectManager | Create a project |
+| GET | `/api/workspaces/{workspaceId}/projects/{projectId}` | Authenticated | Get a project by ID |
+| GET | `/api/workspaces/{workspaceId}/projects` | Authenticated | List projects (paginated) |
+| PUT | `/api/workspaces/{workspaceId}/projects/{projectId}` | Admin/Owner/ProjectManager | Update a project |
+| PATCH | `/api/workspaces/{workspaceId}/projects/{projectId}/status` | Admin/Owner/ProjectManager | Update project status |
+| DELETE | `/api/workspaces/{workspaceId}/projects/{projectId}` | Admin/Owner/ProjectManager | Delete a project |
+
+</details>
+
+<details>
+<summary><strong>ProjectsTasksController</strong> — <code>/api/workspaces/{workspaceId}/projects/{projectId}/tasks</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `.../tasks` | Admin/Owner/ProjectManager | Create a task |
+| GET | `.../tasks/{taskId}` | Authenticated | Get a task by ID |
+| GET | `.../tasks/{taskId}/me` | Authenticated | Get a task assigned to me |
+| GET | `.../tasks` | Authenticated | List project tasks (filterable) |
+| GET | `.../tasks/users/{userId}` | Authenticated | List a user's tasks |
+| GET | `.../tasks/me` | Authenticated | List my tasks |
+| PUT | `.../tasks/{taskId}` | Admin/Owner/ProjectManager | Update a task |
+| DELETE | `.../tasks/{taskId}` | Admin/Owner/ProjectManager | Delete a task |
+| POST | `.../tasks/{taskId}/assignments` | Admin/Owner/ProjectManager | Assign a user |
+| DELETE | `.../tasks/{taskId}/assignments/{assignedUserId}` | Admin/Owner/ProjectManager | Unassign a user |
+| PATCH | `.../tasks/{taskId}/status` | Admin/Owner/ProjectManager | Change task status |
+| PATCH | `.../tasks/{taskId}/me/status` | Authenticated | Change my assigned task status |
+
+</details>
+
+<details>
+<summary><strong>TaskCommentsController</strong> — <code>.../tasks/{taskId}/comments</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `.../comments` | Authenticated | Add a comment |
+| GET | `.../comments` | Authenticated | List task comments (paginated) |
+| GET | `.../comments/{commentId}` | Authenticated | Get a comment by ID |
+| PUT | `.../comments/{commentId}` | Authenticated | Update a comment (author only) |
+| DELETE | `.../comments/{commentId}` | Authenticated | Delete a comment (Admin/Owner or author) |
+
+</details>
+
+<details>
+<summary><strong>TaskAttachmentsController</strong> — <code>.../tasks/{taskId}/attachments</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `.../attachments` | Admin/Owner/ProjectManager | Upload an attachment |
+| GET | `.../attachments` | Authenticated | List task attachments |
+| GET | `.../attachments/{attachmentId}` | Authenticated | Get attachment by ID |
+| GET | `.../attachments/by-name/{name}` | Authenticated | Get attachment by file name |
+| GET | `.../attachments/{attachmentId}/download` | Authenticated | Download an attachment |
+| DELETE | `.../attachments/{attachmentId}` | Admin/Owner/ProjectManager | Delete an attachment |
+
+</details>
+
+<details>
+<summary><strong>ReportsController</strong> — <code>/api/workspaces/{workSpaceId}/reports</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `.../reports/projects/{projectId}/tasks-by-priority` | Authenticated | Tasks grouped by priority |
+| GET | `.../reports/projects/{projectId}/tasks-by-status` | Authenticated | Tasks grouped by status |
+| GET | `.../reports/members/{memberId}/performance` | Admin/Owner/ProjectManager | Member performance in workspace |
+| GET | `.../reports/projects/{projectId}/members/{memberId}/performance` | Authenticated | Member performance in project |
+| GET | `.../reports` | Admin/Owner/ProjectManager | Workspace overview report |
+| GET | `.../reports/pdf/download` | Admin/Owner/ProjectManager | Download workspace report PDF |
+
+</details>
+
+<details>
+<summary><strong>NotificationsController</strong> — <code>/api/notifications</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/notifications/{id}` | Authenticated | Get a notification by ID |
+| GET | `/api/notifications/all` | Authenticated | List my notifications (paginated) |
+| GET | `/api/notifications/all/unread` | Authenticated | List my unread notifications (paginated) |
+| PUT | `/api/notifications/{id}/read` | Authenticated | Mark a notification as read |
+
+</details>
+
+<details>
+<summary><strong>DashboardControllers</strong></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/workspaces/{workspaceId}/dashboard` | Authenticated | Workspace dashboard (full or user-specific) |
+| GET | `/api/admin/dashboard` | Admin | Admin dashboard with global stats |
+| GET | `/api/admin/dashboard/recent-activities` | Admin | Recent activities across the system |
+
+</details>
+
+<details>
+<summary><strong>AdminReportsController</strong> — <code>/api/admin/reports</code></summary>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/admin/reports/member-performances` | Admin | Member performances across workspaces |
+| GET | `/api/admin/reports/overview` | Admin | Workspaces overview report with date filtering |
+| GET | `/api/admin/reports/overview/pdf/download` | Admin | Download workspaces overview report as PDF |
+
+</details>
+
+---
+
+### Request/Response Examples
+
+#### Register
+
+```http
+POST /api/auth/register-user
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "password": "Password123!",
+  "dateOfBirth": "2000-01-01"
+}
+```
+
+**Response:** `200 OK`
+
+```json
+{ "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890" }
+```
+
+#### Login
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{ "email": "john@example.com", "password": "Password123!" }
+```
+
+**Response:** `204 No Content` — sets `access_token` and `refresh_token` HttpOnly cookies.
+
+#### Get current user
+
+```http
+GET /api/auth
+Cookie: access_token=eyJhbGciOi...
+```
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "email": "john@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "dateOfBirth": "2000-01-01"
+}
+```
+
+#### Create workspace
+
+```http
+POST /api/workspaces
+Cookie: access_token=eyJhbGciOi...
+Content-Type: application/json
+
+{ "name": "Acme Corp", "description": "Product development" }
+```
+
+**Response:** `201 Created`
+
+```json
+{
+  "id": 1,
+  "name": "Acme Corp",
+  "description": "Product development",
+  "createdById": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "createdAt": "2026-01-15T08:00:00Z",
+  "lastUpdatedById": null,
+  "lastUpdatedAt": null
+}
+```
+
+#### Create task
+
+```http
+POST /api/workspaces/1/projects/10/tasks
+Cookie: access_token=eyJhbGciOi...
+Content-Type: application/json
+
+{
+  "name": "Design landing page",
+  "description": "High-fidelity mockups",
+  "deadline": "2026-03-01T18:00:00Z",
+  "priority": "High",
+  "assignedUserId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+}
+```
+
+**Response:** `201 Created`
+
+```json
+{
+  "id": 100,
+  "name": "Design landing page",
+  "description": "High-fidelity mockups",
+  "deadline": "2026-03-01T18:00:00Z",
+  "taskStatus": "Backlog",
+  "taskPriority": "High",
+  "createdAt": "2026-01-15T08:00:00Z",
+  "lastUpdatedAt": null,
+  "lastUpdatedById": null,
+  "projectId": 10,
+  "createdById": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "assignments": [
+    {
+      "id": 500,
+      "assignedToId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "assignedById": "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+      "createdAt": "2026-01-15T08:00:00Z",
+      "unassignedAt": null,
+      "isActive": true
+    }
+  ],
+  "attachments": []
+}
+```
+
+#### Filter tasks
+
+```http
+GET /api/workspaces/1/projects/10/tasks?pageNumber=1&pageSize=10&status=InProgress&priority=High&searchTerm=design&sortBy=createdAt&sortOrder=desc
+```
+
+**Response:** `200 OK` with `PaginationResultDto<TaskDto>`.
+
+#### Workspace dashboard
+
+```http
+GET /api/workspaces/1/dashboard
+```
+
+**Response:** `200 OK`
+
+```json
+{
+  "workspace": { "id": 1, "name": "Acme Corp" },
+  "stats": {
+    "totalProjects": 4,
+    "totalTasks": 25,
+    "inProgressTasks": 4,
+    "completedTasks": 8,
+    "completionRate": 32.0
+  },
+  "tasksByStatusReportDtos": [
+    { "taskStatus": "Backlog", "count": 5 },
+    { "taskStatus": "Done", "count": 8 }
+  ],
+  "tasksByPriorityReportDtos": [
+    { "taskPriority": "High", "count": 3 },
+    { "taskPriority": "Low", "count": 1 }
+  ],
+  "activeTasks": [
+    {
+      "id": 100,
+      "name": "Design landing page",
+      "projectName": "Website Redesign",
+      "priority": "High",
+      "status": "InProgress",
+      "createdAt": "2026-01-15T08:00:00Z",
+      "deadLine": "2026-03-01T18:00:00Z"
+    }
+  ],
+  "unReadNotifications": []
+}
+```
+
+---
+
+## Pagination
+
+Any list endpoint accepts `PaginationRequestDto` via query string:
+
+| Query param | Type | Default |
+|-------------|------|---------|
+| `pageNumber` | int | `1` |
+| `pageSize` | int | `10` |
+
+All paginated responses use the standard envelope `PaginationResultDto<T>`:
+
+```json
+{
+  "data": [ /* items */ ],
+  "totalCount": 42,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "nextPage": 2,
+  "previousPage": null,
+  "totalPages": 5,
+  "hasNextPage": true,
+  "hasPreviousPage": false
+}
+```
+
+---
+
+## Error Handling
+
+- The **Application** layer returns `ErrorOr<T>`; controllers translate failures to **RFC 7807 Problem Details** via `errors.ToProblemDetailsObjectResult()`.
+- A global exception handler (`src/Api/ExceptionHandler/GlobalExceptionHandler.cs`) catches and maps infrastructure exceptions:
+
+| Exception | HTTP Status | Title |
+|-----------|-------------|-------|
+| `UniqueConstraintViolationException` | 409 | Unique Constraint Violation |
+| `ForeignKeyConstraintViolationException` | 409 | Foreign Key Constraint Violation |
+| `DatabaseOperationException` | 500 | Database Operation Error |
+| `CacheOperationException` | 500 | Cache Operation Error |
+| Other exceptions | 500 | Unexpected Server Error |
+
+Error type to HTTP status mapping:
+
+| ErrorType | HTTP Status |
+|-----------|-------------|
+| Validation | 400 |
+| NotFound | 404 |
+| Unauthorized | 401 |
+| Forbidden | 403 |
+| Conflict | 409 |
+| Failure | 500 |
+
+---
+
+## Validation
+
+Validation runs as a **MediatR pipeline behavior** (`ValidationBehavior<TRequest, TResponse>`) before every command/query handler. Validators use FluentValidation and are auto-registered from the Application assembly.
+
+If validation fails, the pipeline short-circuits and returns `Error.Validation` errors — the handler never executes.
+
+Example validator rules:
+- **RegisterUserCommand**: First/last name 2-50 chars, valid email, password 8-80 chars with complexity requirements, date of birth must indicate age >= 18.
+- **CreateTaskCommand**: Name required (max 200), description optional (max 2000), priority must be a valid enum value.
+
+---
+
+## Database & Persistence
+
+### Entity Framework Core
+
+- **DbContext**: `AppDbContext` (inherits `IdentityDbContext<User>`)
+- **Database**: SQL Server
+- **Global query tracking**: `NoTracking` (default for all queries)
+- **Query filters**: Global soft-delete filters (`HasQueryFilter(e => !e.IsDeleted)`)
+- **Configurations**: Applied from assembly via `ApplyConfigurationsFromAssembly`
+
+### Performance optimizations
+
+- **Global NoTracking**: Avoids change tracking overhead for read-heavy operations
+- **Indexed queries**: Composite indexes on frequently queried columns (`TaskId+CreatedAt`, `WorkSpaceId+Name`, `UserId+Token` for refresh tokens)
+- **Projected queries**: Direct `.Select()` projections in ReportRepository and DashboardRepository avoid loading full entities
+- **Selective includes**: `Include()` used only where needed (e.g., TaskAssignments, TaskAttachments)
+
+### Database indexes
+
+| Table | Index | Columns |
+|-------|-------|---------|
+| Projects | Unique | `(WorkSpaceId, Name) WHERE IsDeleted = 0` |
+| Projects | Composite | `(WorkSpaceId, CreatedAt)` |
+| Tasks | Composite | `(ProjectId, CreatedAt)` |
+| TaskAssignments | Composite | `(TaskId, AssignedToId)` |
+| TaskAttachments | Composite | `(TaskId, CreatedAt)` |
+| TaskComments | Composite | `(TaskId, CreatedAt)` |
+| RefreshTokens | Composite | `(UserId, Token) INCLUDE (ExpiresAt, CreatedAt, IsRevoked)` |
+| Notifications | Filtered | `(NotifyToId, CreatedAt) WHERE IsRead = 0` |
+
+### Unit of Work
+
+The `UnitOfWork` holds 15 repository instances and provides:
+- `SaveChangesAsync()` — with automatic exception mapping for unique constraint, FK constraint, and deadlock errors
+- `BeginTransactionAsync()` / `CommitTransactionAsync()` / `RollbackTransactionAsync()`
+- `DisposeAsync()`
+
+Handlers never inject repositories directly — all data access flows through `IUnitOfWork`.
+
+---
+
+## Redis & Caching
+
+### Implementation
+
+- **Provider**: Redis via `Microsoft.Extensions.Caching.StackExchangeRedis`
+- **Instance name**: `"RedisCache"`
+- **Serialization**: `System.Text.Json`
+
+### Cache API
+
+```csharp
+Task<T?> GetAsync<T>(string key);
+Task SetAsync<T>(string key, T value, TimeSpan absoluteExpiration);
+Task RemoveAsync(string key);
+```
+
+### What is cached
+
+| Cache Key Pattern | TTL | Endpoint |
+|-------------------|-----|----------|
+| `WorkSpaceDashboard:{workspaceId}:{userId}` | 5 minutes | `GET /api/workspaces/{id}/dashboard` |
+| `AdminDashboard:{userId}` | 5 minutes | `GET /api/admin/dashboard` |
+| Report queries | 10 minutes | `GET /api/workspaces/{id}/reports/*` |
+
+### Cache invalidation
+
+- Cache entries use absolute expiration (TTL-based).
+- No explicit invalidation on mutations — stale data is possible within the TTL window.
+- On cache failure, the system logs the error and either throws `CacheOperationException` or returns `null` depending on configuration.
+
+---
+
+## Real-Time Notifications (SignalR)
+
+### Hub
+
+- **Path**: `/notificationHub`
+- **Interface**: `Hub<NotificationHubClient>`
+
+### Client methods (server to client)
+
+| Method | Payload | Description |
+|--------|---------|-------------|
+| `ReceiveNotification` | `NotificationDto` | A new notification for the user/workspace |
+
+### Hub methods (client to server)
+
+| Method | Params | Description |
+|--------|--------|-------------|
+| `JoinWorkSpace` | `workSpaceId` (long) | Join the group `workspace-{workSpaceId}` |
+| `LeaveWorkSpace` | `workSpaceId` (long) | Leave the group |
+
+### Notification flow
+
+```mermaid
+graph LR
+    A[Business Action] --> B[CreateNotificationCommand]
+    B --> C[Database]
+    B --> D[SignalR Hub]
+    D --> E[Connected Client]
+    B --> F[Persistent Storage]
+
+    style A fill:#4A90D9,color:#fff
+    style B fill:#7B68EE,color:#fff
+    style C fill:#50C878,color:#fff
+    style D fill:#FF8C00,color:#fff
+    style E fill:#FF6B6B,color:#fff
+    style F fill:#50C878,color:#fff
+```
+
+### Notification types
+
+| Type | Trigger |
+|------|---------|
+| `TaskAssigned` | User is assigned to a task |
+| `TaskUnassigned` | User is unassigned from a task |
+| `TaskStatusUpdated` | Task status changes |
+| `TaskUpdated` | Task details are updated |
+| `CommentAdded` | New comment on a task |
+| `TaskDeleted` | Task is deleted |
+| `WorkSpaceInvite` | User receives a workspace invitation |
+
+---
+
+## Reporting & PDF Generation
+
+### Available reports
+
+| Report | Endpoint | Auth | Cached |
+|--------|----------|------|--------|
+| Tasks by priority | `GET .../reports/projects/{id}/tasks-by-priority` | Member | Yes (10 min) |
+| Tasks by status | `GET .../reports/projects/{id}/tasks-by-status` | Member | Yes (10 min) |
+| Member performance (workspace) | `GET .../reports/members/{id}/performance` | Admin/Owner/PM | Yes (10 min) |
+| Member performance (project) | `GET .../reports/projects/{pid}/members/{mid}/performance` | Member | Yes (10 min) |
+| Workspace overview | `GET .../reports` | Admin/Owner/PM | Yes (10 min) |
+| Workspace PDF | `GET .../reports/pdf/download` | Admin/Owner/PM | No |
+| Admin overview | `GET /api/admin/reports/overview` | Admin | Yes (10 min) |
+| Admin member performances | `GET /api/admin/reports/member-performances` | Admin | No |
+| Admin PDF | `GET /api/admin/reports/overview/pdf/download` | Admin | No |
+
+### PDF generation
+
+Implemented via **QuestPDF** (`PdfGeneratorService`). Two report types:
+
+- **Workspace Report**: A4 page with workspace name, owner names, task status breakdown, and member performance table.
+- **WorkSpaces Overview Report**: A4 page with KPI cards (users, workspaces, projects, tasks), task status distribution, and tasks by priority.
+
+Both generate `application/pdf` responses with page numbers in the footer.
+
+---
+
+## Email System
+
+### Implementation
+
+- **Library**: MailKit
+- **Transport**: SMTP with StartTLS
+- **Background processing**: Channel-based in-memory queues (5 queues for different email types)
+- **Background services**: 5 consumers, one per queue, each creating a DI scope to resolve `IMailService`
+
+### Email types
+
+| Type | Template | Trigger |
+|------|----------|---------|
+| Email Confirmation | `ConfirmationEmail.html` | Registration |
+| OTP | `OtpEmail.html` | Forget password |
+| Password Reset | `ResetPasswordEmail.html` | Authenticated password reset |
+| Change Email | `ChangeEmail.html` | Email change request |
+| Delete Account | `DeleteAccountEmail.html` | Account deletion request |
+
+### Background cleanup
+
+`RemoveUnConfirmedUsersBgService` runs every 30 minutes and removes users who:
+- Have not confirmed their email
+- Were created more than 24 hours ago
+
+---
+
+## Logging & Observability
+
+- **Serilog** with structured logging
+- **Sinks**: Console + Seq
+- **Seq URL**: `http://localhost:5341` (configurable)
+- **Enrichers**: Span (for distributed tracing correlation)
+
+---
+
+## Frontend Integration
+
+This backend is designed to be consumed by a frontend client (e.g. Angular).
+
+| Aspect | Configuration |
+|--------|---------------|
+| Base API URL | `http://localhost:5102` |
+| Authentication | HttpOnly cookies (`access_token`, `refresh_token`) |
+| CORS origins | `http://localhost:4200`, `http://localhost:5173` |
+| CORS credentials | Allowed |
+| SignalR | Connect to `http://localhost:5102/notificationHub` |
+| API consumption | REST with JSON payloads |
+
+> [!NOTE]
+> The frontend must send cookies with requests (e.g. `withCredentials: true` in Axios or `credentials: 'include'` in fetch).
+
+---
+
+## Technical Highlights
+
+| Highlight | Engineering Value |
+|-----------|------------------|
+| **Clean Architecture** | Business logic is independent of infrastructure; testable and maintainable |
+| **CQRS with MediatR** | Read and write operations are separated; each feature is self-contained |
+| **ErrorOr result pattern** | Expected failures flow as values, not exceptions; controllers map errors to ProblemDetails |
+| **FluentValidation pipeline** | Validation runs automatically before handlers; consistent error responses |
+| **Repository + Unit of Work** | Data access is abstracted; transaction management is centralized |
+| **Redis caching** | Dashboard and report queries are cached to reduce database load |
+| **SignalR real-time** | Users receive instant notifications without polling |
+| **JWT in HttpOnly cookies** | Tokens are not accessible via JavaScript; protects against XSS |
+| **Refresh token rotation** | Compromised tokens are limited in lifespan |
+| **Background email processing** | Email sending is non-blocking; failures don't affect API responses |
+| **Soft delete with query filters** | Deleted data is preserved but invisible to queries |
+| **PDF generation** | Server-side PDF export for reports via QuestPDF |
+| **RFC 7807 Problem Details** | Standardized error responses across all endpoints |
+
+---
+
+## Performance Considerations
+
+- **Global NoTracking** in DbContext eliminates change tracking overhead
+- **Redis caching** for dashboards and reports (5-10 minute TTLs)
+- **Database indexes** on frequently queried columns
+- **Projected queries** (`Select()`) in reports avoid loading full entities
+- **Channel-based email queues** for non-blocking email processing
+- **Pagination** on all list endpoints to limit data transfer
+- **Composite indexes** on join tables for efficient relationship queries
+
+---
+
+## Security Considerations
+
+- **Password hashing** via BCrypt.Net
+- **JWT in HttpOnly cookies** — not accessible via JavaScript
+- **Refresh token rotation** — old tokens are revoked on use
+- **Email confirmation** required before login
+- **OTP expiration** — time-limited codes for password reset
+- **Account deletion confirmation** — requires emailed token
+- **Authorization policies** — workspace-level resource access control
+- **Input validation** — FluentValidation on every command/query
+- **CORS restrictions** — only configured origins are allowed
+- **No secrets in code** — JWT signing key and OAuth secrets must be provided via user-secrets or environment variables
+
+---
+
+## API Documentation / Swagger
+
+Swagger/OpenAPI is available when running in Development mode. Navigate to:
+
+```
+http://localhost:5102/swagger
+```
+
+---
+
+## Future Improvements
+
+- [ ] Unit and integration test coverage
+- [ ] Docker and Docker Compose configuration
+- [ ] CI/CD pipeline setup
+- [ ] Rate limiting on authentication endpoints
+- [ ] Distributed tracing with OpenTelemetry
+- [ ] SignalR reconnection handling on the client
+- [ ] Email template engine (e.g. Razor templates)
+- [ ] File storage abstraction (e.g. Azure Blob Storage)
