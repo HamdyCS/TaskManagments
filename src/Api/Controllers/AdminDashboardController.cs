@@ -1,14 +1,17 @@
 using Application.Common.Dtos;
 using Application.Features.AdminDashboard.Queries.GetAdminDashboard;
 using Application.Features.AdminDashboard.Queries.GetRecentActivities;
+using Api.Polices;
 using Domain.Common.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/admin/dashboard")]
     [ApiController]
     [Authorize(Roles = nameof(Role.Admin))]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.DashboardRateLimit))]
     public class AdminDashboardController(IMediator mediator) : ControllerBase
     {
         [HttpGet(Name = "GetAdminDashboard")]

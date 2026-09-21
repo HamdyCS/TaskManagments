@@ -7,18 +7,22 @@ using Application.Features.WorkSpaceInvites.Queries.GetAllSendWorkSpaceInvites;
 using Application.Features.WorkSpaceInvites.Queries.GetAllUserInvites;
 using Application.Features.WorkSpaceInvites.Queries.GetInviteByIdAndInviteToId;
 using Application.Features.WorkSpaceInvites.Queries.GetWorkSpaceInviteById;
+using Api.Polices;
 using ErrorOr;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/workspace-invites")]
     [Authorize]
     [ApiController]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
     public class WorkSpaceInvitesController(IMediator mediator,IAuthorizationService authorizationService) : ControllerBase
     {
         [HttpGet("{id}", Name = "GetWorkSpaceInviteById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<WorkSpaceInviteDto>> GetWorkSpaceInviteById([FromRoute] long id)
         {
 
@@ -48,6 +52,7 @@ namespace Api.Controllers
 
 
         [HttpGet("all-my-invites", Name = "GetAllMyWorkSpaceInvites")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<PaginationResultDto<WorkSpaceInviteDto>>> GetAllMyWorkSpaceInvites([FromQuery] PaginationRequestDto paginationRequestDto)
         {
 
@@ -64,6 +69,7 @@ namespace Api.Controllers
 
 
         [HttpGet("all-my-send-invites", Name = "GetAllMyWorkSpaceSendInvites")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<PaginationResultDto<WorkSpaceInviteDto>>> GetAllWorkMySpaceSendInvites([FromQuery] PaginationRequestDto paginationRequestDto)
         {
 

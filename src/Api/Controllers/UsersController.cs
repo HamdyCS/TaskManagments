@@ -8,13 +8,16 @@ using Application.Features.Users.Queries.GetAllAdminUsers;
 using Application.Features.Users.Queries.GetAllRegularUsers;
 using Application.Features.Users.Queries.GetAllUsers;
 using Application.Features.Users.Queries.GetUserById;
+using Api.Polices;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/users")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
     public class UsersController(IMediator mediator) : ControllerBase
     {
         [HttpGet("{id}", Name = "GetUserById")]
@@ -62,6 +65,7 @@ namespace Api.Controllers
 
         [HttpDelete("{id}", Name = "DeleteUserById")]
         [Authorize(Roles = nameof(Role.Admin))]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
         public async Task<IActionResult> DeleteUserById(string id)
         {
             var deletesBy = User.GetUserId();

@@ -10,7 +10,9 @@ using Application.Features.Tasks.Queries.GetAllProjectTasks;
 using Application.Features.Tasks.Queries.GetTaskById;
 using Application.Features.Tasks.Queries.GetTasksForUser;
 using Application.Features.Tasks.Queries.GetMyTasks;
+using Api.Polices;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Application.Features.Tasks.Queries.GetMyTaskById;
 using Application.Features.Tasks.Commands.ChangeTaskStatusByAssignedToId;
 
@@ -19,6 +21,7 @@ namespace Api.Controllers
     [Route("api/workspaces/{workspaceId}/projects/{projectId}/tasks")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
     public class ProjectsTasksController(IMediator mediator, IAuthorizationService authorizationService) : ControllerBase
     {
         private async Task<bool> _IsAdminOrOwnerOrProductManagerAsync(long workspaceId)
@@ -55,6 +58,7 @@ namespace Api.Controllers
 
 
         [HttpGet("{taskId}", Name = "GetTaskById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetTaskById([FromRoute] long workspaceId, [FromRoute] long projectId, [FromRoute] long taskId)
         {
             var isAdmin = User.IsInRole(nameof(Role.Admin));
@@ -75,6 +79,7 @@ namespace Api.Controllers
 
 
         [HttpGet("{taskId}/me", Name = "GetMyTaskById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetMyTaskById([FromRoute] long workspaceId, [FromRoute] long projectId, [FromRoute] long taskId)
         {
             var userId = User.GetUserId();
@@ -97,6 +102,7 @@ namespace Api.Controllers
 
         
         [HttpGet("", Name = "GetAllProjectTasks")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetAllProjectTasks([FromRoute] long workspaceId, [FromRoute] long projectId, [FromQuery] PaginationRequestDto paginationRequestDto, [FromQuery] GetAllTasksQueryParameters filterParams)
         {
             // check if user is admin or workspace user
@@ -118,6 +124,7 @@ namespace Api.Controllers
 
         
         [HttpGet("users/{userId}", Name = "GetTasksForUser")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetTasksForUser([FromRoute] long workspaceId, [FromRoute] long projectId, [FromRoute] string userId, [FromQuery] PaginationRequestDto paginationRequestDto, [FromQuery] GetAllTasksQueryParameters filterParams)
         {
             // check if user is admin or workspace user
@@ -139,6 +146,7 @@ namespace Api.Controllers
 
         
         [HttpGet("me", Name = "GetMyTasks")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetMyTasks([FromRoute] long workspaceId, [FromRoute] long projectId, [FromQuery] PaginationRequestDto paginationRequestDto, [FromQuery] GetAllTasksQueryParameters filterParams)
         {
             var userId = User.GetUserId();

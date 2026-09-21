@@ -4,13 +4,16 @@ using Application.Features.Notifications.Command.GetAllUnReadUserNotifications;
 using Application.Features.Notifications.Command.GetAllUserNotifications;
 using Application.Features.Notifications.Command.GetNotificationByIdAndUserId;
 using Application.Features.Notifications.Command.ReadNotification;
+using Api.Polices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/notifications")]
     [ApiController]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
     public class NotificationsController(IMediator mediator) : ControllerBase
     {
         [HttpGet("{id}", Name = "GetNotificationById")]
@@ -55,6 +58,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{id}/read", Name = "MarkNotificationAsRead")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
         public async Task<IActionResult> MarkNotificationAsRead([FromRoute] long id)
         {
             var userId = User.GetUserId();

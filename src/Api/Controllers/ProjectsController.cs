@@ -6,14 +6,17 @@ using Application.Features.Projects.Commands.UpdateProject;
 using Application.Features.Projects.Commands.UpdateProjectStatus;
 using Application.Features.Projects.Queries.GetAllProjects;
 using Application.Features.Projects.Queries.GetProjectById;
+using Api.Polices;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/workspaces/{workspaceId}/projects")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
     public class ProjectsController(IMediator mediator, IAuthorizationService authorizationService) : ControllerBase
     {
         private async Task<bool> _IsAdminOrOwnerOrProductManagerAsync(long workspaceId)
@@ -80,6 +83,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{projectId}", Name = "GetProjectById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<ProjectDto>> GetProjectById([FromRoute] long workspaceId, [FromRoute] long projectId)
         {
             // Check authorization: Admin or any workspace member
@@ -93,6 +97,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("", Name = "GetAllProjects")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<PaginationResultDto<ProjectDto>>> GetAllProjects([FromRoute] long workspaceId, [FromQuery] PaginationRequestDto paginationRequestDto)
         {
             // Check authorization: Admin or any workspace member

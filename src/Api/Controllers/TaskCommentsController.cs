@@ -5,7 +5,9 @@ using Application.Features.TaskComments.Commands.UpdateComment;
 using Application.Features.TaskComments.Queries.GetCommentById;
 using Application.Features.TaskComments.Queries.GetCommentsByTaskId;
 using Application.Common.Dtos;
+using Api.Polices;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ErrorOr;
 using Application.Features.TaskComments.Commands.DeleteCommentByCommentedById;
 
@@ -14,6 +16,7 @@ namespace Api.Controllers
     [Route("api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
     public class TaskCommentsController(IMediator mediator, IAuthorizationService authorizationService) : ControllerBase
     {
         private async Task<bool> _IsAdminOrOwnerAsync(long workspaceId)
@@ -54,6 +57,7 @@ namespace Api.Controllers
         }
 
         [HttpGet(Name = "GetCommentsByTaskId")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetCommentsByTaskId(
             [FromRoute] long workspaceId,
             [FromRoute] long projectId,
@@ -71,6 +75,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{commentId}", Name = "GetCommentById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetCommentById(
             [FromRoute] long workspaceId,
             [FromRoute] long projectId,

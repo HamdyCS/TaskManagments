@@ -5,13 +5,16 @@ using Application.Features.TaskAttachments.Queries.DownloadAttachmentById;
 using Application.Features.TaskAttachments.Queries.GetAttachmentById;
 using Application.Features.TaskAttachments.Queries.GetAttachmentByName;
 using Application.Features.TaskAttachments.Queries.GetAttachmentsByTaskId;
+using Api.Polices;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
     public class TaskAttachmentsController(IMediator mediator, IAuthorizationService authorizationService) : ControllerBase
     {
         private async Task<bool> _IsAdminOrOwnerOrProductManagerAsync(long workspaceId)
@@ -57,6 +60,7 @@ namespace Api.Controllers
         }
 
         [HttpGet(Name = "GetAttachmentsByTaskId")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetAttachmentsByTaskId(
             [FromRoute] long workspaceId,
             [FromRoute] long projectId,
@@ -73,6 +77,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{attachmentId}", Name = "GetAttachmentById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetAttachmentById(
             [FromRoute] long workspaceId,
             [FromRoute] long projectId,
@@ -91,6 +96,7 @@ namespace Api.Controllers
 
 
         [HttpGet("by-name/{name}", Name = "GetAttachmentByName")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetAttachmentByName(
             [FromRoute] long workspaceId,
             [FromRoute] long projectId,
@@ -108,6 +114,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{attachmentId}/download", Name = "DownloadAttachmentById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> DownloadAttachmentById(
            [FromRoute] long workspaceId,
            [FromRoute] long projectId,

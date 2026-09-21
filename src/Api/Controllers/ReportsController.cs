@@ -5,8 +5,10 @@ using Application.Features.Reports.Queries.GetProjectTasksReportByStatus;
 using Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace;
 using Application.Features.Reports.Queries.GetMemberPerformanceInProject;
 using Application.Features.Reports.Queries.GetWorkSpaceReport;
+using Api.Polices;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Application.Features.Reports.Queries.GetWorkSpaceReportPdf;
 
 namespace Api.Controllers
@@ -14,6 +16,7 @@ namespace Api.Controllers
     [Route("api/workspaces/{workSpaceId}/reports")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.ReportRateLimit))]
     public class ReportsController(IMediator mediator, IAuthorizationService authorizationService, IUnitOfWork unitOfWork) : ControllerBase
     {
         private async Task<bool> _IsAdminOrOwnerOrProductManagerAsync(long workspaceId)
@@ -120,6 +123,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("pdf/download", Name = "DownloadWorkSpaceReportPdf")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.ReportDownloadRateLimit))]
         public async Task<IActionResult> DownloadWorkSpaceReportPdf([FromRoute] long workspaceId)
         {
             var hasPermission = await _IsAdminOrOwnerOrProductManagerAsync(workspaceId);

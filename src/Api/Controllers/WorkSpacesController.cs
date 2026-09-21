@@ -13,8 +13,10 @@ using Application.Features.WorkSpaces.Queries.GetWorkSpaceOverviews;
 using Application.Features.WorkSpaces.Queries.GetUserWorkSpaceRole;
 using Application.Features.WorkSpaceUsers;
 using Application.Features.WorkSpaceUsers.queries.GetAllWorkSpaceUsers;
+using Api.Polices;
 using Domain.Common.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Application.Common.Dtos.WorkSpace;
 
 namespace Api.Controllers
@@ -22,9 +24,11 @@ namespace Api.Controllers
     [Route("api/workspaces")]
     [ApiController]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]
     public class WorkSpacesController(IMediator mediator, IAuthorizationService authorizationService) : ControllerBase
     {
         [HttpGet("{id}", Name = "GetWorkSpaceById")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<WorkSpaceDto>> GetWorkSpaceById([FromRoute] long id)
         {
             //check if user is admin
@@ -48,6 +52,7 @@ namespace Api.Controllers
 
 
         [HttpGet("all", Name = "GetAllWorkSpaces")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<PaginationResultDto<WorkSpaceDto>>> GetAllWorkSpaces([FromQuery] PaginationRequestDto paginationRequestDto)
         {
             //check if user is admin
@@ -76,6 +81,7 @@ namespace Api.Controllers
 
 
         [HttpGet("{id}/all-users", Name = "GetAllWorkSpaceUsers")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<PaginationResultDto<WorkSpaceUserDto>>> GetAllWorkSpaceUsers([FromRoute] long id, [FromQuery] PaginationRequestDto paginationRequestDto)
         {
             //check if user is admin
@@ -96,6 +102,7 @@ namespace Api.Controllers
 
 
         [HttpGet("{id}/my-role", Name = "GetUserWorkSpaceRole")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<IActionResult> GetUserWorkSpaceRole([FromRoute] long id)
         {
             var userId = User.GetUserId();
@@ -177,6 +184,7 @@ namespace Api.Controllers
 
 
         [HttpGet("overviews", Name = "GetWorkSpaceOverviews")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<PaginationResultDto<WorkSpaceOverviewDto>>> GetWorkSpaceOverview(
             [FromRoute] long id,
             [FromQuery] PaginationRequestDto paginationRequestDto,
@@ -196,6 +204,7 @@ namespace Api.Controllers
 
 
         [HttpGet("{id}/details", Name = "GetWorkSpaceDetails")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
         public async Task<ActionResult<WorkSpaceDetailsDto>> GetWorkSpaceDetails([FromRoute] long id)
         {
             var isAdmin = User.IsInRole(nameof(Role.Admin));

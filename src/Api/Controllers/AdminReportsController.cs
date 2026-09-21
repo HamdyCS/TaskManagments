@@ -4,14 +4,17 @@ using Application.Common.Dtos.WorkSpacesOverview;
 using Application.Features.Reports.Queries.GetAllMemberPerformances;
 using Application.Features.Reports.Queries.GetWorkSpacesOverviewReport;
 using Application.Features.Reports.Queries.GetWorkSpacesOverviewReportPdf;
+using Api.Polices;
 using Domain.Common.Pagination;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/admin/reports")]
     [Authorize(Roles = nameof(Role.Admin))]
     [ApiController]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.ReportRateLimit))]
     public class AdminReportsController(IMediator mediator) : ControllerBase
     {
         [HttpGet("member-performances", Name = "GetAllMemberPerformances")]
@@ -42,6 +45,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("overview/pdf/download", Name = "DownloadWorkSpacesOverviewReportPdf")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.ReportDownloadRateLimit))]
         public async Task<IActionResult> DownloadWorkSpacesOverviewReportPdf(
             [FromQuery] WorkSpaceOverviewQueryParameters queryParameters)
         {

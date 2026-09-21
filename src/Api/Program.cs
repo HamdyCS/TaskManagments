@@ -2,6 +2,7 @@ using Api.Common.Origins;
 using Api.Common.Servcies;
 using Api.ExceptionHandler;
 using Api.Hubs.Notification;
+using Api.Middlewares;
 using Application;
 using Application.Common.Interfaces.Services;
 using Infrastructure;
@@ -78,10 +79,24 @@ builder.Services.AddCors(opt=>
    
 });
 
+//register the ClientIdMiddleware
+builder.Services.AddTransient<ClientIdMiddleWare>();
+
+//add rate limiting
+builder.Services.AddCustomRateLimiting();
+
+
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+
+//add middlewares
+app.UseMiddleware<ClientIdMiddleWare>();
+
+//add rate limiting
+app.UseRateLimiter();
 
 app.UseCors("AllowOrigins");
 

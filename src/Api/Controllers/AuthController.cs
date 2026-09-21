@@ -1,5 +1,6 @@
 ﻿using Api.Common.Extensions;
 using Api.Common.Origins;
+using Api.Polices;
 using Application.Features.Auth.Commands.ChangeEmail;
 using Application.Features.Auth.Commands.CreateExternalAuthProperty;
 using Application.Features.Auth.Commands.CreateToken;
@@ -22,16 +23,19 @@ using Domain.Common.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/auth")]
     [Authorize]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.AuthenticationActionsRateLimit))]
     [ApiController]
     public class AuthController(IMediator mediator) : ControllerBase
     {
 
         [HttpPost("register-user", Name = "RegisterUser")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.LoginRegisterRateLimit))]
         [AllowAnonymous]
         public async Task<ActionResult<RegisterUserResultDto>> RegisterUser([FromBody] RegisterUserDto registerUserDto)
         {
@@ -42,6 +46,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("register-admin", Name = "RegisterAdmin")]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.LoginRegisterRateLimit))]
         [Authorize(Roles = nameof(Role.Admin))]
         public async Task<ActionResult<RegisterUserResultDto>> RegisterAdmin([FromBody] RegisterUserDto registerUserDto)
         {
@@ -65,6 +70,7 @@ namespace Api.Controllers
 
         [HttpPost("login", Name = "Login")]
         [AllowAnonymous]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.LoginRegisterRateLimit))]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var result = await mediator.Send(new LoginCommand(loginDto));
@@ -82,6 +88,7 @@ namespace Api.Controllers
 
         [HttpPost("refresh-token", Name = "RefreshToken")]
         [AllowAnonymous]
+        [EnableRateLimiting(nameof(RateLimitingPolicies.RefreshTokenRateLimit))]
         public async Task<IActionResult> RefreshToken()
         {
             //Get refresh token

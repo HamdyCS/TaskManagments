@@ -1,11 +1,14 @@
 ﻿using Application.Features.Dashboard.Queries.GetDashboard;
+using Api.Polices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers
 {
     [Route("api/workspaces/{workspaceId}/dashboard")]
     [ApiController]
+    [EnableRateLimiting(nameof(RateLimitingPolicies.DashboardRateLimit))]
     public class DashboardController(IAuthorizationService authorizationService
         , IMediator mediator) : ControllerBase
     {
