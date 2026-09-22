@@ -1125,26 +1125,63 @@ This backend is designed to be consumed by a frontend client (e.g. Angular).
 - **Input validation** — FluentValidation on every command/query
 - **CORS restrictions** — only configured origins are allowed
 - **No secrets in code** — JWT signing key and OAuth secrets must be provided via user-secrets or environment variables
+- **Rate limiting** — Fixed window rate limiting on all endpoints to prevent abuse
 
 ---
 
-## API Documentation / Swagger
+## Rate Limiting
 
-Swagger/OpenAPI is available when running in Development mode. Navigate to:
+All API endpoints are protected by fixed window rate limiting. Exceeding the limit returns `429 Too Many Requests`.
 
+### Rate Limit Policies
+
+| Policy | Requests | Window | Applies To |
+|--------|----------|--------|------------|
+| `GlobalRateLimit` | 100 | 10 seconds | All unauthenticated requests |
+| `AuthenticationActionsRateLimit` | 10 | 1 minute | Auth actions (password reset, email change, account deletion) |
+| `RefreshTokenRateLimit` | 5 | 1 minute | Token refresh endpoint |
+| `GlobalAuthenticatedGetRateLimit` | 100 | 1 minute | All authenticated GET requests |
+| `GlobalAuthenticatedWriteRateLimit` | 30 | 1 minute | All authenticated write requests (POST, PUT, DELETE, PATCH) |
+| `DashboardRateLimit` | 30 | 1 minute | Dashboard endpoints |
+| `ReportRateLimit` | 30 | 1 minute | Report generation endpoints |
+| `ReportDownloadRateLimit` | 5 | 1 minute | PDF report downloads |
+
+### Partition Key
+
+Rate limits are partitioned by client IP address. Each unique IP gets its own rate limit window.
+
+### Policy Assignment
+
+| Controller | Endpoints | Policy |
+|------------|-----------|--------|
+| `AuthController` | Register, Confirm Email, Login | `AuthenticationActionsRateLimit` |
+| `AuthController` | Refresh Token | `RefreshTokenRateLimit` |
+| `WorkSpacesController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `ProjectsController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `ProjectsTasksController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `TaskCommentsController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `TaskAttachmentsController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `WorkSpaceInvitesController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `UsersController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `NotificationsController` | All endpoints | `GlobalAuthenticatedWriteRateLimit` (write) / `GlobalAuthenticatedGetRateLimit` (read) |
+| `DashboardController` | All endpoints | `DashboardRateLimit` |
+| `AdminDashboardController` | All endpoints | `DashboardRateLimit` |
+| `ReportsController` | Report queries | `ReportRateLimit` |
+| `ReportsController` | PDF download | `ReportDownloadRateLimit` |
+| `AdminReportsController` | Report queries | `ReportRateLimit` |
+| `AdminReportsController` | PDF download | `ReportDownloadRateLimit` |
+
+### Error Response
+
+When rate limit is exceeded:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7807",
+  "title": "Too Many Requests",
+  "status": 429,
+  "detail": "Rate limit exceeded. Please try again later."
+}
 ```
-http://localhost:5102/swagger
-```
 
----
 
-## Future Improvements
-
-- [ ] Unit and integration test coverage
-- [ ] Docker and Docker Compose configuration
-- [ ] CI/CD pipeline setup
-- [ ] Rate limiting on authentication endpoints
-- [ ] Distributed tracing with OpenTelemetry
-- [ ] SignalR reconnection handling on the client
-- [ ] Email template engine (e.g. Razor templates)
-- [ ] File storage abstraction (e.g. Azure Blob Storage)
