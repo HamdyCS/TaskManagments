@@ -76,6 +76,19 @@ namespace Api.Common.Extensions
                 );
 
 
+                //login register rate limit
+                options.AddPolicy(RateLimitingPolicies.LoginRegisterRateLimit, httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: GetClientKey(httpContext),
+                        factory: partition => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            Window = TimeSpan.FromSeconds(10),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 0
+                        })
+                );
+
                 //refresh token rate limit
                 options.AddPolicy(RateLimitingPolicies.RefreshTokenRateLimit, httpContext =>
                 RateLimitPartition.GetFixedWindowLimiter(
