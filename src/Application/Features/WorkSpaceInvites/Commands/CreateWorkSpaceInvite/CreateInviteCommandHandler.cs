@@ -78,6 +78,7 @@ namespace Application.Features.WorkSpaceInvites.Commands.CreateWorkSpaceInvite
             newWorkSpaceInvite.WorkSpaceInviteStatus = WorkSpaceInviteStatus.Pending;
             newWorkSpaceInvite.InvitedToId = inviteToUser.Id;
             newWorkSpaceInvite.InvitedToEmail = inviteToUser.Email;
+            newWorkSpaceInvite.WorkSpaceName = workspace.Name;
 
             var inviteLifeTimeDays = configuration.GetValue<long>("WorkSpaceInvite:LifeTimeDays");
             newWorkSpaceInvite.ExpiresAt = DateTime.UtcNow.AddDays(inviteLifeTimeDays);

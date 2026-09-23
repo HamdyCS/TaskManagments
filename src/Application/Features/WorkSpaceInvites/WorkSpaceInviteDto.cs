@@ -10,6 +10,8 @@ namespace Application.Features.WorkSpaceInvites
         public long Id { get; set; }
 
         public long WorkSpaceId { get; set; }
+        
+        public string WorkSpaceName { get; set; }
 
         public string InvitedToId { get; set; }
 

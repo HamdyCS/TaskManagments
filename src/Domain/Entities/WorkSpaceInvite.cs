@@ -13,6 +13,8 @@ namespace Domain.Entities
 
         public long WorkSpaceId { get; set; }
 
+        public string WorkSpaceName { get; set; }
+
         public string InvitedToId { get; set; }
 
         public string InvitedToEmail { get; set; }
