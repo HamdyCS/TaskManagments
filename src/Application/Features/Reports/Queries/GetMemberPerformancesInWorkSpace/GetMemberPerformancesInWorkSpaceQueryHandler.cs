@@ -5,22 +5,22 @@ using Application.Common.Interfaces.Services;
 using ErrorOr;
 using MediatR;
 
-namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
+namespace Application.Features.Reports.Queries.GetMemberPerformancesInWorkSpace
 {
-    public class GetMemberPerformanceInWorkSpaceQueryHandler(
+    public class GetMemberPerformancesInWorkSpaceQueryHandler(
         IUnitOfWork unitOfWork,
         ICacheService cacheService,
-        ILogger<GetMemberPerformanceInWorkSpaceQueryHandler> logger) : IRequestHandler<GetMemberPerformanceInWorkSpaceQuery, ErrorOr<MemberPerformanceDto>>
+        ILogger<GetMemberPerformancesInWorkSpaceQueryHandler> logger) : IRequestHandler<GetMemberPerformancesInWorkSpaceQuery, ErrorOr<MemberPerformanceDto>>
     {
-        public async Task<ErrorOr<MemberPerformanceDto>> Handle(GetMemberPerformanceInWorkSpaceQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<MemberPerformanceDto>> Handle(GetMemberPerformancesInWorkSpaceQuery request, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Starting Get member performance with userId {UserId} in workspace with workspaceId {WorkspaceId}", request.userId, request.WorkspaceId);
+            logger.LogInformation("Starting Get member performances in workspace with workspaceId {WorkspaceId}", request.WorkspaceId);
 
             var workspace = await unitOfWork.WorkSpaceRepository.GetByIdAsync(request.WorkspaceId);
             if (workspace is null)
                 return WorkSpaceErrors.WorkSpaceNotFoundById(request.WorkspaceId);
 
-            var cacheKey = $"report:member-performance-ws:{request.WorkspaceId}:user:{request.userId}";
+            var cacheKey = $"report:member-performances-ws:{request.WorkspaceId}";
 
             var cachedResult = await cacheService.GetAsync<MemberPerformanceDto>(cacheKey);
             if (cachedResult is not null)
@@ -29,7 +29,7 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
                 return cachedResult;
             }
 
-            var report = await unitOfWork.ReportRepository.GetMemberPerformanceInWorkSpaceAsync(request.WorkspaceId, request.userId);
+            var report = await unitOfWork.ReportRepository.GetMemberPerformancesInWorkSpaceAsync(request.WorkspaceId);
 
             await cacheService.SetAsync(cacheKey, report, TimeSpan.FromMinutes(10));
 

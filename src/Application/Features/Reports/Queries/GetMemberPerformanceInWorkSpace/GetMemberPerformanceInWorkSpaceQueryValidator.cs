@@ -6,6 +6,10 @@ namespace Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace
     {
         public GetMemberPerformanceInWorkSpaceQueryValidator()
         {
+            RuleFor(x => x.userId)
+                .NotEmpty().WithMessage("User ID is required")
+                .NotNull().WithMessage("User ID cannot be null");
+
             RuleFor(x => x.WorkspaceId)
                 .GreaterThan(0).WithMessage("Workspace ID must be greater than 0");
         }

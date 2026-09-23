@@ -70,7 +70,7 @@ namespace Infrastructure.Repositories
             return new PaginationResult<MemberPerformanceDto>(memberPerformances, totalCount, pageNumber, pageSize);
         }
 
-        public async Task<MemberPerformanceDto> GetMemberPerformanceInWorkSpaceAsync(long workspaceId)
+        public async Task<MemberPerformanceDto> GetMemberPerformancesInWorkSpaceAsync(long workspaceId)
         {
 
             var memberPerformance = await context.TaskAssignments
@@ -97,6 +97,34 @@ namespace Infrastructure.Repositories
             return memberPerformance;
         }
 
+        public async Task<MemberPerformanceDto> GetMemberPerformanceInWorkSpaceAsync(long workspaceId, string memberId)
+        {
+
+            var memberPerformance = await context.TaskAssignments
+              .Where(ta => ta.AssignedToId == memberId
+              && ta.Task.Project.WorkSpaceId == workspaceId && ta.IsActive)
+              .GroupBy(_ => 1)
+              .Select(g => new MemberPerformanceDto
+              {
+                  Id = g.First().AssignedToId,
+                  Name = g.First().AssignedTo.FirstName + " " + g.First().AssignedTo.LastName,
+                  AssignedCount = g.Count(),
+                  InProgressCount = g.Count(ta => ta.Task.TaskStatus == ProjectTaskStatus.InProgress),
+                  DoneCount = g.Count(ta => ta.Task.TaskStatus == ProjectTaskStatus.Done)
+              }).FirstOrDefaultAsync();
+
+            if (memberPerformance is null)
+            {
+                return new MemberPerformanceDto { AssignedCount = 0, InProgressCount = 0, DoneCount = 0 };
+            }
+            memberPerformance.CompletionPercentage = memberPerformance?.AssignedCount > 0
+                ? (double)memberPerformance.DoneCount / memberPerformance.AssignedCount * 100
+                : 0;
+
+            return memberPerformance;
+        }
+
+
         public async Task<IEnumerable<MemberPerformanceDto>> GetAllMemberPerformanceInWorkSpaceAsync(long workspaceId)
         {
 
@@ -118,7 +146,12 @@ namespace Infrastructure.Repositories
                   ta.IsActive && ta.Task.Project.WorkSpaceId == wu.WorkSpaceId &&
                   ta.Task.TaskStatus == ProjectTaskStatus.Done && ta.IsActive),
               }).ToListAsync();
-
+            foreach (var memberPerformance in memberPerformances)
+            {
+                memberPerformance.CompletionPercentage = memberPerformance.AssignedCount > 0
+                    ? (double)memberPerformance.DoneCount / memberPerformance.AssignedCount * 100
+                    : 0;
+            }
             return memberPerformances;
         }
 
@@ -137,8 +170,16 @@ namespace Infrastructure.Repositories
                   InProgressCount = g.Count(ta => ta.Task.TaskStatus == ProjectTaskStatus.InProgress),
                   DoneCount = g.Count(ta => ta.Task.TaskStatus == ProjectTaskStatus.Done)
               }).FirstOrDefaultAsync();
+           
+            if(memberPerformance is null)
+            {
+                return new MemberPerformanceDto { AssignedCount = 0, InProgressCount = 0, DoneCount = 0 };
+            }
+            memberPerformance.CompletionPercentage = memberPerformance?.AssignedCount > 0
+                ? (double)memberPerformance.DoneCount / memberPerformance.AssignedCount * 100
+                : 0;
 
-            return memberPerformance ?? new MemberPerformanceDto { AssignedCount = 0, InProgressCount = 0, DoneCount = 0 };
+            return memberPerformance;
         }
 
         public async Task<WorkSpaceReportDto> GetWorkSpaceReportAsync(long workspaceId)

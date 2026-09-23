@@ -2,7 +2,7 @@ using Application.Common.Dtos;
 using Application.Common.Interfaces.Repositories;
 using Application.Features.Reports.Queries.GetProjectTasksReportByPriority;
 using Application.Features.Reports.Queries.GetProjectTasksReportByStatus;
-using Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace;
+using Application.Features.Reports.Queries.GetMemberPerformancesInWorkSpace;
 using Application.Features.Reports.Queries.GetMemberPerformanceInProject;
 using Application.Features.Reports.Queries.GetWorkSpaceReport;
 using Api.Polices;
@@ -10,6 +10,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Application.Features.Reports.Queries.GetWorkSpaceReportPdf;
+using Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace;
 
 namespace Api.Controllers
 {
@@ -82,14 +83,27 @@ namespace Api.Controllers
                 errors => errors.ToProblemDetailsObjectResult());
         }     
 
-        [HttpGet("members/performance", Name = "GetMemberPerformanceInWorkSpace")]
-        public async Task<IActionResult> GetMemberPerformanceInWorkSpace([FromRoute] long workspaceId)
+        [HttpGet("members/performance", Name = "GetMemberPerformancesInWorkSpace")]
+        public async Task<IActionResult> GetMemberPerformancesInWorkSpace([FromRoute] long workspaceId)
         {
             var hasPermission = await _IsAdminOrOwnerOrProductManagerAsync(workspaceId);
             if (!hasPermission)
                 return Forbid();
 
-            var result = await mediator.Send(new GetMemberPerformanceInWorkSpaceQuery(workspaceId));
+            var result = await mediator.Send(new GetMemberPerformancesInWorkSpaceQuery(workspaceId));
+
+            return result.Match<IActionResult>(value => Ok(value),
+                errors => errors.ToProblemDetailsObjectResult());
+        }
+
+        [HttpGet("members/{userId}/performance", Name = "GetMemberPerformanceInWorkSpace")]
+        public async Task<IActionResult> GetMemberPerformanceInWorkSpace([FromRoute] long workspaceId, [FromRoute] string userId)
+        {
+            var hasPermission = await _IsAdminOrOwnerOrProductManagerAsync(workspaceId);
+            if (!hasPermission)
+                return Forbid();
+
+            var result = await mediator.Send(new GetMemberPerformanceInWorkSpaceQuery(userId, workspaceId));
 
             return result.Match<IActionResult>(value => Ok(value),
                 errors => errors.ToProblemDetailsObjectResult());
