@@ -35,106 +35,270 @@ namespace Infrastructure.Services
         private void _AddWorkSpaceReportPageSettings(PageDescriptor page)
         {
             page.Size(PageSizes.A4);
-            page.Margin(30);
-            page.PageColor(Colors.White);
-            page.DefaultTextStyle(x => x.FontSize(20));
+            page.MarginHorizontal(35);
+            page.MarginVertical(30);
+            page.PageColor(Colors.Grey.Lighten5);
+
+            page.DefaultTextStyle(text =>
+                text.FontFamily("Arial")
+                    .FontSize(10)
+                    .FontColor(Colors.Grey.Darken3));
         }
 
         private void _AddWorkSpaceReportHeader(PageDescriptor page, WorkSpaceReportDto workSpaceReportDto)
         {
-            page.Header().Column(column =>
-            {
-                column.Item()
-                    .Text($"WorkSpace Report: {workSpaceReportDto.WorkSpaceName}")
-                    .SemiBold()
-                    .FontSize(36)
-                    .FontColor(Colors.Blue.Medium);
+            page.Header()
+                .PaddingBottom(20)
+                .Column(column =>
+                {
+                    column.Item()
+                        .Row(row =>
+                        {
+                            row.RelativeItem()
+                                .Column(header =>
+                                {
+                                    header.Item()
+                                        .Text("WORKSPACE REPORT")
+                                        .FontSize(11)
+                                        .Bold()
+                                        .FontColor(Colors.Blue.Medium);
 
-                column.Item()
-                    .PaddingTop(10)
-                    .Text($"Generated on: {DateTime.Now.ToString("yyyy-MMMM-dd HH:mm:ss")}")
-                    .FontSize(20)
-                    .FontColor(Colors.Grey.Darken1);
-            });
+                                    header.Item()
+                                        .PaddingTop(3)
+                                        .Text(workSpaceReportDto.WorkSpaceName ?? "")
+                                        .FontSize(26)
+                                        .Bold()
+                                        .FontColor(Colors.Grey.Darken4);
+                                });
+
+                            row.AutoItem()
+                                .AlignRight()
+                                .Column(date =>
+                                {
+                                    date.Item()
+                                        .Text("GENERATED")
+                                        .FontSize(8)
+                                        .Bold()
+                                        .FontColor(Colors.Grey.Medium);
+
+                                    date.Item()
+                                        .PaddingTop(3)
+                                        .Text(DateTime.Now.ToString("MMM dd, yyyy"))
+                                        .FontSize(10)
+                                        .SemiBold()
+                                        .FontColor(Colors.Grey.Darken2);
+
+                                    date.Item()
+                                        .Text(DateTime.Now.ToString("HH:mm:ss"))
+                                        .FontSize(9)
+                                        .FontColor(Colors.Grey.Medium);
+                                });
+                        });
+
+                    column.Item()
+                        .PaddingTop(15)
+                        .LineHorizontal(1)
+                        .LineColor(Colors.Grey.Lighten2);
+                });
         }
 
-        private void _AddWorkSpaceReportContent(PageDescriptor page, WorkSpaceReportDto workSpaceReportDto)
+        private void _AddWorkSpaceReportContent(PageDescriptor page, WorkSpaceReportDto dto)
         {
-            page.Content().Column(column =>
+            page.Content()
+                .Column(column =>
+                {
+                    _AddWorkSpaceKpiCards(column, dto);
+
+                    column.Item().PaddingTop(15);
+
+                    var ownerNames = dto.OwnerNames != null && dto.OwnerNames.Any()
+                        ? string.Join(", ", dto.OwnerNames)
+                        : "N/A";
+
+                    column.Item()
+                        .Text(text =>
+                        {
+                            text.Span("Owners: ").FontSize(10).Bold().FontColor(Colors.Grey.Darken4);
+                            text.Span(ownerNames).FontSize(10).FontColor(Colors.Grey.Darken3);
+                        });
+
+                    column.Item().PaddingTop(25);
+
+                    _AddWorkSpaceTaskStatusSection(column, dto);
+
+                    column.Item().PaddingTop(25);
+
+                    _AddMemberPerformanceSection(column, dto);
+                });
+        }
+
+        private void _AddWorkSpaceKpiCards(ColumnDescriptor column, WorkSpaceReportDto dto)
+        {
+            column.Item()
+                .Row(row =>
+                {
+                    _AddKpiCard(row.RelativeItem(), "Projects", dto.TotalProjects.ToString(), "Projects");
+                    row.ConstantItem(10);
+                    _AddKpiCard(row.RelativeItem(), "Members", dto.TotalMembers.ToString(), "People");
+                    row.ConstantItem(10);
+                    _AddKpiCard(row.RelativeItem(), "Tasks", dto.TotalTasks.ToString(), "Total");
+                    row.ConstantItem(10);
+                    _AddKpiCard(row.RelativeItem(), "Completion", $"{dto.CompletionPercentage:0.#}%", "Done");
+                });
+        }
+
+        private void _AddWorkSpaceTaskStatusSection(ColumnDescriptor column, WorkSpaceReportDto dto)
+        {
+            column.Item()
+                .Background(Colors.White)
+                .Border(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .CornerRadius(8)
+                .Padding(18)
+                .Column(section =>
+                {
+                    section.Item()
+                        .Text("Task Status Distribution")
+                        .FontSize(15)
+                        .Bold()
+                        .FontColor(Colors.Grey.Darken4);
+
+                    section.Item()
+                        .PaddingTop(4)
+                        .Text("Current distribution of tasks in this workspace")
+                        .FontSize(9)
+                        .FontColor(Colors.Grey.Medium);
+
+                    section.Item().PaddingTop(15);
+
+                    _AddWorkSpaceTaskStatusTable(section, dto);
+                });
+        }
+
+        private void _AddWorkSpaceTaskStatusTable(ColumnDescriptor column, WorkSpaceReportDto dto)
+        {
+            var rows = new List<(string Status, int Count)>
             {
-                var ownerNames = workSpaceReportDto.OwnerNames != null
-                    ? string.Join(", ", workSpaceReportDto.OwnerNames)
-                    : "N/A";
+                ("Backlog", dto.TotalBacklogTasks),
+                ("Todo", dto.TotalTodoTasks),
+                ("InProgress", dto.TotalInProgressTasks),
+                ("Review", dto.TotalReviewTasks),
+                ("Done", dto.TotalDoneTasks),
+            };
 
-                column.Item()
-                    .PaddingVertical(10)
-                    .Text($"Owner Names: {ownerNames}")
-                    .FontSize(18)
-                    .Bold();
-
-                column.Item().Text($"Total Projects: {workSpaceReportDto.TotalProjects}");
-                column.Item().Text($"Total Members: {workSpaceReportDto.TotalMembers}");
-                column.Item().Text($"Total Tasks: {workSpaceReportDto.TotalTasks}");
-                column.Item().Text($"Total Backlog Tasks: {workSpaceReportDto.TotalBacklogTasks}");
-                column.Item().Text($"Total Todo Tasks: {workSpaceReportDto.TotalTodoTasks}");
-                column.Item().Text($"Total In Progress Tasks: {workSpaceReportDto.TotalInProgressTasks}");
-                column.Item().Text($"Total Review Tasks: {workSpaceReportDto.TotalReviewTasks}");
-                column.Item().Text($"Total Done Tasks: {workSpaceReportDto.TotalDoneTasks}");
-
-                column.Item().PaddingTop(15).Table(table =>
+            column.Item()
+                .Table(table =>
                 {
                     table.ColumnsDefinition(columns =>
                     {
-                        columns.RelativeColumn();
-                        columns.RelativeColumn();
-                        columns.RelativeColumn();
-                        columns.RelativeColumn();
+                        columns.RelativeColumn(3);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
                     });
 
                     table.Header(header =>
                     {
-                        header.Cell().Element(HeaderCellStyle).Text("Name").Bold();
-                        header.Cell().Element(HeaderCellStyle).Text("Tasks").Bold();
-                        header.Cell().Element(HeaderCellStyle).Text("InProgress").Bold();
-                        header.Cell().Element(HeaderCellStyle).Text("Done").Bold();
-
-                        static IContainer HeaderCellStyle(IContainer container) =>
-                            container
-                                .Border(1)
-                                .BorderColor("#B0B0B0")
-                                .Background("#D9D9D9")
-                                .Padding(6);
+                        _AddOverviewTableHeaderCell(header, "Status");
+                        _AddOverviewTableHeaderCell(header, "Tasks");
+                        _AddOverviewTableHeaderCell(header, "Share");
                     });
 
-                    if (workSpaceReportDto.MemberPerformances != null)
-                    {
-                        foreach (var memberPerformance in workSpaceReportDto.MemberPerformances)
-                        {
-                            table.Cell().Element(DataCellStyle).Text(memberPerformance.Name ?? "");
-                            table.Cell().Element(DataCellStyle).Text(memberPerformance.AssignedCount.ToString());
-                            table.Cell().Element(DataCellStyle).Text(memberPerformance.InProgressCount.ToString());
-                            table.Cell().Element(DataCellStyle).Text(memberPerformance.DoneCount.ToString());
-                        }
+                    var total = rows.Sum(x => x.Count);
 
-                        static IContainer DataCellStyle(IContainer container) =>
-                            container
-                                .Border(1)
-                                .BorderColor("#D3D3D3")
-                                .Padding(6);
+                    foreach (var item in rows)
+                    {
+                        var percentage = total == 0 ? 0 : (double)item.Count / total * 100;
+
+                        _AddOverviewTableCell(table, item.Status);
+                        _AddOverviewTableCell(table, item.Count.ToString());
+                        _AddOverviewTableCell(table, $"{percentage:0.0}%");
                     }
                 });
-            });
+        }
+
+        private void _AddMemberPerformanceSection(ColumnDescriptor column, WorkSpaceReportDto dto)
+        {
+            column.Item()
+                .Background(Colors.White)
+                .Border(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .CornerRadius(8)
+                .Padding(18)
+                .Column(section =>
+                {
+                    section.Item()
+                        .Text("Member Performance")
+                        .FontSize(15)
+                        .Bold()
+                        .FontColor(Colors.Grey.Darken4);
+
+                    section.Item()
+                        .PaddingTop(4)
+                        .Text("Task workload and progress by workspace member")
+                        .FontSize(9)
+                        .FontColor(Colors.Grey.Medium);
+
+                    section.Item().PaddingTop(15);
+
+                    _AddMemberPerformanceTable(section, dto.MemberPerformances);
+                });
+        }
+
+        private void _AddMemberPerformanceTable(ColumnDescriptor column, IEnumerable<MemberPerformanceDto> members)
+        {
+            var data = members?.ToList() ?? [];
+
+            column.Item()
+                .Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(3);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                    });
+
+                    table.Header(header =>
+                    {
+                        _AddOverviewTableHeaderCell(header, "Name");
+                        _AddOverviewTableHeaderCell(header, "Assigned");
+                        _AddOverviewTableHeaderCell(header, "In Progress");
+                        _AddOverviewTableHeaderCell(header, "Done");
+                    });
+
+                    foreach (var member in data)
+                    {
+                        _AddOverviewTableCell(table, member.Name ?? "");
+                        _AddOverviewTableCell(table, member.AssignedCount.ToString());
+                        _AddOverviewTableCell(table, member.InProgressCount.ToString());
+                        _AddOverviewTableCell(table, member.DoneCount.ToString());
+                    }
+                });
         }
 
         private void _AddWorkSpaceReportFooter(PageDescriptor page, WorkSpaceReportDto workSpaceReportDto)
         {
-            page.Footer().AlignCenter().Text(t =>
-            {
-                t.Span("page ");
-                t.CurrentPageNumber();
-                t.Span(" of ");
-                t.TotalPages();
-            });
+            page.Footer()
+                .PaddingTop(15)
+                .BorderTop(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .Row(row =>
+                {
+                    row.RelativeItem().PaddingTop(15)
+                        .Text($"Workspace Report - {workSpaceReportDto.WorkSpaceName}")
+                        .FontSize(8)
+                        .FontColor(Colors.Grey.Medium);
+
+                    row.AutoItem().PaddingTop(15)
+                        .Text(text =>
+                        {
+                            text.Span("Page ").FontSize(8).FontColor(Colors.Grey.Medium);
+                            text.CurrentPageNumber().FontSize(8).FontColor(Colors.Grey.Medium);
+                            text.Span(" of ").FontSize(8).FontColor(Colors.Grey.Medium);
+                            text.TotalPages().FontSize(8).FontColor(Colors.Grey.Medium);
+                        });
+                });
         }
 
         //workspaces overview report generation
