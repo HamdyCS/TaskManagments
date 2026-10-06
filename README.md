@@ -25,7 +25,7 @@ TaskManagments is a **RESTful, backend-only API** for organizing work into works
 - **Reports** provide workspace analytics with PDF export.
 
 > [!NOTE]
-> This is an API-only project. A frontend client (e.g. Angular) is expected to consume it. The default base URL is `http://localhost:5102`.
+> This is an API-only project. A frontend client (e.g. React) is expected to consume it. The default base URL is `http://localhost:5102`.
 
 ### Who uses it
 
