@@ -21,7 +21,7 @@ namespace Infrastructure.BackgroundServices
                 var mailService = scope.ServiceProvider.GetRequiredService<IMailService>();
 
                 logger.LogInformation("ChangeEmailBgService( service is running sending change email {Email}. Time = {TimeNow})", changeEmailContent.To, DateTime.UtcNow);
-                await mailService.SendChnageEmailAsync(changeEmailContent);
+                await mailService.SendChangeEmailAsync(changeEmailContent);
             }
         }
     }

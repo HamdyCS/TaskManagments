@@ -7,7 +7,7 @@ namespace Application.Common.Interfaces.Services
 {
     public interface IMailService 
     {
-        Task SendChnageEmailAsync(ChangeEmailContent changeEmailContent);
+        Task SendChangeEmailAsync(ChangeEmailContent changeEmailContent);
         Task SendConfirmationEmailAsync(ConfirmationEmailContent confirmationEmailContent);
 
         Task SendOtpEmailAsync(OtpEmailContent otpEmailContent);

@@ -106,6 +106,8 @@ app.UseStaticFiles();
 
 app.MapControllers();
 
+app.MapHealthChecks("api/health");
+
 //map hub
 app.MapHub<NotificationHub>("/notificationHub");
 

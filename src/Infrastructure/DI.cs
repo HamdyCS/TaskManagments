@@ -6,6 +6,7 @@ using Domain.Entities;
 using Infrastructure.BackgroundServices;
 using Infrastructure.common.channels;
 using Infrastructure.Common.Channels;
+using Infrastructure.Common.Checks;
 using Infrastructure.Common.Options;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
@@ -65,6 +66,9 @@ namespace Infrastructure
 
             //unit of work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            //health checks
+            services.AddCustomHealthChecks(configuration);
 
             return services;
         }
@@ -234,6 +238,16 @@ namespace Infrastructure
                 opt.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
 
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddCustomHealthChecks(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHealthChecks()
+                .AddSqlServer(configuration.GetConnectionString("SqlServer"))
+                .AddRedis(configuration.GetConnectionString("Redis"))
+                .AddCheck<MailHealthCheck>(nameof(MailHealthCheck));
 
             return services;
         }

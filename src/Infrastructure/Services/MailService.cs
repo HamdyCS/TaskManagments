@@ -113,7 +113,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task SendChnageEmailAsync(ChangeEmailContent changeEmailContent)
+        public async Task SendChangeEmailAsync(ChangeEmailContent changeEmailContent)
         {
             try
             {
