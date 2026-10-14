@@ -5,10 +5,12 @@ using Api.Polices;
 using Domain.Common.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/admin/dashboard")]
+    [Route("api/v{version:apiVersion}/admin/dashboard")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize(Roles = nameof(Role.Admin))]
     [EnableRateLimiting(nameof(RateLimitingPolicies.DashboardRateLimit))]

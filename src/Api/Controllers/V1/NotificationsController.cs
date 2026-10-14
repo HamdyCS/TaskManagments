@@ -8,10 +8,12 @@ using Api.Polices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/notifications")]
+    [Route("api/v{version:apiVersion}/notifications")]
+    [ApiVersion("1.0")]
     [ApiController]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]
     public class NotificationsController(IMediator mediator) : ControllerBase

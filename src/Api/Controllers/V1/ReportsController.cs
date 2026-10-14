@@ -11,10 +11,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Application.Features.Reports.Queries.GetWorkSpaceReportPdf;
 using Application.Features.Reports.Queries.GetMemberPerformanceInWorkSpace;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspaces/{workSpaceId}/reports")]
+    [Route("api/v{version:apiVersion}/workspaces/{workSpaceId}/reports")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.ReportRateLimit))]

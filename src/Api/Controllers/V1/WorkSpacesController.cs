@@ -18,10 +18,12 @@ using Domain.Common.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Application.Common.Dtos.WorkSpace;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspaces")]
+    [Route("api/v{version:apiVersion}/workspaces")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]

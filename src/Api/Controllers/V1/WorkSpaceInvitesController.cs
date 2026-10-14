@@ -12,10 +12,12 @@ using ErrorOr;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspace-invites")]
+    [Route("api/v{version:apiVersion}/workspace-invites")]
+    [ApiVersion("1.0")]
     [Authorize]
     [ApiController]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]

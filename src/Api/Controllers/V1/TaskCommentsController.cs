@@ -10,10 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using ErrorOr;
 using Application.Features.TaskComments.Commands.DeleteCommentByCommentedById;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments")]
+    [Route("api/v{version:apiVersion}/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/comments")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]

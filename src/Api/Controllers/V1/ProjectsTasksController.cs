@@ -15,10 +15,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Application.Features.Tasks.Queries.GetMyTaskById;
 using Application.Features.Tasks.Commands.ChangeTaskStatusByAssignedToId;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspaces/{workspaceId}/projects/{projectId}/tasks")]
+    [Route("api/v{version:apiVersion}/workspaces/{workspaceId}/projects/{projectId}/tasks")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]

@@ -19,15 +19,17 @@ using Application.Features.Users;
 using Application.Features.Users.Commands.RegisterNewUser;
 using Application.Features.Users.Commands.UpdateUser;
 using Application.Features.Users.Queries.GetUserById;
+using Asp.Versioning;
 using Domain.Common.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/auth")]
+    [Route("api/v{version:apiVersion}/auth")]
+    [ApiVersion("1.0")]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.AuthenticationActionsRateLimit))]
     [ApiController]

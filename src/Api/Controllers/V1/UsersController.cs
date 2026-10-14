@@ -11,10 +11,12 @@ using Application.Features.Users.Queries.GetUserById;
 using Api.Polices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/users")]
+    [Route("api/v{version:apiVersion}/users")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedGetRateLimit))]

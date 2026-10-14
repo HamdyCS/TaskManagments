@@ -10,10 +10,12 @@ using Api.Polices;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspaces/{workspaceId}/projects")]
+    [Route("api/v{version:apiVersion}/workspaces/{workspaceId}/projects")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]

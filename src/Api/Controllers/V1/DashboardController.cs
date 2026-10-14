@@ -3,10 +3,12 @@ using Api.Polices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspaces/{workspaceId}/dashboard")]
+    [Route("api/v{version:apiVersion}/workspaces/{workspaceId}/dashboard")]
+    [ApiVersion("1.0")]
     [ApiController]
     [EnableRateLimiting(nameof(RateLimitingPolicies.DashboardRateLimit))]
     public class DashboardController(IAuthorizationService authorizationService

@@ -8,10 +8,12 @@ using Application.Features.TaskAttachments.Queries.GetAttachmentsByTaskId;
 using Api.Polices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Asp.Versioning;
 
-namespace Api.Controllers
+namespace Api.Controllers.V1
 {
-    [Route("api/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments")]
+    [Route("api/v{version:apiVersion}/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/attachments")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [EnableRateLimiting(nameof(RateLimitingPolicies.GlobalAuthenticatedWriteRateLimit))]

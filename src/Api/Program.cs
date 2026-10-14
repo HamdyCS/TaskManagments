@@ -5,6 +5,7 @@ using Api.Hubs.Notification;
 using Api.Middlewares;
 using Application;
 using Application.Common.Interfaces.Services;
+using Asp.Versioning;
 using Infrastructure;
 using Microsoft.AspNetCore.StaticFiles;
 using Serilog;
@@ -85,7 +86,17 @@ builder.Services.AddTransient<ClientIdMiddleWare>();
 //add rate limiting
 builder.Services.AddCustomRateLimiting();
 
-
+//Api versioning
+builder.Services
+    .AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.AssumeDefaultVersionWhenUnspecified = true; // لو مفيش version يستخدم الافتراضي
+        options.ReportApiVersions = true;                   // يرجّع الـ headers: api-supported-versions
+        options.ApiVersionReader = new UrlSegmentApiVersionReader(); // القراءة من الـ URL
+    })
+    .AddMvc();
+   
 
 var app = builder.Build();
 
